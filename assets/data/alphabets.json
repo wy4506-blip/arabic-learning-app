@@ -1,0 +1,303 @@
+[
+  {
+    "id": 1,
+    "title": "第一组字母",
+    "subtitle": "先认识最基础的几个字母形状与发音",
+    "letters": [
+      {
+        "arabic": "ا",
+        "name": "Alif",
+        "pronunciation": "a / aa",
+        "soundHint": "常作为长音承载，也可在部分场景中承接开头音。",
+        "hint": "常作为长音开头，字形最简单。",
+        "example": {
+          "arabic": "أنا",
+          "latin": "anaa",
+          "meaning": "我"
+        },
+        "pronunciations": [
+          { "form": "اَ", "latin": "a", "label": "短音 a", "hint": "短促开口音" },
+          { "form": "اِ", "latin": "i", "label": "短音 i", "hint": "短促 i 音" },
+          { "form": "اُ", "latin": "u", "label": "短音 u", "hint": "嘴唇略圆" },
+          { "form": "اا", "latin": "aa", "label": "长音 aa", "hint": "拉长 a 音" },
+          { "form": "اي", "latin": "ii", "label": "长音 ii", "hint": "拉长 i 音" },
+          { "form": "او", "latin": "uu", "label": "长音 uu", "hint": "拉长 u 音" },
+          { "form": "اْ", "latin": "ʼ", "label": "静音 / sukūn", "hint": "不带元音，停顿感更强" },
+          { "form": "اَّ", "latin": "ʼa", "label": "重音 + a", "hint": "双写并带 a 音" },
+          { "form": "اِّ", "latin": "ʼi", "label": "重音 + i", "hint": "双写并带 i 音" },
+          { "form": "اُّ", "latin": "ʼu", "label": "重音 + u", "hint": "双写并带 u 音" },
+          { "form": "اً", "latin": "an", "label": "尾音 an", "hint": "常见名词尾音之一" },
+          { "form": "اٍ", "latin": "in", "label": "尾音 in", "hint": "常见名词尾音之一" },
+          { "form": "اٌ", "latin": "un", "label": "尾音 un", "hint": "常见名词尾音之一" }
+        ],
+        "forms": {
+          "isolated": "ا",
+          "initial": "ا",
+          "medial": "ـا",
+          "final": "ـا"
+        },
+        "connectsAfter": false,
+        "tip": "Alif 常常像一根竖线，是最容易辨认的字母之一。"
+      },
+      {
+        "arabic": "ب",
+        "name": "Ba",
+        "pronunciation": "b",
+        "soundHint": "双唇闭合后快速放开，发清晰的 b 音。",
+        "hint": "下方一个点，发 b 音。",
+        "example": {
+          "arabic": "باب",
+          "latin": "baab",
+          "meaning": "门"
+        },
+        "pronunciations": [
+          { "form": "بَ", "latin": "ba", "label": "短音 a", "hint": "张口短促发音" },
+          { "form": "بِ", "latin": "bi", "label": "短音 i", "hint": "嘴角略收" },
+          { "form": "بُ", "latin": "bu", "label": "短音 u", "hint": "嘴唇略圆" },
+          { "form": "با", "latin": "baa", "label": "长音 aa", "hint": "拉长 a 音" },
+          { "form": "بي", "latin": "bii", "label": "长音 ii", "hint": "拉长 i 音" },
+          { "form": "بو", "latin": "buu", "label": "长音 uu", "hint": "拉长 u 音" },
+          { "form": "بْ", "latin": "b", "label": "静音 / sukūn", "hint": "不带元音，直接收尾" },
+          { "form": "بَّ", "latin": "bba", "label": "重音 + a", "hint": "双写加强再接 a" },
+          { "form": "بِّ", "latin": "bbi", "label": "重音 + i", "hint": "双写加强再接 i" },
+          { "form": "بُّ", "latin": "bbu", "label": "重音 + u", "hint": "双写加强再接 u" },
+          { "form": "بً", "latin": "ban", "label": "尾音 an", "hint": "尾部带 an 音" },
+          { "form": "بٍ", "latin": "bin", "label": "尾音 in", "hint": "尾部带 in 音" },
+          { "form": "بٌ", "latin": "bun", "label": "尾音 un", "hint": "尾部带 un 音" }
+        ],
+        "forms": {
+          "isolated": "ب",
+          "initial": "بـ",
+          "medial": "ـبـ",
+          "final": "ـب"
+        },
+        "connectsAfter": true,
+        "tip": "记住关键特征：下面 1 个点，是和 ت / ث 区分的重点。"
+      },
+      {
+        "arabic": "ت",
+        "name": "Ta",
+        "pronunciation": "t",
+        "soundHint": "舌尖轻触上齿龈，发清楚的 t 音。",
+        "hint": "上方两个点，发 t 音。",
+        "example": {
+          "arabic": "تفاح",
+          "latin": "tuffaah",
+          "meaning": "苹果"
+        },
+        "pronunciations": [
+          { "form": "تَ", "latin": "ta", "label": "短音 a", "hint": "短促 ta" },
+          { "form": "تِ", "latin": "ti", "label": "短音 i", "hint": "短促 ti" },
+          { "form": "تُ", "latin": "tu", "label": "短音 u", "hint": "短促 tu" },
+          { "form": "تا", "latin": "taa", "label": "长音 aa", "hint": "拉长 ta 的 a" },
+          { "form": "تي", "latin": "tii", "label": "长音 ii", "hint": "拉长 ti 的 i" },
+          { "form": "تو", "latin": "tuu", "label": "长音 uu", "hint": "拉长 tu 的 u" },
+          { "form": "تْ", "latin": "t", "label": "静音 / sukūn", "hint": "直接收尾 t" },
+          { "form": "تَّ", "latin": "tta", "label": "重音 + a", "hint": "双写加强再接 a" },
+          { "form": "تِّ", "latin": "tti", "label": "重音 + i", "hint": "双写加强再接 i" },
+          { "form": "تُّ", "latin": "ttu", "label": "重音 + u", "hint": "双写加强再接 u" },
+          { "form": "تً", "latin": "tan", "label": "尾音 an", "hint": "尾部带 an 音" },
+          { "form": "تٍ", "latin": "tin", "label": "尾音 in", "hint": "尾部带 in 音" },
+          { "form": "تٌ", "latin": "tun", "label": "尾音 un", "hint": "尾部带 un 音" }
+        ],
+        "forms": {
+          "isolated": "ت",
+          "initial": "تـ",
+          "medial": "ـتـ",
+          "final": "ـت"
+        },
+        "connectsAfter": true,
+        "tip": "和 Ba 很像，但点在上面，而且有 2 个。"
+      },
+      {
+        "arabic": "ث",
+        "name": "Tha",
+        "pronunciation": "th",
+        "soundHint": "类似英语 think 中的 th，舌尖轻触上齿。",
+        "hint": "上方三个点，类似英语 th。",
+        "example": {
+          "arabic": "ثوب",
+          "latin": "thawb",
+          "meaning": "长袍"
+        },
+        "pronunciations": [
+          { "form": "ثَ", "latin": "tha", "label": "短音 a", "hint": "短促 tha" },
+          { "form": "ثِ", "latin": "thi", "label": "短音 i", "hint": "短促 thi" },
+          { "form": "ثُ", "latin": "thu", "label": "短音 u", "hint": "短促 thu" },
+          { "form": "ثا", "latin": "thaa", "label": "长音 aa", "hint": "拉长 tha 的 a" },
+          { "form": "ثي", "latin": "thii", "label": "长音 ii", "hint": "拉长 thi 的 i" },
+          { "form": "ثو", "latin": "thuu", "label": "长音 uu", "hint": "拉长 thu 的 u" },
+          { "form": "ثْ", "latin": "th", "label": "静音 / sukūn", "hint": "直接收尾 th" },
+          { "form": "ثَّ", "latin": "ttha", "label": "重音 + a", "hint": "双写加强再接 a" },
+          { "form": "ثِّ", "latin": "tthi", "label": "重音 + i", "hint": "双写加强再接 i" },
+          { "form": "ثُّ", "latin": "tthu", "label": "重音 + u", "hint": "双写加强再接 u" },
+          { "form": "ثً", "latin": "than", "label": "尾音 an", "hint": "尾部带 an 音" },
+          { "form": "ثٍ", "latin": "thin", "label": "尾音 in", "hint": "尾部带 in 音" },
+          { "form": "ثٌ", "latin": "thun", "label": "尾音 un", "hint": "尾部带 un 音" }
+        ],
+        "forms": {
+          "isolated": "ث",
+          "initial": "ثـ",
+          "medial": "ـثـ",
+          "final": "ـث"
+        },
+        "connectsAfter": true,
+        "tip": "和 Ta 很像，只是上面从 2 个点变成 3 个点。"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "title": "第二组字母",
+    "subtitle": "学习喉音与相近字母的区别",
+    "letters": [
+      {
+        "arabic": "ج",
+        "name": "Jim",
+        "pronunciation": "j",
+        "soundHint": "不同地区读音略有差异，首版先按 j 来记。",
+        "hint": "下方一个点，常见于词中。",
+        "example": {
+          "arabic": "جمل",
+          "latin": "jamal",
+          "meaning": "骆驼"
+        },
+        "pronunciations": [
+          { "form": "جَ", "latin": "ja", "label": "短音 a", "hint": "短促 ja" },
+          { "form": "جِ", "latin": "ji", "label": "短音 i", "hint": "短促 ji" },
+          { "form": "جُ", "latin": "ju", "label": "短音 u", "hint": "短促 ju" },
+          { "form": "جا", "latin": "jaa", "label": "长音 aa", "hint": "拉长 ja 的 a" },
+          { "form": "جي", "latin": "jii", "label": "长音 ii", "hint": "拉长 ji 的 i" },
+          { "form": "جو", "latin": "juu", "label": "长音 uu", "hint": "拉长 ju 的 u" },
+          { "form": "جْ", "latin": "j", "label": "静音 / sukūn", "hint": "直接收尾 j" },
+          { "form": "جَّ", "latin": "jja", "label": "重音 + a", "hint": "双写加强再接 a" },
+          { "form": "جِّ", "latin": "jji", "label": "重音 + i", "hint": "双写加强再接 i" },
+          { "form": "جُّ", "latin": "jju", "label": "重音 + u", "hint": "双写加强再接 u" },
+          { "form": "جً", "latin": "jan", "label": "尾音 an", "hint": "尾部带 an 音" },
+          { "form": "جٍ", "latin": "jin", "label": "尾音 in", "hint": "尾部带 in 音" },
+          { "form": "جٌ", "latin": "jun", "label": "尾音 un", "hint": "尾部带 un 音" }
+        ],
+        "forms": {
+          "isolated": "ج",
+          "initial": "جـ",
+          "medial": "ـجـ",
+          "final": "ـج"
+        },
+        "connectsAfter": true,
+        "tip": "记住它是弯弯的形状，下面有 1 个点。"
+      },
+      {
+        "arabic": "ح",
+        "name": "Ha",
+        "pronunciation": "h",
+        "soundHint": "从喉部较深位置送气，不是普通轻 h。",
+        "hint": "无点，发较深的 h 音。",
+        "example": {
+          "arabic": "حب",
+          "latin": "hubb",
+          "meaning": "爱"
+        },
+        "pronunciations": [
+          { "form": "حَ", "latin": "ha", "label": "短音 a", "hint": "短促 ha" },
+          { "form": "حِ", "latin": "hi", "label": "短音 i", "hint": "短促 hi" },
+          { "form": "حُ", "latin": "hu", "label": "短音 u", "hint": "短促 hu" },
+          { "form": "حا", "latin": "haa", "label": "长音 aa", "hint": "拉长 ha 的 a" },
+          { "form": "حي", "latin": "hii", "label": "长音 ii", "hint": "拉长 hi 的 i" },
+          { "form": "حو", "latin": "huu", "label": "长音 uu", "hint": "拉长 hu 的 u" },
+          { "form": "حْ", "latin": "h", "label": "静音 / sukūn", "hint": "直接收尾 h" },
+          { "form": "حَّ", "latin": "hha", "label": "重音 + a", "hint": "双写加强再接 a" },
+          { "form": "حِّ", "latin": "hhi", "label": "重音 + i", "hint": "双写加强再接 i" },
+          { "form": "حُّ", "latin": "hhu", "label": "重音 + u", "hint": "双写加强再接 u" },
+          { "form": "حً", "latin": "han", "label": "尾音 an", "hint": "尾部带 an 音" },
+          { "form": "حٍ", "latin": "hin", "label": "尾音 in", "hint": "尾部带 in 音" },
+          { "form": "حٌ", "latin": "hun", "label": "尾音 un", "hint": "尾部带 un 音" }
+        ],
+        "forms": {
+          "isolated": "ح",
+          "initial": "حـ",
+          "medial": "ـحـ",
+          "final": "ـح"
+        },
+        "connectsAfter": true,
+        "tip": "和 Jim、Kha 外形接近，但没有点。"
+      },
+      {
+        "arabic": "خ",
+        "name": "Kha",
+        "pronunciation": "kh",
+        "soundHint": "带摩擦感，类似德语 Bach 或较重的 kh。",
+        "hint": "上方一点，类似带摩擦的 kh。",
+        "example": {
+          "arabic": "خبز",
+          "latin": "khubz",
+          "meaning": "面包"
+        },
+        "pronunciations": [
+          { "form": "خَ", "latin": "kha", "label": "短音 a", "hint": "短促 kha" },
+          { "form": "خِ", "latin": "khi", "label": "短音 i", "hint": "短促 khi" },
+          { "form": "خُ", "latin": "khu", "label": "短音 u", "hint": "短促 khu" },
+          { "form": "خا", "latin": "khaa", "label": "长音 aa", "hint": "拉长 kha 的 a" },
+          { "form": "خي", "latin": "khii", "label": "长音 ii", "hint": "拉长 khi 的 i" },
+          { "form": "خو", "latin": "khuu", "label": "长音 uu", "hint": "拉长 khu 的 u" },
+          { "form": "خْ", "latin": "kh", "label": "静音 / sukūn", "hint": "直接收尾 kh" },
+          { "form": "خَّ", "latin": "kkha", "label": "重音 + a", "hint": "双写加强再接 a" },
+          { "form": "خِّ", "latin": "kkhi", "label": "重音 + i", "hint": "双写加强再接 i" },
+          { "form": "خُّ", "latin": "kkhu", "label": "重音 + u", "hint": "双写加强再接 u" },
+          { "form": "خً", "latin": "khan", "label": "尾音 an", "hint": "尾部带 an 音" },
+          { "form": "خٍ", "latin": "khin", "label": "尾音 in", "hint": "尾部带 in 音" },
+          { "form": "خٌ", "latin": "khun", "label": "尾音 un", "hint": "尾部带 un 音" }
+        ],
+        "forms": {
+          "isolated": "خ",
+          "initial": "خـ",
+          "medial": "ـخـ",
+          "final": "ـخ"
+        },
+        "connectsAfter": true,
+        "tip": "和 Ha 很像，但上面多了 1 个点。"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "title": "第三组字母",
+    "subtitle": "认识容易混淆的细节差异",
+    "letters": [
+      {
+        "arabic": "د",
+        "name": "Dal",
+        "pronunciation": "d",
+        "soundHint": "舌尖轻触上齿龈，发清晰 d 音。",
+        "hint": "无点，短小，发 d 音。",
+        "example": {
+          "arabic": "درس",
+          "latin": "dars",
+          "meaning": "课"
+        },
+        "pronunciations": [
+          { "form": "دَ", "latin": "da", "label": "短音 a", "hint": "短促 da" },
+          { "form": "دِ", "latin": "di", "label": "短音 i", "hint": "短促 di" },
+          { "form": "دُ", "latin": "du", "label": "短音 u", "hint": "短促 du" },
+          { "form": "دا", "latin": "daa", "label": "长音 aa", "hint": "拉长 da 的 a" },
+          { "form": "دي", "latin": "dii", "label": "长音 ii", "hint": "拉长 di 的 i" },
+          { "form": "دو", "latin": "duu", "label": "长音 uu", "hint": "拉长 du 的 u" },
+          { "form": "دْ", "latin": "d", "label": "静音 / sukūn", "hint": "直接收尾 d" },
+          { "form": "دَّ", "latin": "dda", "label": "重音 + a", "hint": "双写加强再接 a" },
+          { "form": "دِّ", "latin": "ddi", "label": "重音 + i", "hint": "双写加强再接 i" },
+          { "form": "دُّ", "latin": "ddu", "label": "重音 + u", "hint": "双写加强再接 u" },
+          { "form": "دً", "latin": "dan", "label": "尾音 an", "hint": "尾部带 an 音" },
+          { "form": "دٍ", "latin": "din", "label": "尾音 in", "hint": "尾部带 in 音" },
+          { "form": "دٌ", "latin": "dun", "label": "尾音 un", "hint": "尾部带 un 音" }
+        ],
+        "forms": {
+          "isolated": "د",
+          "initial": "د",
+          "medial": "ـد",
+          "final": "ـد"
+        },
+        "connectsAfter": false,
+        "tip": "Dal 是不向后连接的字母之一。"
+      }
+    ]
+  }
+]

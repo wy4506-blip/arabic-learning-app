@@ -1,0 +1,1295 @@
+[
+  {
+    "id": "U1L1",
+    "unitId": "U1",
+    "titleCn": "阿拉伯语入门",
+    "titleAr": "مدخل إلى العربية",
+    "category": "alphabet",
+    "difficulty": 1,
+    "estimatedMinutes": 18,
+    "objectives": [
+      "知道阿拉伯语从右向左书写",
+      "认识4个基础字母",
+      "学会3个最基础词"
+    ],
+    "letters": ["ا", "ب", "ت", "ن"],
+    "vocabulary": [
+      {
+        "arabic": "أنا",
+        "transliteration": "ana",
+        "chinese": "我",
+        "wordType": "pronoun"
+      },
+      {
+        "arabic": "نعم",
+        "transliteration": "naam",
+        "chinese": "是",
+        "wordType": "particle"
+      },
+      {
+        "arabic": "لا",
+        "transliteration": "la",
+        "chinese": "不",
+        "wordType": "particle"
+      },
+      {
+        "arabic": "باب",
+        "transliteration": "bab",
+        "chinese": "门",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "بيت",
+        "transliteration": "bayt",
+        "chinese": "房子",
+        "wordType": "noun"
+      }
+    ],
+    "patterns": [
+      {
+        "arabic": "أنا ...",
+        "transliteration": "ana ...",
+        "chinese": "我是……"
+      },
+      {
+        "arabic": "نعم",
+        "transliteration": "naam",
+        "chinese": "是/对"
+      },
+      {
+        "arabic": "لا",
+        "transliteration": "la",
+        "chinese": "不/不是"
+      }
+    ],
+    "dialogues": [
+      {
+        "speaker": "A",
+        "arabic": "مرحبًا",
+        "transliteration": "marhaban",
+        "chinese": "你好"
+      },
+      {
+        "speaker": "B",
+        "arabic": "مرحبًا",
+        "transliteration": "marhaban",
+        "chinese": "你好"
+      }
+    ],
+    "grammarTitle": "阿拉伯语书写方向",
+    "grammarExplanation": "阿拉伯语从右往左书写和阅读。单词内部字母会连写，学习时先建立方向感和字形感。",
+    "exercises": [
+      {
+        "question": "“أنا” 的中文意思是？",
+        "options": ["我", "你", "他", "她"],
+        "correctAnswer": "我"
+      },
+      {
+        "question": "下面哪个表示“不”？",
+        "options": ["أنا", "نعم", "لا", "باب"],
+        "correctAnswer": "لا"
+      },
+      {
+        "question": "阿拉伯语主要书写方向是？",
+        "options": ["从左到右", "从右到左", "从上到下", "从下到上"],
+        "correctAnswer": "从右到左"
+      }
+    ],
+    "isLocked": false
+  },
+  {
+    "id": "U1L2",
+    "unitId": "U1",
+    "titleCn": "基础字母 A",
+    "titleAr": "الحروف الأساسية أ",
+    "category": "alphabet",
+    "difficulty": 1,
+    "estimatedMinutes": 20,
+    "objectives": [
+      "学会6个新字母",
+      "能识别字母点数差异",
+      "能拼读简单词"
+    ],
+    "letters": ["ث", "ي", "س", "م", "ل", "ك"],
+    "vocabulary": [
+      {
+        "arabic": "كتاب",
+        "transliteration": "kitab",
+        "chinese": "书",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "سمك",
+        "transliteration": "samak",
+        "chinese": "鱼",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "لبن",
+        "transliteration": "laban",
+        "chinese": "牛奶",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "يد",
+        "transliteration": "yad",
+        "chinese": "手",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "ملك",
+        "transliteration": "malik",
+        "chinese": "国王",
+        "wordType": "noun"
+      }
+    ],
+    "patterns": [
+      {
+        "arabic": "هذا كتاب",
+        "transliteration": "hatha kitab",
+        "chinese": "这是一本书"
+      },
+      {
+        "arabic": "هذه يد",
+        "transliteration": "hathihi yad",
+        "chinese": "这是手"
+      },
+      {
+        "arabic": "نعم، هذا كتاب",
+        "transliteration": "naam, hatha kitab",
+        "chinese": "是的，这是一本书"
+      }
+    ],
+    "dialogues": [
+      {
+        "speaker": "A",
+        "arabic": "ما هذا؟",
+        "transliteration": "ma hatha",
+        "chinese": "这是什么？"
+      },
+      {
+        "speaker": "B",
+        "arabic": "هذا كتاب",
+        "transliteration": "hatha kitab",
+        "chinese": "这是一本书"
+      }
+    ],
+    "grammarTitle": "字母在单词中的位置变化",
+    "grammarExplanation": "同一个字母在词首、词中、词尾时，写法可能会变化，但仍然是同一个字母。",
+    "exercises": [
+      {
+        "question": "下面哪个词表示“书”？",
+        "options": ["سمك", "كتاب", "لبن", "يد"],
+        "correctAnswer": "كتاب"
+      },
+      {
+        "question": "“سمك” 的中文意思是？",
+        "options": ["牛奶", "手", "鱼", "国王"],
+        "correctAnswer": "鱼"
+      },
+      {
+        "question": "“هذا كتاب” 的意思是？",
+        "options": ["这是鱼", "这是一本书", "这是牛奶", "这是手"],
+        "correctAnswer": "这是一本书"
+      }
+    ],
+    "isLocked": false
+  },
+  {
+    "id": "U1L3",
+    "unitId": "U1",
+    "titleCn": "基础字母 B",
+    "titleAr": "الحروف الأساسية ب",
+    "category": "alphabet",
+    "difficulty": 1,
+    "estimatedMinutes": 20,
+    "objectives": [
+      "学会6个新字母",
+      "感知后部发音字母",
+      "能拼读二音节词"
+    ],
+    "letters": ["ج", "ح", "خ", "د", "ر", "ز"],
+    "vocabulary": [
+      {
+        "arabic": "خبز",
+        "transliteration": "khubz",
+        "chinese": "面包",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "رجل",
+        "transliteration": "rajul",
+        "chinese": "男人",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "ورد",
+        "transliteration": "ward",
+        "chinese": "花",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "حبر",
+        "transliteration": "hibr",
+        "chinese": "墨水",
+        "wordType": "noun"
+      }
+    ],
+    "patterns": [
+      {
+        "arabic": "هذا خبز",
+        "transliteration": "hatha khubz",
+        "chinese": "这是面包"
+      },
+      {
+        "arabic": "هذا رجل",
+        "transliteration": "hatha rajul",
+        "chinese": "这是男人"
+      },
+      {
+        "arabic": "ما هذا؟",
+        "transliteration": "ma hatha",
+        "chinese": "这是什么？"
+      }
+    ],
+    "dialogues": [
+      {
+        "speaker": "A",
+        "arabic": "ما هذا؟",
+        "transliteration": "ma hatha",
+        "chinese": "这是什么？"
+      },
+      {
+        "speaker": "B",
+        "arabic": "هذا خبز",
+        "transliteration": "hatha khubz",
+        "chinese": "这是面包"
+      }
+    ],
+    "grammarTitle": "发音部位初识",
+    "grammarExplanation": "ح、خ 这类字母发音位置较靠后，初学时先做到能区分、能模仿，不必追求一步到位。",
+    "exercises": [
+      {
+        "question": "“خبز” 的中文意思是？",
+        "options": ["面包", "花", "男人", "墨水"],
+        "correctAnswer": "面包"
+      },
+      {
+        "question": "“هذا رجل” 的意思是？",
+        "options": ["这是花", "这是面包", "这是男人", "这是书"],
+        "correctAnswer": "这是男人"
+      },
+      {
+        "question": "“ورد” 的中文意思是？",
+        "options": ["花", "门", "鱼", "手"],
+        "correctAnswer": "花"
+      }
+    ],
+    "isLocked": true
+  },
+  {
+    "id": "U1L4",
+    "unitId": "U1",
+    "titleCn": "基础字母 C",
+    "titleAr": "الحروف الأساسية ج",
+    "category": "alphabet",
+    "difficulty": 1,
+    "estimatedMinutes": 18,
+    "objectives": [
+      "学会新字母",
+      "认识连写与断开概念",
+      "能识别高频短词"
+    ],
+    "letters": ["ش", "ص", "ض", "ط", "ظ", "و"],
+    "vocabulary": [
+      {
+        "arabic": "شاي",
+        "transliteration": "shay",
+        "chinese": "茶",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "صوت",
+        "transliteration": "sawt",
+        "chinese": "声音",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "وقت",
+        "transliteration": "waqt",
+        "chinese": "时间",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "طريق",
+        "transliteration": "tariq",
+        "chinese": "路",
+        "wordType": "noun"
+      }
+    ],
+    "patterns": [
+      {
+        "arabic": "هذا شاي",
+        "transliteration": "hatha shay",
+        "chinese": "这是茶"
+      },
+      {
+        "arabic": "هذا وقت",
+        "transliteration": "hatha waqt",
+        "chinese": "这是时间"
+      },
+      {
+        "arabic": "أين الطريق؟",
+        "transliteration": "ayna al-tariq",
+        "chinese": "路在哪里？"
+      }
+    ],
+    "dialogues": [
+      {
+        "speaker": "A",
+        "arabic": "أين الطريق؟",
+        "transliteration": "ayna al-tariq",
+        "chinese": "路在哪里？"
+      },
+      {
+        "speaker": "B",
+        "arabic": "الطريق هناك",
+        "transliteration": "al-tariq hunak",
+        "chinese": "路在那里"
+      }
+    ],
+    "grammarTitle": "部分字母连接特点",
+    "grammarExplanation": "有些字母连接方式有限，学习时先通过识词和反复看例子建立感觉。",
+    "exercises": [
+      {
+        "question": "“شاي” 的中文意思是？",
+        "options": ["茶", "路", "时间", "声音"],
+        "correctAnswer": "茶"
+      },
+      {
+        "question": "“أين الطريق？ ” 的意思是？",
+        "options": ["茶在哪里？", "书在哪里？", "路在哪里？", "时间在哪里？"],
+        "correctAnswer": "路在哪里？"
+      },
+      {
+        "question": "“وقت” 的中文意思是？",
+        "options": ["声音", "时间", "茶", "花"],
+        "correctAnswer": "时间"
+      }
+    ],
+    "isLocked": true
+  },
+  {
+    "id": "U1L5",
+    "unitId": "U1",
+    "titleCn": "基础字母 D",
+    "titleAr": "الحروف الأساسية د",
+    "category": "alphabet",
+    "difficulty": 1,
+    "estimatedMinutes": 22,
+    "objectives": [
+      "补全常用基础字母体系",
+      "接触发音难点字母",
+      "完成字母系统第一轮学习"
+    ],
+    "letters": ["ع", "غ", "ف", "ق", "ه"],
+    "vocabulary": [
+      {
+        "arabic": "قمر",
+        "transliteration": "qamar",
+        "chinese": "月亮",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "فم",
+        "transliteration": "fam",
+        "chinese": "嘴",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "عين",
+        "transliteration": "ayn",
+        "chinese": "眼睛",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "غرفة",
+        "transliteration": "ghurfa",
+        "chinese": "房间",
+        "wordType": "noun"
+      }
+    ],
+    "patterns": [
+      {
+        "arabic": "هذا قمر",
+        "transliteration": "hatha qamar",
+        "chinese": "这是月亮"
+      },
+      {
+        "arabic": "هذه غرفة",
+        "transliteration": "hathihi ghurfa",
+        "chinese": "这是房间"
+      },
+      {
+        "arabic": "أين الهاتف؟",
+        "transliteration": "ayna al-hatif",
+        "chinese": "电话在哪里？"
+      }
+    ],
+    "dialogues": [
+      {
+        "speaker": "A",
+        "arabic": "أين الهاتف؟",
+        "transliteration": "ayna al-hatif",
+        "chinese": "电话在哪里？"
+      },
+      {
+        "speaker": "B",
+        "arabic": "الهاتف هنا",
+        "transliteration": "al-hatif huna",
+        "chinese": "电话在这里"
+      }
+    ],
+    "grammarTitle": "难点辅音入门",
+    "grammarExplanation": "ع、غ、ق 对中文学习者较陌生，本课目标是先建立识别和模仿意识。",
+    "exercises": [
+      {
+        "question": "“قمر” 的中文意思是？",
+        "options": ["房间", "月亮", "眼睛", "嘴"],
+        "correctAnswer": "月亮"
+      },
+      {
+        "question": "“غرفة” 的中文意思是？",
+        "options": ["房间", "门", "手", "鱼"],
+        "correctAnswer": "房间"
+      },
+      {
+        "question": "“فم” 的中文意思是？",
+        "options": ["眼睛", "月亮", "嘴", "书"],
+        "correctAnswer": "嘴"
+      }
+    ],
+    "isLocked": true
+  },
+  {
+    "id": "U1L6",
+    "unitId": "U1",
+    "titleCn": "字母与发音复习",
+    "titleAr": "مراجعة الحروف والأصوات",
+    "category": "review",
+    "difficulty": 1,
+    "estimatedMinutes": 15,
+    "objectives": [
+      "复习 Unit 1 所有字母",
+      "完成字母认读小测",
+      "掌握基础拼读节奏"
+    ],
+    "letters": [],
+    "vocabulary": [
+      {
+        "arabic": "أنا",
+        "transliteration": "ana",
+        "chinese": "我",
+        "wordType": "pronoun"
+      },
+      {
+        "arabic": "كتاب",
+        "transliteration": "kitab",
+        "chinese": "书",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "خبز",
+        "transliteration": "khubz",
+        "chinese": "面包",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "شاي",
+        "transliteration": "shay",
+        "chinese": "茶",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "قمر",
+        "transliteration": "qamar",
+        "chinese": "月亮",
+        "wordType": "noun"
+      }
+    ],
+    "patterns": [
+      {
+        "arabic": "هذا كتاب",
+        "transliteration": "hatha kitab",
+        "chinese": "这是一本书"
+      },
+      {
+        "arabic": "هذا خبز",
+        "transliteration": "hatha khubz",
+        "chinese": "这是面包"
+      },
+      {
+        "arabic": "هذا شاي",
+        "transliteration": "hatha shay",
+        "chinese": "这是茶"
+      }
+    ],
+    "dialogues": [
+      {
+        "speaker": "A",
+        "arabic": "ما هذا؟",
+        "transliteration": "ma hatha",
+        "chinese": "这是什么？"
+      },
+      {
+        "speaker": "B",
+        "arabic": "هذا كتاب",
+        "transliteration": "hatha kitab",
+        "chinese": "这是一本书"
+      }
+    ],
+    "grammarTitle": "Unit 1 复习",
+    "grammarExplanation": "本课不新增知识，重点是把已学字母、词汇和基础句型整合起来。",
+    "exercises": [
+      {
+        "question": "“هذا كتاب” 的意思是？",
+        "options": ["这是鱼", "这是一本书", "这是茶", "这是门"],
+        "correctAnswer": "这是一本书"
+      },
+      {
+        "question": "“قمر” 的中文意思是？",
+        "options": ["月亮", "房间", "嘴", "眼睛"],
+        "correctAnswer": "月亮"
+      },
+      {
+        "question": "“خبز” 的中文意思是？",
+        "options": ["茶", "书", "面包", "牛奶"],
+        "correctAnswer": "面包"
+      },
+      {
+        "question": "“ما هذا？ ” 的意思是？",
+        "options": ["你是谁？", "你在哪里？", "这是什么？", "你几岁？"],
+        "correctAnswer": "这是什么？"
+      }
+    ],
+    "isLocked": true
+  },
+  {
+    "id": "U2L7",
+    "unitId": "U2",
+    "titleCn": "问候与自我介绍",
+    "titleAr": "التحية والتعريف بالنفس",
+    "category": "dialogue",
+    "difficulty": 2,
+    "estimatedMinutes": 20,
+    "objectives": [
+      "学会基础问候表达",
+      "会说自己的名字",
+      "会询问别人名字"
+    ],
+    "letters": [],
+    "vocabulary": [
+      {
+        "arabic": "مرحبًا",
+        "transliteration": "marhaban",
+        "chinese": "你好",
+        "wordType": "expression"
+      },
+      {
+        "arabic": "أهلًا",
+        "transliteration": "ahlan",
+        "chinese": "你好／欢迎",
+        "wordType": "expression"
+      },
+      {
+        "arabic": "اسمي",
+        "transliteration": "ismi",
+        "chinese": "我的名字是",
+        "wordType": "expression"
+      },
+      {
+        "arabic": "اسم",
+        "transliteration": "ism",
+        "chinese": "名字",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "أنا",
+        "transliteration": "ana",
+        "chinese": "我",
+        "wordType": "pronoun"
+      },
+      {
+        "arabic": "أنتَ",
+        "transliteration": "anta",
+        "chinese": "你（男）",
+        "wordType": "pronoun"
+      },
+      {
+        "arabic": "أنتِ",
+        "transliteration": "anti",
+        "chinese": "你（女）",
+        "wordType": "pronoun"
+      }
+    ],
+    "patterns": [
+      {
+        "arabic": "اسمي خالد",
+        "transliteration": "ismi khalid",
+        "chinese": "我的名字是哈立德"
+      },
+      {
+        "arabic": "ما اسمك؟",
+        "transliteration": "ma ismuka",
+        "chinese": "你叫什么名字？"
+      },
+      {
+        "arabic": "أنا لي",
+        "transliteration": "ana li",
+        "chinese": "我是李"
+      }
+    ],
+    "dialogues": [
+      {
+        "speaker": "A",
+        "arabic": "مرحبًا",
+        "transliteration": "marhaban",
+        "chinese": "你好"
+      },
+      {
+        "speaker": "B",
+        "arabic": "أهلًا",
+        "transliteration": "ahlan",
+        "chinese": "你好"
+      },
+      {
+        "speaker": "A",
+        "arabic": "ما اسمك؟",
+        "transliteration": "ma ismuka",
+        "chinese": "你叫什么名字？"
+      },
+      {
+        "speaker": "B",
+        "arabic": "اسمي عمر",
+        "transliteration": "ismi umar",
+        "chinese": "我叫欧麦尔"
+      }
+    ],
+    "grammarTitle": "人称代词入门",
+    "grammarExplanation": "本课先掌握“我”和“你”的最基础表达。阿拉伯语中，对男性和女性的称呼形式可能不同，先建立感知即可。",
+    "exercises": [
+      {
+        "question": "“ما اسمك？” 的意思是？",
+        "options": ["你来自哪里？", "你叫什么名字？", "你好吗？", "你几岁？"],
+        "correctAnswer": "你叫什么名字？"
+      },
+      {
+        "question": "“اسمي” 的中文意思是？",
+        "options": ["我的语言", "我的家庭", "我的名字是", "我是"],
+        "correctAnswer": "我的名字是"
+      },
+      {
+        "question": "“أنا لي” 的意思是？",
+        "options": ["我是李", "我来自中国", "我是老师", "我很好"],
+        "correctAnswer": "我是李"
+      }
+    ],
+    "isLocked": false
+  },
+  {
+    "id": "U2L8",
+    "unitId": "U2",
+    "titleCn": "国籍与语言",
+    "titleAr": "الجنسية واللغة",
+    "category": "dialogue",
+    "difficulty": 2,
+    "estimatedMinutes": 22,
+    "objectives": [
+      "会表达自己来自哪里",
+      "会说自己会什么语言",
+      "会进行简单身份问答"
+    ],
+    "letters": [],
+    "vocabulary": [
+      {
+        "arabic": "من",
+        "transliteration": "min",
+        "chinese": "来自",
+        "wordType": "prep"
+      },
+      {
+        "arabic": "أين",
+        "transliteration": "ayna",
+        "chinese": "哪里",
+        "wordType": "question"
+      },
+      {
+        "arabic": "الصين",
+        "transliteration": "al-sin",
+        "chinese": "中国",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "السعودية",
+        "transliteration": "al-saudiyya",
+        "chinese": "沙特阿拉伯",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "العربية",
+        "transliteration": "al-arabiyya",
+        "chinese": "阿拉伯语",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "الإنجليزية",
+        "transliteration": "al-injiliziyya",
+        "chinese": "英语",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "أتكلم",
+        "transliteration": "atakallam",
+        "chinese": "我说",
+        "wordType": "verb"
+      },
+      {
+        "arabic": "قليلًا",
+        "transliteration": "qalilan",
+        "chinese": "一点儿",
+        "wordType": "adverb"
+      }
+    ],
+    "patterns": [
+      {
+        "arabic": "أنا من الصين",
+        "transliteration": "ana min al-sin",
+        "chinese": "我来自中国"
+      },
+      {
+        "arabic": "من أين أنت؟",
+        "transliteration": "min ayna anta",
+        "chinese": "你来自哪里？"
+      },
+      {
+        "arabic": "أتكلم العربية قليلًا",
+        "transliteration": "atakallam al-arabiyya qalilan",
+        "chinese": "我会说一点阿拉伯语"
+      }
+    ],
+    "dialogues": [
+      {
+        "speaker": "A",
+        "arabic": "من أين أنت؟",
+        "transliteration": "min ayna anta",
+        "chinese": "你来自哪里？"
+      },
+      {
+        "speaker": "B",
+        "arabic": "أنا من الصين",
+        "transliteration": "ana min al-sin",
+        "chinese": "我来自中国"
+      },
+      {
+        "speaker": "A",
+        "arabic": "هل تتكلم العربية؟",
+        "transliteration": "hal tatakallam al-arabiyya",
+        "chinese": "你会说阿拉伯语吗？"
+      },
+      {
+        "speaker": "B",
+        "arabic": "نعم، قليلًا",
+        "transliteration": "naam, qalilan",
+        "chinese": "会，一点点"
+      }
+    ],
+    "grammarTitle": "هل 疑问句",
+    "grammarExplanation": "在简单的是非问句中，可以用 هل 放在句首，表示“是否……”。回答常用 نعم 或 لا。",
+    "exercises": [
+      {
+        "question": "“أنا من الصين” 的意思是？",
+        "options": ["我来自中国", "我去中国", "我是中国人老师", "我喜欢中国"],
+        "correctAnswer": "我来自中国"
+      },
+      {
+        "question": "“هل تتكلم العربية？” 的意思是？",
+        "options": ["你来自哪里？", "你会说阿拉伯语吗？", "你叫什么名字？", "你在学习吗？"],
+        "correctAnswer": "你会说阿拉伯语吗？"
+      },
+      {
+        "question": "“قليلًا” 的中文意思是？",
+        "options": ["很多", "一点儿", "现在", "昨天"],
+        "correctAnswer": "一点儿"
+      }
+    ],
+    "isLocked": false
+  },
+  {
+    "id": "U2L9",
+    "unitId": "U2",
+    "titleCn": "家庭成员",
+    "titleAr": "أفراد الأسرة",
+    "category": "dialogue",
+    "difficulty": 2,
+    "estimatedMinutes": 20,
+    "objectives": [
+      "学会家庭成员基础词汇",
+      "会表达“这是我的……”",
+      "初步接触所属关系"
+    ],
+    "letters": [],
+    "vocabulary": [
+      {
+        "arabic": "أب",
+        "transliteration": "ab",
+        "chinese": "父亲",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "أم",
+        "transliteration": "umm",
+        "chinese": "母亲",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "أخ",
+        "transliteration": "akh",
+        "chinese": "兄弟",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "أخت",
+        "transliteration": "ukht",
+        "chinese": "姐妹",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "ابن",
+        "transliteration": "ibn",
+        "chinese": "儿子",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "أسرة",
+        "transliteration": "usra",
+        "chinese": "家庭",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "هذا",
+        "transliteration": "hatha",
+        "chinese": "这个（阳）",
+        "wordType": "demonstrative"
+      },
+      {
+        "arabic": "هذه",
+        "transliteration": "hathihi",
+        "chinese": "这个（阴）",
+        "wordType": "demonstrative"
+      }
+    ],
+    "patterns": [
+      {
+        "arabic": "هذا أبي",
+        "transliteration": "hatha abi",
+        "chinese": "这是我父亲"
+      },
+      {
+        "arabic": "هذه أمي",
+        "transliteration": "hathihi ummi",
+        "chinese": "这是我母亲"
+      },
+      {
+        "arabic": "هذه أسرتي",
+        "transliteration": "hathihi usrati",
+        "chinese": "这是我的家庭"
+      }
+    ],
+    "dialogues": [
+      {
+        "speaker": "A",
+        "arabic": "من هذا؟",
+        "transliteration": "man hatha",
+        "chinese": "这是谁？"
+      },
+      {
+        "speaker": "B",
+        "arabic": "هذا أبي",
+        "transliteration": "hatha abi",
+        "chinese": "这是我父亲"
+      },
+      {
+        "speaker": "A",
+        "arabic": "ومن هذه؟",
+        "transliteration": "wa man hathihi",
+        "chinese": "那这位是谁？"
+      },
+      {
+        "speaker": "B",
+        "arabic": "هذه أمي",
+        "transliteration": "hathihi ummi",
+        "chinese": "这是我母亲"
+      }
+    ],
+    "grammarTitle": "هذا / هذه 指示词",
+    "grammarExplanation": "指近处的人或物时，阳性一般用 هذا，阴性一般用 هذه。先通过常见搭配熟悉。",
+    "exercises": [
+      {
+        "question": "“هذا أبي” 的意思是？",
+        "options": ["这是我兄弟", "这是我父亲", "这是我儿子", "这是我朋友"],
+        "correctAnswer": "这是我父亲"
+      },
+      {
+        "question": "“أم” 的中文意思是？",
+        "options": ["姐妹", "母亲", "家庭", "父亲"],
+        "correctAnswer": "母亲"
+      },
+      {
+        "question": "表示阴性“这个”的是？",
+        "options": ["هذا", "هذه", "أنا", "أنت"],
+        "correctAnswer": "هذه"
+      }
+    ],
+    "isLocked": true
+  },
+  {
+    "id": "U2L10",
+    "unitId": "U2",
+    "titleCn": "数字与年龄",
+    "titleAr": "الأرقام والعمر",
+    "category": "grammar",
+    "difficulty": 2,
+    "estimatedMinutes": 22,
+    "objectives": [
+      "学会 1–10 的数字",
+      "会表达年龄",
+      "会询问年龄"
+    ],
+    "letters": [],
+    "vocabulary": [
+      {
+        "arabic": "واحد",
+        "transliteration": "wahid",
+        "chinese": "一",
+        "wordType": "number"
+      },
+      {
+        "arabic": "اثنان",
+        "transliteration": "ithnan",
+        "chinese": "二",
+        "wordType": "number"
+      },
+      {
+        "arabic": "ثلاثة",
+        "transliteration": "thalatha",
+        "chinese": "三",
+        "wordType": "number"
+      },
+      {
+        "arabic": "أربعة",
+        "transliteration": "arbaa",
+        "chinese": "四",
+        "wordType": "number"
+      },
+      {
+        "arabic": "خمسة",
+        "transliteration": "khamsa",
+        "chinese": "五",
+        "wordType": "number"
+      },
+      {
+        "arabic": "عمر",
+        "transliteration": "umr",
+        "chinese": "年龄",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "سنة",
+        "transliteration": "sana",
+        "chinese": "岁／年",
+        "wordType": "noun"
+      }
+    ],
+    "patterns": [
+      {
+        "arabic": "كم عمرك؟",
+        "transliteration": "kam umruka",
+        "chinese": "你几岁？"
+      },
+      {
+        "arabic": "عمري عشرون سنة",
+        "transliteration": "umri ishruna sana",
+        "chinese": "我二十岁"
+      },
+      {
+        "arabic": "عندي ثلاثة كتب",
+        "transliteration": "indi thalathatu kutub",
+        "chinese": "我有三本书"
+      }
+    ],
+    "dialogues": [
+      {
+        "speaker": "A",
+        "arabic": "كم عمرك؟",
+        "transliteration": "kam umruka",
+        "chinese": "你几岁？"
+      },
+      {
+        "speaker": "B",
+        "arabic": "عمري خمس وعشرون سنة",
+        "transliteration": "umri khams wa ishruna sana",
+        "chinese": "我二十五岁"
+      }
+    ],
+    "grammarTitle": "数字基础入门",
+    "grammarExplanation": "本课先以读、听、认、用为主，不展开复杂的数字性别规则。",
+    "exercises": [
+      {
+        "question": "“كم عمرك？” 的意思是？",
+        "options": ["你叫什么名字？", "你几岁？", "你来自哪里？", "你在做什么？"],
+        "correctAnswer": "你几岁？"
+      },
+      {
+        "question": "“خمسة” 的中文意思是？",
+        "options": ["三", "四", "五", "六"],
+        "correctAnswer": "五"
+      },
+      {
+        "question": "“سنة” 的中文意思是？",
+        "options": ["时间", "书", "岁／年", "年龄"],
+        "correctAnswer": "岁／年"
+      }
+    ],
+    "isLocked": true
+  },
+  {
+    "id": "U2L11",
+    "unitId": "U2",
+    "titleCn": "教室与日常物品",
+    "titleAr": "أشياء الصف والحياة اليومية",
+    "category": "dialogue",
+    "difficulty": 2,
+    "estimatedMinutes": 20,
+    "objectives": [
+      "学会常见物品名称",
+      "会问“这是什么”",
+      "能进行简单判断句表达"
+    ],
+    "letters": [],
+    "vocabulary": [
+      {
+        "arabic": "كتاب",
+        "transliteration": "kitab",
+        "chinese": "书",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "قلم",
+        "transliteration": "qalam",
+        "chinese": "笔",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "كرسي",
+        "transliteration": "kursi",
+        "chinese": "椅子",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "طاولة",
+        "transliteration": "tawila",
+        "chinese": "桌子",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "هاتف",
+        "transliteration": "hatif",
+        "chinese": "手机／电话",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "حقيبة",
+        "transliteration": "haqiba",
+        "chinese": "包",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "مفتاح",
+        "transliteration": "miftah",
+        "chinese": "钥匙",
+        "wordType": "noun"
+      }
+    ],
+    "patterns": [
+      {
+        "arabic": "ما هذا؟",
+        "transliteration": "ma hatha",
+        "chinese": "这是什么？"
+      },
+      {
+        "arabic": "هذا كتاب",
+        "transliteration": "hatha kitab",
+        "chinese": "这是书"
+      },
+      {
+        "arabic": "هذه حقيبة",
+        "transliteration": "hathihi haqiba",
+        "chinese": "这是包"
+      }
+    ],
+    "dialogues": [
+      {
+        "speaker": "A",
+        "arabic": "ما هذا؟",
+        "transliteration": "ma hatha",
+        "chinese": "这是什么？"
+      },
+      {
+        "speaker": "B",
+        "arabic": "هذا هاتف",
+        "transliteration": "hatha hatif",
+        "chinese": "这是手机"
+      },
+      {
+        "speaker": "A",
+        "arabic": "وهذه؟",
+        "transliteration": "wa hathihi",
+        "chinese": "那这个呢？"
+      },
+      {
+        "speaker": "B",
+        "arabic": "هذه حقيبة",
+        "transliteration": "hathihi haqiba",
+        "chinese": "这是包"
+      }
+    ],
+    "grammarTitle": "名词阴阳性初识",
+    "grammarExplanation": "很多阿拉伯语名词分阳性和阴性，部分阴性词常见词尾为 ة，本课先通过常见词建立感觉。",
+    "exercises": [
+      {
+        "question": "“ما هذا？” 的意思是？",
+        "options": ["这是谁？", "这是什么？", "在哪里？", "你好吗？"],
+        "correctAnswer": "这是什么？"
+      },
+      {
+        "question": "“قلم” 的中文意思是？",
+        "options": ["书", "桌子", "笔", "椅子"],
+        "correctAnswer": "笔"
+      },
+      {
+        "question": "“هذه حقيبة” 的意思是？",
+        "options": ["这是钥匙", "这是包", "这是书", "这是手机"],
+        "correctAnswer": "这是包"
+      }
+    ],
+    "isLocked": true
+  },
+  {
+    "id": "U2L12",
+    "unitId": "U2",
+    "titleCn": "基础交流复习",
+    "titleAr": "مراجعة التواصل الأساسي",
+    "category": "review",
+    "difficulty": 2,
+    "estimatedMinutes": 18,
+    "objectives": [
+      "巩固问候、自我介绍、国籍、年龄、家庭、物品表达",
+      "输出完整基础自我介绍",
+      "完成 Unit 2 单元测验"
+    ],
+    "letters": [],
+    "vocabulary": [
+      {
+        "arabic": "مرحبًا",
+        "transliteration": "marhaban",
+        "chinese": "你好",
+        "wordType": "expression"
+      },
+      {
+        "arabic": "الصين",
+        "transliteration": "al-sin",
+        "chinese": "中国",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "أب",
+        "transliteration": "ab",
+        "chinese": "父亲",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "كتاب",
+        "transliteration": "kitab",
+        "chinese": "书",
+        "wordType": "noun"
+      },
+      {
+        "arabic": "عمر",
+        "transliteration": "umr",
+        "chinese": "年龄",
+        "wordType": "noun"
+      }
+    ],
+    "patterns": [
+      {
+        "arabic": "اسمي لي",
+        "transliteration": "ismi li",
+        "chinese": "我叫李"
+      },
+      {
+        "arabic": "أنا من الصين",
+        "transliteration": "ana min al-sin",
+        "chinese": "我来自中国"
+      },
+      {
+        "arabic": "هذا أبي",
+        "transliteration": "hatha abi",
+        "chinese": "这是我父亲"
+      },
+      {
+        "arabic": "ما هذا؟",
+        "transliteration": "ma hatha",
+        "chinese": "这是什么？"
+      }
+    ],
+    "dialogues": [
+      {
+        "speaker": "A",
+        "arabic": "مرحبًا، ما اسمك؟",
+        "transliteration": "marhaban, ma ismuka",
+        "chinese": "你好，你叫什么名字？"
+      },
+      {
+        "speaker": "B",
+        "arabic": "اسمي لي، وأنا من الصين",
+        "transliteration": "ismi li, wa ana min al-sin",
+        "chinese": "我叫李，我来自中国"
+      }
+    ],
+    "grammarTitle": "Unit 2 复习",
+    "grammarExplanation": "本课不新增知识，重点是把基础交流场景整合起来，形成简单输出能力。",
+    "exercises": [
+      {
+        "question": "“أنا من الصين” 的意思是？",
+        "options": ["我来自中国", "我去中国", "我是中国老师", "我喜欢中国"],
+        "correctAnswer": "我来自中国"
+      },
+      {
+        "question": "“هذا أبي” 的意思是？",
+        "options": ["这是我父亲", "这是我朋友", "这是我儿子", "这是我兄弟"],
+        "correctAnswer": "这是我父亲"
+      },
+      {
+        "question": "“ما هذا？” 的意思是？",
+        "options": ["你是谁？", "这是什么？", "你在哪里？", "你几岁？"],
+        "correctAnswer": "这是什么？"
+      },
+      {
+        "question": "“اسمي لي” 的意思是？",
+        "options": ["我是老师", "我来自中国", "我叫李", "我很好"],
+        "correctAnswer": "我叫李"
+      }
+    ],
+    "isLocked": true
+  }
+]

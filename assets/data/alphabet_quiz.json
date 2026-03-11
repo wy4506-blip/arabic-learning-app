@@ -1,0 +1,178 @@
+{
+  "recognition": [
+    {
+      "title": "这个字母叫什么？",
+      "prompt": "ب",
+      "promptType": "arabic",
+      "correct": "Ba",
+      "options": ["Ba", "Ta", "Jim"]
+    },
+    {
+      "title": "这个字母叫什么？",
+      "prompt": "ت",
+      "promptType": "arabic",
+      "correct": "Ta",
+      "options": ["Tha", "Ta", "Ra"]
+    },
+    {
+      "title": "请选择对应的阿语字母",
+      "prompt": "Jim",
+      "promptType": "name",
+      "correct": "ج",
+      "options": ["ج", "ح", "خ"]
+    },
+    {
+      "title": "请选择对应的阿语字母",
+      "prompt": "Kha",
+      "promptType": "name",
+      "correct": "خ",
+      "options": ["خ", "ج", "د"]
+    },
+    {
+      "title": "这个字母叫什么？",
+      "prompt": "ح",
+      "promptType": "arabic",
+      "correct": "Ha",
+      "options": ["Ha", "Dal", "Zay"]
+    },
+    {
+      "title": "请选择对应的阿语字母",
+      "prompt": "Dal",
+      "promptType": "name",
+      "correct": "د",
+      "options": ["د", "ذ", "ر"]
+    }
+  ],
+  "compare": [
+    {
+      "title": "根据提示选字母",
+      "prompt": "下面 1 个点",
+      "promptType": "hint",
+      "correct": "ب",
+      "options": ["ب", "ت", "ث"]
+    },
+    {
+      "title": "根据提示选字母",
+      "prompt": "上面 3 个点",
+      "promptType": "hint",
+      "correct": "ث",
+      "options": ["ب", "ت", "ث"]
+    },
+    {
+      "title": "根据提示选字母",
+      "prompt": "没有点",
+      "promptType": "hint",
+      "correct": "ح",
+      "options": ["ج", "ح", "خ"]
+    },
+    {
+      "title": "根据提示选字母",
+      "prompt": "上面 1 个点",
+      "promptType": "hint",
+      "correct": "خ",
+      "options": ["ج", "ح", "خ"]
+    },
+    {
+      "title": "根据提示选字母",
+      "prompt": "和 د 外形接近，但上面多 1 个点",
+      "promptType": "hint",
+      "correct": "ذ",
+      "options": ["د", "ذ", "ر"]
+    },
+    {
+      "title": "根据提示选字母",
+      "prompt": "和 ر 外形接近，但上面多 1 个点",
+      "promptType": "hint",
+      "correct": "ز",
+      "options": ["ر", "ز", "د"]
+    }
+  ],
+  "sound": [
+    {
+      "title": "这个字母的基础发音是什么？",
+      "prompt": "ب",
+      "promptType": "arabic",
+      "correct": "b",
+      "options": ["b", "t", "kh"]
+    },
+    {
+      "title": "这个字母的基础发音是什么？",
+      "prompt": "ت",
+      "promptType": "arabic",
+      "correct": "t",
+      "options": ["th", "t", "d"]
+    },
+    {
+      "title": "这个字母的基础发音是什么？",
+      "prompt": "ث",
+      "promptType": "arabic",
+      "correct": "th",
+      "options": ["b", "th", "r"]
+    },
+    {
+      "title": "根据基础发音选字母",
+      "prompt": "kh",
+      "promptType": "sound",
+      "correct": "خ",
+      "options": ["خ", "ح", "ج"]
+    },
+    {
+      "title": "根据基础发音选字母",
+      "prompt": "j",
+      "promptType": "sound",
+      "correct": "ج",
+      "options": ["ج", "ذ", "ز"]
+    },
+    {
+      "title": "根据基础发音选字母",
+      "prompt": "d",
+      "promptType": "sound",
+      "correct": "د",
+      "options": ["د", "ذ", "ر"]
+    }
+  ],
+  "pronunciation": [
+    {
+      "title": "看读音形式，选正确转写",
+      "prompt": "بَ",
+      "promptType": "arabic",
+      "correct": "ba",
+      "options": ["ba", "bi", "buu"]
+    },
+    {
+      "title": "看读音形式，选正确转写",
+      "prompt": "بِ",
+      "promptType": "arabic",
+      "correct": "bi",
+      "options": ["ba", "bi", "ban"]
+    },
+    {
+      "title": "看读音形式，选正确转写",
+      "prompt": "با",
+      "promptType": "arabic",
+      "correct": "baa",
+      "options": ["baa", "bu", "bin"]
+    },
+    {
+      "title": "看读音形式，选正确类别",
+      "prompt": "بْ",
+      "promptType": "arabic",
+      "correct": "静音 / sukūn",
+      "options": ["长音 aa", "静音 / sukūn", "尾音 an"]
+    },
+    {
+      "title": "看读音形式，选正确类别",
+      "prompt": "بً",
+      "promptType": "arabic",
+      "correct": "尾音 an",
+      "options": ["尾音 an", "短音 u", "重音 + i"]
+    },
+    {
+      "title": "看读音形式，选正确类别",
+      "prompt": "بُّ",
+      "promptType": "arabic",
+      "correct": "重音 + u",
+      "options": ["短音 u", "长音 uu", "重音 + u"]
+    }
+  ]
+}
