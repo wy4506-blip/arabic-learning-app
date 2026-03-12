@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+
+import '../models/word_item.dart';
+import '../services/progress_service.dart';
+import '../services/vocab_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/app_widgets.dart';
 
 class ReviewPage extends StatefulWidget {
   const ReviewPage({super.key});
@@ -9,342 +14,98 @@ class ReviewPage extends StatefulWidget {
 }
 
 class _ReviewPageState extends State<ReviewPage> {
-  final List<Map<String, String>> _reviewWords = [
-    {
-      'arabic': 'مرحبا',
-      'pronunciation': 'marhaban',
-      'meaning': '你好',
-    },
-    {
-      'arabic': 'شكرا',
-      'pronunciation': 'shukran',
-      'meaning': '谢谢',
-    },
-    {
-      'arabic': 'نعم',
-      'pronunciation': 'na\'am',
-      'meaning': '是',
-    },
-  ];
+  List<WordItem> _words = const [];
+  int _index = 0;
+  bool _loading = true;
 
-  int _currentIndex = 0;
-
-  void _nextWord() {
-    if (_currentIndex < _reviewWords.length - 1) {
-      setState(() {
-        _currentIndex++;
-      });
-    } else {
-      _showFinishDialog();
-    }
+  @override
+  void initState() {
+    super.initState();
+    _load();
   }
 
-  void _showFinishDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        final text = Theme.of(context).textTheme;
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
-          ),
-          title: Text('今日复习完成', style: text.titleLarge),
-          content: Text(
-            '今天的待复习内容已经完成，继续保持学习节奏。',
-            style: text.bodyMedium,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pop(context);
-              },
-              child: const Text('返回首页'),
-            ),
-          ],
-        );
-      },
-    );
+  Future<void> _load() async {
+    final words = await VocabService.getFavoriteWords();
+    if (!mounted) return;
+    setState(() {
+      _words = words;
+      _loading = false;
+    });
+  }
+
+  Future<void> _next() async {
+    await ProgressService.incrementReviewCount();
+    if (!mounted) return;
+    setState(() => _index = (_index + 1) % (_words.isEmpty ? 1 : _words.length));
   }
 
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-    final currentWord = _reviewWords[_currentIndex];
-
+    if (_loading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    final word = _words.isEmpty ? null : _words[_index];
     return Scaffold(
-      backgroundColor: AppTheme.background,
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+          padding: AppTheme.pagePadding,
           children: [
-            Row(
-              children: [
-                _buildTopButton(
-                  icon: Icons.arrow_back_ios_new_rounded,
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('今日复习', style: text.titleLarge),
-                      const SizedBox(height: 2),
-                      Text(
-                        '温习旧内容，让记忆更牢固',
-                        style: text.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 22),
-            Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFFFFF4E8),
-                    Color(0xFFFFEFD9),
+            SectionTitle(title: 'Review', subtitle: '清晰答题、降低压力，优先复习已收藏内容'),
+            const SizedBox(height: 16),
+            if (word == null)
+              AppSurface(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 8),
+                    const Icon(Icons.celebration_outlined, size: 42, color: AppTheme.accentMintDark),
+                    const SizedBox(height: 12),
+                    Text('当前没有待复习内容', style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 6),
+                    Text('先去课程详情页或单词本收藏几个重点词。', style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
                   ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x14000000),
-                    blurRadius: 22,
-                    offset: Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.82),
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: const Icon(
-                      Icons.refresh_rounded,
-                      color: Color(0xFFF08A24),
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              )
+            else ...[
+              AppSurface(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Text('今天待复习 ${_reviewWords.length} 个词',
-                            style: text.titleMedium),
-                        const SizedBox(height: 4),
-                        Text(
-                          '每天回顾一点，长期记忆会更稳定。',
-                          style: text.bodySmall,
-                        ),
+                        Pill(label: '今日复习'),
+                        const Spacer(),
+                        Text('${_index + 1} / ${_words.length}', style: Theme.of(context).textTheme.labelMedium),
                       ],
                     ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('复习进度', style: text.titleLarge),
-                Text(
-                  '${_currentIndex + 1}/${_reviewWords.length}',
-                  style: text.labelLarge?.copyWith(
-                    color: AppTheme.deepAccent,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: LinearProgressIndicator(
-                value: (_currentIndex + 1) / _reviewWords.length,
-                minHeight: 8,
-                backgroundColor: const Color(0xFFE5E7EB),
-                valueColor: const AlwaysStoppedAnimation<Color>(
-                  AppTheme.deepAccent,
+                    const SizedBox(height: 16),
+                    Text(word.arabic, style: const TextStyle(fontSize: 34, height: 1.4, fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 8),
+                    Text(word.pronunciation, style: Theme.of(context).textTheme.bodyMedium),
+                    const SizedBox(height: 8),
+                    Text(word.meaning, style: Theme.of(context).textTheme.titleMedium),
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(28),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x10000000),
-                    blurRadius: 18,
-                    offset: Offset(0, 8),
-                  ),
-                ],
+              const SizedBox(height: 16),
+              AppSurface(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('复习提示', style: Theme.of(context).textTheme.titleSmall),
+                    const SizedBox(height: 8),
+                    Text('一次只服务一个决策：看 → 想 → 记 → 下一步。', style: Theme.of(context).textTheme.bodyMedium),
+                  ],
+                ),
               ),
-              child: Column(
+              const SizedBox(height: 16),
+              Row(
                 children: [
-                  Text(
-                    currentWord['arabic']!,
-                    style: text.headlineLarge?.copyWith(
-                      fontSize: 34,
-                      fontWeight: FontWeight.w700,
-                    ),
-                    textDirection: TextDirection.rtl,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    currentWord['pronunciation']!,
-                    style: text.bodyMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    currentWord['meaning']!,
-                    style: text.titleMedium,
-                  ),
+                  Expanded(child: OutlinedButton(onPressed: _next, child: const Text('稍后复习'))),
+                  const SizedBox(width: 12),
+                  Expanded(child: FilledButton(onPressed: _next, child: const Text('我记住了'))),
                 ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      side: const BorderSide(color: Color(0xFFD0D5DD)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                    ),
-                    onPressed: _nextWord,
-                    child: const Text('稍后复习'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppTheme.deepAccent,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                    ),
-                    onPressed: _nextWord,
-                    child: const Text('已掌握'),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Text('复习建议', style: text.titleLarge),
-            const SizedBox(height: 12),
-            _buildTipCard(
-              context,
-              icon: Icons.lightbulb_rounded,
-              title: '先看发音，再看词义',
-              subtitle: '先建立声音记忆，再对应中文含义，会更容易记住。',
-            ),
-            _buildTipCard(
-              context,
-              icon: Icons.repeat_rounded,
-              title: '不要一次背太多',
-              subtitle: '每天稳定复习少量内容，效果比突击更好。',
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  static Widget _buildTopButton({
-    required IconData icon,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x10000000),
-                blurRadius: 14,
-                offset: Offset(0, 6),
               ),
             ],
-          ),
-          child: Icon(
-            icon,
-            color: AppTheme.primaryText,
-            size: 20,
-          ),
+          ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildTipCard(
-    BuildContext context, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-  }) {
-    final text = Theme.of(context).textTheme;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x10000000),
-            blurRadius: 16,
-            offset: Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            radius: 22,
-            backgroundColor: const Color(0xFFFFF1E6),
-            child: Icon(icon, color: const Color(0xFFF08A24)),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: text.titleMedium),
-                const SizedBox(height: 4),
-                Text(subtitle, style: text.bodySmall),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

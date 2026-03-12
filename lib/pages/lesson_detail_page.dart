@@ -1,491 +1,244 @@
 import 'package:flutter/material.dart';
+
+import '../models/app_settings.dart';
 import '../models/lesson.dart';
+import '../models/word_item.dart';
+import '../services/progress_service.dart';
+import '../services/vocab_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/app_widgets.dart';
 import 'lesson_quiz_page.dart';
 
-class LessonDetailPage extends StatelessWidget {
+class LessonDetailPage extends StatefulWidget {
   final Lesson lesson;
+  final AppSettings settings;
+  final bool isUnlocked;
 
   const LessonDetailPage({
     super.key,
     required this.lesson,
+    required this.settings,
+    required this.isUnlocked,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
+  State<LessonDetailPage> createState() => _LessonDetailPageState();
+}
 
-    return Scaffold(
-      backgroundColor: AppTheme.background,
-      appBar: AppBar(
-        title: Text(lesson.titleCn),
+class _LessonDetailPageState extends State<LessonDetailPage> {
+  final Set<String> _saved = {};
+  bool _completed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final snapshot = await ProgressService.getSnapshot();
+    if (!mounted) return;
+    setState(() => _completed = snapshot.completedLessons.contains(widget.lesson.id));
+  }
+
+  String _displayArabic(String text) {
+    switch (widget.settings.textMode) {
+      case ArabicTextMode.withDiacritics:
+        return text;
+      case ArabicTextMode.dual:
+        final plain = removeArabicDiacritics(text);
+        return plain == text ? text : '$text\n$plain';
+      case ArabicTextMode.withoutDiacritics:
+        return removeArabicDiacritics(text);
+    }
+  }
+
+  Future<void> _saveWord(LessonWord word) async {
+    await VocabService.toggleFavorite(
+      WordItem(
+        arabic: word.arabic,
+        pronunciation: word.transliteration,
+        meaning: word.chinese,
       ),
+    );
+    if (!mounted) return;
+    setState(() => _saved.add(word.arabic));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('已加入单词本')));
+  }
+
+  Future<void> _start() async {
+    if (widget.lesson.isLocked && !widget.isUnlocked) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('当前课时需要解锁后继续')));
+      return;
+    }
+    await ProgressService.markLessonStarted(widget.lesson.id);
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => LessonQuizPage(lesson: widget.lesson)),
+    );
+    if (result == true) {
+      await ProgressService.markLessonCompleted(widget.lesson.id);
+      if (!mounted) return;
+      setState(() => _completed = true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final lesson = widget.lesson;
+    final locked = lesson.isLocked && !widget.isUnlocked;
+    final text = Theme.of(context).textTheme;
+    return Scaffold(
+      appBar: AppBar(title: Text(lesson.titleCn)),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
         children: [
-          Container(
-            padding: const EdgeInsets.all(22),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: AppTheme.border, width: 0.6),
-              boxShadow: AppTheme.softShadow,
-            ),
+          AppSurface(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  lesson.titleCn,
-                  style: text.headlineSmall,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  lesson.titleAr,
-                  textDirection: TextDirection.rtl,
-                  style: const TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.primaryText,
-                    height: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+                Row(
                   children: [
-                    _MetaPill(label: '难度 ${lesson.difficulty}'),
-                    _MetaPill(label: '${lesson.estimatedMinutes} 分钟'),
-                    _MetaPill(label: _categoryLabel(lesson.category)),
+                    Pill(label: lesson.id),
+                    const SizedBox(width: 8),
+                    Pill(label: '${lesson.estimatedMinutes} 分钟'),
+                    const Spacer(),
+                    if (locked) const Icon(Icons.lock_outline_rounded),
                   ],
                 ),
                 const SizedBox(height: 14),
-                Text(
-                  '按顺序完成本课内容：目标 → 词汇 → 句型 → 对话 → 语法 → 练习。',
-                  style: text.bodyMedium,
-                ),
+                Text(lesson.titleCn, style: text.headlineMedium),
+                const SizedBox(height: 6),
+                Text(_displayArabic(lesson.titleAr), style: const TextStyle(fontSize: 30, height: 1.4, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 12),
+                Wrap(spacing: 8, runSpacing: 8, children: lesson.objectives.take(3).map((e) => Pill(label: e)).toList()),
+                const SizedBox(height: 18),
+                FilledButton(onPressed: _start, child: Text(_completed ? '复习本课' : '开始学习')),
               ],
             ),
           ),
-          const SizedBox(height: 24),
-          const _SectionHeader(
-            title: '学习目标',
-            subtitle: '先知道这节课要学会什么',
-          ),
+          const SizedBox(height: 20),
+          SectionTitle(title: '模块结构', subtitle: 'Vocabulary / Dialogue / Grammar / Exercise'),
           const SizedBox(height: 12),
-          _WhiteCard(
-            child: Column(
-              children: lesson.objectives
-                  .map(
-                    (e) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 20,
-                            height: 20,
-                            margin: const EdgeInsets.only(top: 1),
-                            decoration: BoxDecoration(
-                              color: AppTheme.softAccent,
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: const Icon(
-                              Icons.check_rounded,
-                              size: 14,
-                              color: AppTheme.deepAccent,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              e,
-                              style: text.bodyLarge,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                  .toList(),
-            ),
-          ),
-          if (lesson.letters.isNotEmpty) ...[
-            const SizedBox(height: 24),
-            const _SectionHeader(
-              title: '本课字母',
-              subtitle: '先熟悉字形和读音',
-            ),
-            const SizedBox(height: 12),
-            _WhiteCard(
-              child: Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: lesson.letters
-                    .map(
-                      (letter) => Container(
-                        width: 58,
-                        height: 58,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF2F2F7),
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Text(
-                          letter,
-                          textDirection: TextDirection.rtl,
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.primaryText,
-                          ),
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
-          ],
+          ...[
+            _ModuleCard(title: 'Vocabulary', count: lesson.vocabulary.length, subtitle: '优先掌握高频词'),
+            _ModuleCard(title: 'Dialogue', count: lesson.dialogues.length, subtitle: '把词放进真实交流'),
+            _ModuleCard(title: 'Grammar', count: lesson.grammarTitle.isEmpty ? 0 : 1, subtitle: lesson.grammarTitle.isEmpty ? '待补充' : lesson.grammarTitle),
+            _ModuleCard(title: 'Exercise', count: lesson.exercises.length, subtitle: '答题强化记忆'),
+          ].map((e) => Padding(padding: const EdgeInsets.only(bottom: 10), child: e)),
           if (lesson.vocabulary.isNotEmpty) ...[
-            const SizedBox(height: 24),
-            const _SectionHeader(
-              title: '核心词汇',
-              subtitle: '优先掌握高频词',
-            ),
+            const SizedBox(height: 10),
+            SectionTitle(title: '核心词汇', subtitle: '阿语字号更大，布局克制稳定'),
             const SizedBox(height: 12),
-            ...lesson.vocabulary.map(
-              (word) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _WhiteCard(
+            ...lesson.vocabulary.map((word) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: AppSurface(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(_displayArabic(word.arabic), style: const TextStyle(fontSize: 28, height: 1.45, fontWeight: FontWeight.w600)),
+                              const SizedBox(height: 4),
+                              Text(word.chinese, style: text.titleSmall),
+                              const SizedBox(height: 4),
+                              Text(word.transliteration, style: text.bodyMedium),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => _saveWord(word),
+                          icon: Icon(_saved.contains(word.arabic) ? Icons.bookmark_rounded : Icons.bookmark_border_rounded),
+                        ),
+                      ],
+                    ),
+                  ),
+                )),
+          ],
+          if (lesson.dialogues.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            SectionTitle(title: '对话', subtitle: '长文本允许纵向展开，不强行压缩'),
+            const SizedBox(height: 12),
+            AppSurface(
+              child: Column(
+                children: lesson.dialogues.map((line) => Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        width: 54,
-                        height: 54,
-                        decoration: BoxDecoration(
-                          color: AppTheme.softAccent,
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: const Icon(
-                          Icons.translate_rounded,
-                          color: AppTheme.deepAccent,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
+                      CircleAvatar(radius: 14, backgroundColor: AppTheme.bgCardSoft, child: Text(line.speaker, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary))),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              word.arabic,
-                              textDirection: TextDirection.rtl,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w700,
-                                color: AppTheme.primaryText,
-                              ),
-                            ),
+                            Text(_displayArabic(line.arabic), style: const TextStyle(fontSize: 24, height: 1.45, fontWeight: FontWeight.w600)),
                             const SizedBox(height: 4),
-                            Text(
-                              word.chinese,
-                              style: text.titleSmall,
-                            ),
+                            Text(line.transliteration, style: text.bodySmall),
                             const SizedBox(height: 4),
-                            Text(
-                              word.transliteration,
-                              style: text.bodySmall?.copyWith(
-                                color: AppTheme.deepAccent,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              word.wordType,
-                              style: text.labelSmall,
-                            ),
+                            Text(line.chinese, style: text.bodyMedium),
                           ],
                         ),
                       ),
                     ],
                   ),
-                ),
+                )).toList(),
               ),
             ),
           ],
-          if (lesson.patterns.isNotEmpty) ...[
-            const SizedBox(height: 24),
-            const _SectionHeader(
-              title: '核心句型',
-              subtitle: '先记住能直接开口用的句子',
-            ),
-            const SizedBox(height: 12),
-            ...lesson.patterns.map(
-              (pattern) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _WhiteCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        pattern.arabic,
-                        textDirection: TextDirection.rtl,
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.primaryText,
-                          height: 1.35,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        pattern.transliteration,
-                        style: text.bodySmall?.copyWith(
-                          color: AppTheme.deepAccent,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        pattern.chinese,
-                        style: text.bodyMedium,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-          if (lesson.dialogues.isNotEmpty) ...[
-            const SizedBox(height: 24),
-            const _SectionHeader(
-              title: '对话',
-              subtitle: '把词和句子放进真实交流里',
-            ),
-            const SizedBox(height: 12),
-            _WhiteCard(
-              child: Column(
-                children: lesson.dialogues
-                    .map(
-                      (line) => Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 28,
-                              height: 28,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF2F2F7),
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                              child: Text(
-                                line.speaker,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppTheme.secondaryText,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    line.arabic,
-                                    textDirection: TextDirection.rtl,
-                                    style: const TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppTheme.primaryText,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    line.transliteration,
-                                    style: text.bodySmall?.copyWith(
-                                      color: AppTheme.deepAccent,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    line.chinese,
-                                    style: text.bodyMedium,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
-          ],
-          const SizedBox(height: 24),
-          const _SectionHeader(
-            title: '语法点',
-            subtitle: '只讲这一课最关键的一点',
-          ),
+          const SizedBox(height: 10),
+          SectionTitle(title: '语法点', subtitle: '只讲这一课最关键的一点'),
           const SizedBox(height: 12),
-          _WhiteCard(
+          AppSurface(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  lesson.grammarTitle,
-                  style: text.titleMedium,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  lesson.grammarExplanation,
-                  style: text.bodyMedium,
-                ),
+                Text(lesson.grammarTitle, style: text.titleMedium),
+                const SizedBox(height: 8),
+                Text(lesson.grammarExplanation, style: text.bodyMedium),
               ],
             ),
-          ),
-          if (lesson.exercises.isNotEmpty) ...[
-            const SizedBox(height: 24),
-            const _SectionHeader(
-              title: '练习预览',
-              subtitle: '做题前先看一眼题型',
-            ),
-            const SizedBox(height: 12),
-            _WhiteCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    lesson.exercises.first.question,
-                    style: text.titleSmall,
-                  ),
-                  const SizedBox(height: 12),
-                  ...lesson.exercises.first.options.map(
-                    (option) => Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(bottom: 8),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF2F2F7),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text(
-                        option,
-                        style: text.bodyMedium?.copyWith(
-                          color: AppTheme.primaryText,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-          const SizedBox(height: 28),
-          FilledButton(
-            onPressed: lesson.exercises.isEmpty
-                ? null
-                : () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => LessonQuizPage(lesson: lesson),
-                      ),
-                    );
-                  },
-            child: const Text('开始学习'),
           ),
         ],
       ),
     );
   }
-
-  static String _categoryLabel(String category) {
-    switch (category) {
-      case 'alphabet':
-        return '字母';
-      case 'dialogue':
-        return '对话';
-      case 'grammar':
-        return '语法';
-      case 'review':
-        return '复习';
-      default:
-        return category;
-    }
-  }
 }
 
-class _SectionHeader extends StatelessWidget {
+class _ModuleCard extends StatelessWidget {
   final String title;
+  final int count;
   final String subtitle;
 
-  const _SectionHeader({
-    required this.title,
-    required this.subtitle,
-  });
+  const _ModuleCard({required this.title, required this.count, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: text.titleLarge),
-        const SizedBox(height: 4),
-        Text(subtitle, style: text.bodyMedium),
-      ],
-    );
-  }
-}
-
-class _WhiteCard extends StatelessWidget {
-  final Widget child;
-
-  const _WhiteCard({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppTheme.border, width: 0.6),
-        boxShadow: AppTheme.softShadow,
-      ),
-      child: child,
-    );
-  }
-}
-
-class _MetaPill extends StatelessWidget {
-  final String label;
-
-  const _MetaPill({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF2F2F7),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: AppTheme.secondaryText,
-        ),
+    return AppSurface(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(color: AppTheme.bgCardSoft, borderRadius: BorderRadius.circular(18)),
+            child: const Icon(Icons.grid_view_rounded, color: AppTheme.accentMintDark),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: 3),
+                Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+              ],
+            ),
+          ),
+          Pill(label: '$count'),
+        ],
       ),
     );
   }
