@@ -2,26 +2,67 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
+import '../models/app_settings.dart';
 import 'audio_manifest_service.dart';
 
 class AudioService {
   static final AudioPlayer _player = AudioPlayer();
-  static final FlutterTts _tts = FlutterTts();
+  static FlutterTts? _tts;
 
   static bool _initialized = false;
-  static bool _backendAvailable = true;
+  static bool _initializing = false;
+  static bool _playerAvailable = true;
   static bool _isPlaying = false;
   static bool _usingTts = false;
   static String? _currentAsset;
+  static AudioVoicePreference _voicePreference = AudioVoicePreference.ai;
+
+  static void setVoicePreference(AudioVoicePreference preference) {
+    _voicePreference = preference;
+  }
+
+  static bool get _isWindowsTtsDisabled {
+    return !kIsWeb && defaultTargetPlatform == TargetPlatform.windows;
+  }
+
+  static Future<FlutterTts?> _getTts() async {
+    if (_isWindowsTtsDisabled) {
+      debugPrint(
+        '[Audio] Windows platform, skip flutter_tts instance creation',
+      );
+      return null;
+    }
+
+    if (_tts != null) return _tts;
+
+    try {
+      final tts = FlutterTts();
+      await tts.awaitSpeakCompletion(true);
+      await tts.setLanguage('ar');
+      await tts.setSpeechRate(0.42);
+      await tts.setPitch(1.0);
+
+      tts.setCompletionHandler(_resetPlaybackState);
+      tts.setCancelHandler(_resetPlaybackState);
+      tts.setErrorHandler((message) {
+        debugPrint('[Audio] TTS error: $message');
+        _resetPlaybackState();
+      });
+
+      _tts = tts;
+      return _tts;
+    } catch (error) {
+      debugPrint('[Audio] FlutterTts init error: $error');
+      return null;
+    }
+  }
 
   static Future<void> initialize() async {
     if (_initialized) return;
+    if (_initializing) return;
+    _initializing = true;
 
     try {
-      await _tts.awaitSpeakCompletion(true);
-      await _tts.setLanguage('ar');
-      await _tts.setSpeechRate(0.42);
-      await _tts.setPitch(1.0);
       await _player.setReleaseMode(ReleaseMode.stop);
 
       _player.onPlayerComplete.listen((_) {
@@ -30,34 +71,43 @@ class AudioService {
 
       _player.onPlayerStateChanged.listen((state) {
         if (_usingTts) return;
+
         _isPlaying = state == PlayerState.playing;
         if (state != PlayerState.playing) {
           _currentAsset = null;
         }
       });
-
-      _tts.setCompletionHandler(_resetPlaybackState);
-      _tts.setCancelHandler(_resetPlaybackState);
-      _tts.setErrorHandler((message) {
-        debugPrint('TTS error: $message');
-        _resetPlaybackState();
-      });
     } catch (error) {
-      _backendAvailable = false;
-      debugPrint('Audio backend init error: $error');
+      _playerAvailable = false;
+      debugPrint('[Audio] Audio player init error: $error');
     }
 
     _initialized = true;
+    _initializing = false;
   }
 
   static Future<void> stop() async {
     await initialize();
-    if (!_backendAvailable) {
-      _resetPlaybackState();
-      return;
+
+    try {
+      if (_playerAvailable) {
+        await _player.stop();
+      }
+    } catch (error) {
+      debugPrint('[Audio] Player stop error: $error');
     }
-    await _player.stop();
-    await _tts.stop();
+
+    if (!_isWindowsTtsDisabled) {
+      try {
+        final tts = await _getTts();
+        if (tts != null) {
+          await tts.stop();
+        }
+      } catch (error) {
+        debugPrint('[Audio] TTS stop error: $error');
+      }
+    }
+
     _resetPlaybackState();
   }
 
@@ -67,11 +117,13 @@ class AudioService {
 
   static Future<void> playAsset(String relativePath) async {
     await initialize();
-    if (!_backendAvailable) {
-      throw StateError('Audio backend unavailable');
+
+    if (!_playerAvailable) {
+      throw StateError('Audio player unavailable');
     }
 
     final String fullPath = _normalizeAssetPath(relativePath);
+
     if (_currentAsset == fullPath && _isPlaying) {
       await stop();
       return;
@@ -81,12 +133,14 @@ class AudioService {
     _currentAsset = fullPath;
     _usingTts = false;
 
+    debugPrint('[Audio] play asset: $fullPath');
+
     try {
       await _player.play(AssetSource(fullPath));
       _isPlaying = true;
     } catch (error) {
       _resetPlaybackState();
-      debugPrint('Audio asset error: $error');
+      debugPrint('[Audio] Audio asset error: $error');
       rethrow;
     }
   }
@@ -94,29 +148,45 @@ class AudioService {
   static Future<void> speakLetter(String text) async {
     final String normalized = text.trim();
 
-    const Map<String, String> letterMap = <String, String>{};
-    final manifestAsset = await AudioManifestService.findAlphabetAsset(
+    final assets = await AudioManifestService.findAlphabetAssets(
       type: 'letter',
       speed: 'normal',
+      preference: _voicePreference,
       textAr: normalized,
       textPlain: normalized,
     );
-    await _playAssetOrSpeak(
-      asset: manifestAsset ?? letterMap[normalized],
+
+    if (assets.isNotEmpty) {
+      debugPrint('[Audio] manifest hit(letter): ${assets.first}');
+    } else {
+      debugPrint('[Audio] manifest miss(letter): $normalized');
+    }
+
+    await _playAssetsOrSpeak(
+      assets: assets,
       fallbackText: normalized,
     );
   }
 
   static Future<void> speakPronunciation(String form) async {
-    final normalized = form.trim();
-    final manifestAsset = await AudioManifestService.findAlphabetAsset(
+    final String normalized = form.trim();
+
+    final assets = await AudioManifestService.findAlphabetAssets(
       type: 'pronunciation',
       speed: 'normal',
+      preference: _voicePreference,
       textAr: normalized,
       textPlain: normalized,
     );
-    await _playAssetOrSpeak(
-      asset: manifestAsset,
+
+    if (assets.isNotEmpty) {
+      debugPrint('[Audio] manifest hit(pronunciation): ${assets.first}');
+    } else {
+      debugPrint('[Audio] manifest miss(pronunciation): $normalized');
+    }
+
+    await _playAssetsOrSpeak(
+      assets: assets,
       fallbackText: normalized,
     );
   }
@@ -124,27 +194,28 @@ class AudioService {
   static Future<void> speakExampleWord(String word) async {
     final String normalized = word.trim();
 
-    const Map<String, String> wordMap = <String, String>{
-      'أنا': 'words/ana.ogg.ogg',
-      'نعم': 'words/naam.ogg.ogg',
-      'لا': 'words/la.ogg.ogg',
-      'كتاب': 'words/kitab.oga.oga',
-    };
-    final manifestAsset = await AudioManifestService.findAlphabetAsset(
+    final assets = await AudioManifestService.findAlphabetAssets(
       type: 'word',
       speed: 'normal',
+      preference: _voicePreference,
       textAr: normalized,
       textPlain: normalized,
     );
 
-    await _playAssetOrSpeak(
-      asset: manifestAsset ?? wordMap[normalized],
+    if (assets.isNotEmpty) {
+      debugPrint('[Audio] manifest hit(word): ${assets.first}');
+    } else {
+      debugPrint('[Audio] manifest miss(word): $normalized');
+    }
+
+    await _playAssetsOrSpeak(
+      assets: assets,
       fallbackText: normalized,
     );
   }
 
   static Future<void> speakText(String text) async {
-    await _speakWithTts(text.trim());
+    await _safeSpeakFallback(text);
   }
 
   static Future<void> playLessonAudio({
@@ -160,68 +231,115 @@ class AudioService {
     final normalizedText = fallbackText.trim();
     final normalizedTextAr = textAr?.trim();
     final normalizedTextPlain = textPlain?.trim();
-    String? resolvedAsset = normalizedAsset;
 
-    if (resolvedAsset == null || resolvedAsset.isEmpty) {
-      final sequence = lessonSequence;
-      if (sequence != null) {
-        resolvedAsset = await AudioManifestService.findLessonAsset(
-          lessonSequence: sequence,
-          type: type,
-          speed: speed,
-          textAr: normalizedTextAr,
-          textPlain: normalizedTextPlain ?? normalizedText,
-        );
-      }
-    }
-
-    if (resolvedAsset != null && resolvedAsset.isNotEmpty) {
+    // If an explicit asset is provided, try it first.
+    if (normalizedAsset != null && normalizedAsset.isNotEmpty) {
+      debugPrint('[Audio] explicit asset(lesson): $normalizedAsset');
       try {
-        await playAsset(resolvedAsset);
+        await playAsset(normalizedAsset);
         return;
-      } catch (_) {
-        // Fall back to TTS when lesson assets are absent.
+      } catch (error) {
+        debugPrint('[Audio] explicit asset failed, fallback: $error');
       }
     }
 
-    await _speakWithTts(normalizedText);
+    // Lookup all matching assets sorted by voice preference.
+    final sequence = lessonSequence;
+    if (sequence != null) {
+      final assets = await AudioManifestService.findLessonAssets(
+        lessonSequence: sequence,
+        type: type,
+        speed: speed,
+        preference: _voicePreference,
+        textAr: normalizedTextAr,
+        textPlain: normalizedTextPlain ?? normalizedText,
+      );
+
+      for (final path in assets) {
+        debugPrint('[Audio] manifest hit(lesson): $path');
+        try {
+          await playAsset(path);
+          return;
+        } catch (error) {
+          debugPrint('[Audio] asset failed, try next: $error');
+        }
+      }
+
+      if (assets.isEmpty) {
+        debugPrint('[Audio] manifest miss(lesson): $normalizedText');
+      }
+    }
+
+    await _safeSpeakFallback(normalizedText);
   }
 
-  static Future<void> _playAssetOrSpeak({
-    required String? asset,
+  static Future<void> _playAssetsOrSpeak({
+    required List<String> assets,
     required String fallbackText,
   }) async {
-    if (asset == null) {
-      await _speakWithTts(fallbackText);
+    for (final asset in assets) {
+      try {
+        await playAsset(asset);
+        return;
+      } catch (error) {
+        debugPrint('[Audio] asset failed, try next: $error');
+      }
+    }
+
+    if (assets.isEmpty) {
+      debugPrint('[Audio] manifest miss, fallback text: $fallbackText');
+    }
+
+    await _safeSpeakFallback(fallbackText);
+  }
+
+  static Future<void> _safeSpeakFallback(String? text) async {
+    final fallbackText = text?.trim() ?? '';
+
+    if (fallbackText.isEmpty) {
+      debugPrint('[Audio] fallback text empty, skip TTS');
       return;
     }
 
-    try {
-      await playAsset(asset);
-    } catch (_) {
-      await _speakWithTts(fallbackText);
+    if (_isWindowsTtsDisabled) {
+      debugPrint(
+        '[Audio] Windows platform: TTS unavailable for "$fallbackText"',
+      );
+      throw StateError(
+        'No audio available: asset missing and TTS disabled on Windows',
+      );
     }
+
+    await _speakWithTts(fallbackText);
   }
 
   static Future<void> _speakWithTts(String text) async {
     if (text.isEmpty) return;
 
+    if (_isWindowsTtsDisabled) {
+      debugPrint('[Audio] Windows platform, skip _speakWithTts');
+      return;
+    }
+
     await initialize();
-    if (!_backendAvailable) {
-      debugPrint('Audio backend unavailable. Skip speaking: $text');
+
+    await stop();
+
+    final tts = await _getTts();
+    if (tts == null) {
+      debugPrint('[Audio] TTS unavailable, skip speaking');
       _resetPlaybackState();
       return;
     }
-    await stop();
 
     _usingTts = true;
     _currentAsset = 'tts:$text';
     _isPlaying = true;
 
     try {
-      await _tts.speak(text);
+      await tts.speak(text);
     } catch (error) {
-      debugPrint('TTS speak error: $error');
+      debugPrint('[Audio] TTS failed: $error');
       _resetPlaybackState();
     }
   }

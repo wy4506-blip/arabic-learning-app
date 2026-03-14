@@ -10,6 +10,7 @@ import 'features/onboarding/services/onboarding_storage_service.dart';
 import 'l10n/app_strings.dart';
 import 'models/app_settings.dart';
 import 'pages/app_shell.dart';
+import 'services/audio_service.dart';
 import 'services/settings_service.dart';
 import 'theme/app_theme.dart';
 
@@ -55,10 +56,12 @@ class _ArabicLearningAppState extends State<ArabicLearningApp> {
       _launchStage = _resolveLaunchStage(onboarding);
       _ready = true;
     });
+    AudioService.setVoicePreference(loaded.voicePreference);
   }
 
   Future<void> _updateSettings(AppSettings settings) async {
     await SettingsService.saveSettings(settings);
+    AudioService.setVoicePreference(settings.voicePreference);
     if (!mounted) return;
     setState(() => _settings = settings);
   }

@@ -8,6 +8,8 @@ enum ContentLanguage { zh, en }
 
 enum ArabicFontScale { standard, large }
 
+enum AudioVoicePreference { ai, human }
+
 class AppSettings {
   final ArabicTextMode textMode;
   final AppThemePreference themePreference;
@@ -17,6 +19,7 @@ class AppSettings {
   final ArabicFontScale arabicFontScale;
   final bool reminderEnabled;
   final String reminderTime;
+  final AudioVoicePreference voicePreference;
 
   const AppSettings({
     this.textMode = ArabicTextMode.smart,
@@ -27,6 +30,7 @@ class AppSettings {
     this.arabicFontScale = ArabicFontScale.standard,
     this.reminderEnabled = false,
     this.reminderTime = '20:00',
+    this.voicePreference = AudioVoicePreference.ai,
   });
 
   AppSettings copyWith({
@@ -38,6 +42,7 @@ class AppSettings {
     ArabicFontScale? arabicFontScale,
     bool? reminderEnabled,
     String? reminderTime,
+    AudioVoicePreference? voicePreference,
   }) {
     return AppSettings(
       textMode: textMode ?? this.textMode,
@@ -48,6 +53,7 @@ class AppSettings {
       arabicFontScale: arabicFontScale ?? this.arabicFontScale,
       reminderEnabled: reminderEnabled ?? this.reminderEnabled,
       reminderTime: reminderTime ?? this.reminderTime,
+      voicePreference: voicePreference ?? this.voicePreference,
     );
   }
 }

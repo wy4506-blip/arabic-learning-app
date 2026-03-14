@@ -53,7 +53,11 @@ class _AlphabetLetterHomePageState extends State<AlphabetLetterHomePage> {
     }
 
     setState(() => _playingTarget = _namePlaybackKey);
-    await AudioService.speakText(letter.arabicName);
+    try {
+      await AudioService.speakLetter(letter.arabic);
+    } catch (_) {
+      // Audio unavailable (e.g. Windows without TTS) — ignore gracefully.
+    }
     if (!mounted) return;
     setState(() => _playingTarget = null);
   }

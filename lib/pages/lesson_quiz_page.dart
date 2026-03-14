@@ -74,31 +74,35 @@ class _LessonQuizPageState extends State<LessonQuizPage> {
   Future<void> _playCurrentAudio() async {
     final audioText = _currentItem.audioText ?? _currentItem.correctAnswer;
 
-    switch (_currentItem.audioScope) {
-      case LessonPracticeAudioScope.alphabet:
-        if (_currentItem.audioType == 'letter') {
-          await AudioService.speakLetter(audioText);
+    try {
+      switch (_currentItem.audioScope) {
+        case LessonPracticeAudioScope.alphabet:
+          if (_currentItem.audioType == 'letter') {
+            await AudioService.speakLetter(audioText);
+            return;
+          }
+          if (_currentItem.audioType == 'pronunciation') {
+            await AudioService.speakPronunciation(audioText);
+            return;
+          }
+          if (_currentItem.audioType == 'word') {
+            await AudioService.speakExampleWord(audioText);
+            return;
+          }
+          await AudioService.speakText(audioText);
           return;
-        }
-        if (_currentItem.audioType == 'pronunciation') {
-          await AudioService.speakPronunciation(audioText);
+        case LessonPracticeAudioScope.lesson:
+          await AudioService.playLessonAudio(
+            asset: _currentItem.audioAsset,
+            lessonSequence: widget.lesson.sequence,
+            type: _currentItem.audioType ?? 'sentence',
+            textPlain: audioText,
+            fallbackText: audioText,
+          );
           return;
-        }
-        if (_currentItem.audioType == 'word') {
-          await AudioService.speakExampleWord(audioText);
-          return;
-        }
-        await AudioService.speakText(audioText);
-        return;
-      case LessonPracticeAudioScope.lesson:
-        await AudioService.playLessonAudio(
-          asset: _currentItem.audioAsset,
-          lessonSequence: widget.lesson.sequence,
-          type: _currentItem.audioType ?? 'sentence',
-          textPlain: audioText,
-          fallbackText: audioText,
-        );
-        return;
+      }
+    } catch (_) {
+      // Audio unavailable — ignore gracefully in quiz context.
     }
   }
 
@@ -132,7 +136,9 @@ class _LessonQuizPageState extends State<LessonQuizPage> {
   }
 
   String get _currentAnswer {
-    return _currentItem.requiresWriting ? _typedAnswer : (_selectedAnswer ?? '');
+    return _currentItem.requiresWriting
+        ? _typedAnswer
+        : (_selectedAnswer ?? '');
   }
 
   bool get _isCorrect {
@@ -284,10 +290,8 @@ class _LessonQuizPageState extends State<LessonQuizPage> {
       appBar: AppBar(
         title: Text(
           _appText(
-            zh:
-                '${LessonLocalizer.title(widget.lesson, context.appSettings.appLanguage)} · 练习',
-            en:
-                '${LessonLocalizer.title(widget.lesson, context.appSettings.appLanguage)} · Practice',
+            zh: '${LessonLocalizer.title(widget.lesson, context.appSettings.appLanguage)} · 练习',
+            en: '${LessonLocalizer.title(widget.lesson, context.appSettings.appLanguage)} · Practice',
           ),
         ),
       ),

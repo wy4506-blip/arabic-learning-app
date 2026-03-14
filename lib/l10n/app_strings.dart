@@ -591,6 +591,14 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'zh': '统一调整学习内容里的阿语字号。',
     'en': 'Adjust Arabic text size across learning content.',
   },
+  'profile.voice_preference': <String, String>{
+    'zh': '配音偏好',
+    'en': 'Voice Preference',
+  },
+  'profile.voice_preference_subtitle': <String, String>{
+    'zh': '选择 AI 配音或人工配音（人工配音逐步覆盖中）。',
+    'en': 'Choose AI or human voice (human recordings being added).',
+  },
   'profile.theme_mode_subtitle': <String, String>{
     'zh': '控制应用整体的明暗外观。',
     'en': 'Control the overall appearance of the app.',
@@ -814,6 +822,22 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   'settings.font_large': <String, String>{
     'zh': '大',
     'en': 'Large',
+  },
+  'settings.voice_ai': <String, String>{
+    'zh': 'AI 配音',
+    'en': 'AI Voice',
+  },
+  'settings.voice_human': <String, String>{
+    'zh': '人工配音',
+    'en': 'Human Voice',
+  },
+  'settings.voice_ai_desc': <String, String>{
+    'zh': '使用 AI 合成语音朗读，覆盖所有内容。',
+    'en': 'AI-synthesized voice, covers all content.',
+  },
+  'settings.voice_human_desc': <String, String>{
+    'zh': '优先使用人工录制配音，未覆盖部分自动回退到 AI。',
+    'en': 'Prefer human recordings; falls back to AI for uncovered content.',
   },
   'settings.theme_system': <String, String>{
     'zh': '跟随系统',

@@ -4,6 +4,7 @@ import '../app_scope.dart';
 import '../l10n/alphabet_content_localizer.dart';
 import '../l10n/localized_text.dart';
 import '../models/alphabet_group.dart';
+import '../models/app_settings.dart';
 import '../services/alphabet_service.dart';
 import '../theme/app_arabic_typography.dart';
 import '../theme/app_theme.dart';
@@ -20,6 +21,7 @@ class AlphabetPage extends StatefulWidget {
 class _AlphabetPageState extends State<AlphabetPage> {
   List<AlphabetGroup> _groups = [];
   bool _isLoading = true;
+  bool _loadError = false;
 
   int get _letterCount => _groups.fold<int>(
         0,
@@ -33,12 +35,20 @@ class _AlphabetPageState extends State<AlphabetPage> {
   }
 
   Future<void> _loadData() async {
-    final groups = await AlphabetService.loadAlphabetGroups();
-    if (!mounted) return;
-    setState(() {
-      _groups = groups;
-      _isLoading = false;
-    });
+    try {
+      final groups = await AlphabetService.loadAlphabetGroups();
+      if (!mounted) return;
+      setState(() {
+        _groups = groups;
+        _isLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _loadError = true;
+      });
+    }
   }
 
   @override
@@ -191,8 +201,8 @@ class _AlphabetPageState extends State<AlphabetPage> {
                               Text(
                                 localizedText(
                                   context,
-                                  zh: '7 组学完 28 个字母',
-                                  en: 'Learn 28 Letters in 7 Groups',
+                                  zh: '${_groups.length} 组学完 $letterCount 个字母',
+                                  en: 'Learn $letterCount Letters in ${_groups.length} Groups',
                                 ),
                                 style: text.titleMedium,
                               ),
@@ -261,7 +271,53 @@ class _AlphabetPageState extends State<AlphabetPage> {
                     style: text.bodyMedium,
                   ),
                   const SizedBox(height: 16),
-                  ..._groups.map((group) => _buildGroupCard(context, group)),
+                  if (_loadError)
+                    AppSurface(
+                      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+                      child: Column(
+                        children: [
+                          Text(
+                            localizedText(
+                              context,
+                              zh: '加载失败，请稍后重试',
+                              en: 'Failed to load. Please try again later.',
+                            ),
+                            style: text.bodyMedium,
+                          ),
+                          const SizedBox(height: 12),
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                _isLoading = true;
+                                _loadError = false;
+                              });
+                              _loadData();
+                            },
+                            child: Text(
+                              localizedText(
+                                context,
+                                zh: '重试',
+                                en: 'Retry',
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else if (_groups.isEmpty)
+                    AppSurface(
+                      padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+                      child: Text(
+                        localizedText(
+                          context,
+                          zh: '未找到字母分组，请稍后重试。',
+                          en: 'No alphabet groups found. Please try again later.',
+                        ),
+                        style: text.bodyMedium,
+                      ),
+                    )
+                  else
+                    ..._groups.map((group) => _buildGroupCard(context, group)),
                 ],
               ),
       ),
@@ -334,9 +390,12 @@ class _AlphabetPageState extends State<AlphabetPage> {
     final text = Theme.of(context).textTheme;
     final previewLetters = group.letters.take(4).toList();
     final remainingCount = group.letters.length - previewLetters.length;
+    final subtitleLang = context.appSettings.appLanguage == AppLanguage.en
+        ? ContentLanguage.en
+        : ContentLanguage.zh;
     final subtitle = AlphabetContentLocalizer.groupSubtitle(
       group,
-      context.appSettings.meaningLanguage,
+      subtitleLang,
     );
 
     return Container(
@@ -435,7 +494,7 @@ class _AlphabetPageState extends State<AlphabetPage> {
                     localizedText(
                       context,
                       zh: '其余 $remainingCount 个字母进入本组后继续学习',
-                      en: '$remainingCount more letters continue inside this group.',
+                      en: '$remainingCount more letters to explore in this group.',
                     ),
                     style: text.bodySmall?.copyWith(
                       color: AppTheme.textSecondary,
@@ -449,7 +508,7 @@ class _AlphabetPageState extends State<AlphabetPage> {
                       localizedText(
                         context,
                         zh: '进入学习',
-                        en: 'Open Group',
+                        en: 'Start Learning',
                       ),
                       style: text.labelLarge?.copyWith(
                         color: AppTheme.deepAccent,

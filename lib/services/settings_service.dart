@@ -11,6 +11,7 @@ class SettingsService {
   static const _arabicFontScaleKey = 'app_arabic_font_scale';
   static const _reminderEnabledKey = 'app_reminder_enabled';
   static const _reminderTimeKey = 'app_reminder_time';
+  static const _voicePreferenceKey = 'app_voice_preference';
 
   static Future<AppSettings> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
@@ -33,6 +34,9 @@ class SettingsService {
               .clamp(0, ArabicFontScale.values.length - 1)],
       reminderEnabled: prefs.getBool(_reminderEnabledKey) ?? false,
       reminderTime: prefs.getString(_reminderTimeKey) ?? '20:00',
+      voicePreference: AudioVoicePreference.values[
+          (prefs.getInt(_voicePreferenceKey) ?? AudioVoicePreference.ai.index)
+              .clamp(0, AudioVoicePreference.values.length - 1)],
     );
   }
 
@@ -49,5 +53,6 @@ class SettingsService {
     await prefs.setInt(_arabicFontScaleKey, settings.arabicFontScale.index);
     await prefs.setBool(_reminderEnabledKey, settings.reminderEnabled);
     await prefs.setString(_reminderTimeKey, settings.reminderTime);
+    await prefs.setInt(_voicePreferenceKey, settings.voicePreference.index);
   }
 }

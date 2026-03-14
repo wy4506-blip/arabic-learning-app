@@ -72,7 +72,7 @@ class _ProfilePageState extends State<ProfilePage> {
   static const String _developerMailbox = '13823724506@163.com';
   static final bool _isFlutterTest =
       const bool.fromEnvironment('FLUTTER_TEST', defaultValue: false) ||
-      Platform.environment.containsKey('FLUTTER_TEST');
+          Platform.environment.containsKey('FLUTTER_TEST');
 
   bool _loading = true;
   bool _unlocked = false;
@@ -107,9 +107,9 @@ class _ProfilePageState extends State<ProfilePage> {
         onTimeout: () => false,
       );
       final lessons = await LessonService().loadLessons().timeout(
-        _profileLoadTimeout,
-        onTimeout: () => <Lesson>[],
-      );
+            _profileLoadTimeout,
+            onTimeout: () => <Lesson>[],
+          );
       String appVersion = '--';
 
       if (!_isFlutterTest) {
@@ -318,7 +318,9 @@ ${strings.t('profile.text_mode')}: ${_textModeLabel(widget.settings.textMode)}
 ${strings.t('profile.show_transliteration')}: ${widget.settings.showTransliteration ? strings.t('common.on') : strings.t('common.off')}
 ${strings.t('profile.arabic_font_size')}: ${_fontScaleLabel(widget.settings.arabicFontScale)}
 ${strings.t('profile.theme_mode')}: ${_themeLabel(widget.settings.themePreference)}
-${strings.t('profile.reminder')}: ${widget.settings.reminderEnabled ? strings.t('profile.reminder_on_short', params: <String, String>{'time': widget.settings.reminderTime}) : strings.t('profile.reminder_off_short')}
+${strings.t('profile.reminder')}: ${widget.settings.reminderEnabled ? strings.t('profile.reminder_on_short', params: <String, String>{
+                'time': widget.settings.reminderTime
+              }) : strings.t('profile.reminder_off_short')}
 ${strings.t('profile.plan_card_title')}: ${plan.title}
 ${strings.t('profile.about_version')}: $_appVersion
 ''';
@@ -428,6 +430,12 @@ ${strings.t('profile.about_version')}: $_appVersion
                   subtitle: strings.t('profile.font_size_subtitle'),
                   onTap: () => _showArabicFontScaleSheet(context),
                 ),
+                _SettingsValueItem(
+                  title: strings.t('profile.voice_preference'),
+                  value: _voicePreferenceLabel(widget.settings.voicePreference),
+                  subtitle: strings.t('profile.voice_preference_subtitle'),
+                  onTap: () => _showVoicePreferenceSheet(context),
+                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -512,7 +520,8 @@ ${strings.t('profile.about_version')}: $_appVersion
                 _SettingsNavItem(
                   title: strings.t('profile.submit_suggestion'),
                   subtitle: strings.t('profile.submit_suggestion_subtitle'),
-                  onTap: () => _openFeedbackBoard('feedback.category_suggestion'),
+                  onTap: () =>
+                      _openFeedbackBoard('feedback.category_suggestion'),
                 ),
                 _SettingsNavItem(
                   title: strings.t('profile.report_issue'),
@@ -572,7 +581,9 @@ ${strings.t('profile.about_version')}: $_appVersion
               );
 
     String suggestion;
-    if (!_unlocked && _freeLessonCount > 0 && _freeCompletedCount >= _freeLessonCount) {
+    if (!_unlocked &&
+        _freeLessonCount > 0 &&
+        _freeCompletedCount >= _freeLessonCount) {
       suggestion = strings.t('profile.overview_suggestion_unlock');
     } else if (_progress.reviewCount > 0) {
       suggestion = strings.t(
@@ -585,7 +596,8 @@ ${strings.t('profile.about_version')}: $_appVersion
             ? 'profile.overview_suggestion_first_lesson'
             : 'profile.overview_suggestion_continue',
         params: <String, String>{
-          'lesson': LessonLocalizer.title(nextLesson, widget.settings.appLanguage),
+          'lesson':
+              LessonLocalizer.title(nextLesson, widget.settings.appLanguage),
         },
       );
     } else {
@@ -694,7 +706,8 @@ ${strings.t('profile.about_version')}: $_appVersion
     return _lessons
         .where(
           (lesson) =>
-              !lesson.isLocked && _progress.completedLessons.contains(lesson.id),
+              !lesson.isLocked &&
+              _progress.completedLessons.contains(lesson.id),
         )
         .length;
   }
@@ -864,6 +877,22 @@ ${strings.t('profile.about_version')}: $_appVersion
     );
   }
 
+  void _showVoicePreferenceSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (_) => _OptionsSheet<AudioVoicePreference>(
+        title: context.strings.t('profile.voice_preference'),
+        current: widget.settings.voicePreference,
+        options: AudioVoicePreference.values,
+        labelBuilder: _voicePreferenceLabel,
+        subtitleBuilder: _voicePreferenceDescription,
+        onSelected: (value) => widget.onSettingsChanged(
+          widget.settings.copyWith(voicePreference: value),
+        ),
+      ),
+    );
+  }
+
   String _textModeLabel(ArabicTextMode mode) {
     final strings = context.strings;
     switch (mode) {
@@ -931,6 +960,26 @@ ${strings.t('profile.about_version')}: $_appVersion
         return strings.t('settings.font_standard');
       case ArabicFontScale.large:
         return strings.t('settings.font_large');
+    }
+  }
+
+  String _voicePreferenceLabel(AudioVoicePreference pref) {
+    final strings = context.strings;
+    switch (pref) {
+      case AudioVoicePreference.ai:
+        return strings.t('settings.voice_ai');
+      case AudioVoicePreference.human:
+        return strings.t('settings.voice_human');
+    }
+  }
+
+  String _voicePreferenceDescription(AudioVoicePreference pref) {
+    final strings = context.strings;
+    switch (pref) {
+      case AudioVoicePreference.ai:
+        return strings.t('settings.voice_ai_desc');
+      case AudioVoicePreference.human:
+        return strings.t('settings.voice_human_desc');
     }
   }
 }
