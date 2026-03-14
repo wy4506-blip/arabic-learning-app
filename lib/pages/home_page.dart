@@ -412,17 +412,17 @@ class _HomePageState extends State<HomePage> {
       subtitle: hasWarmUp
           ? localizedText(
               context,
-              zh: isContinuingFormalReview
-                  ? '你还有一轮正式复习没完成，先接上它，再进入下一节课。'
-                  : '建议先完成一轮正式复习，再进入下一节课。',
+            zh: isContinuingFormalReview
+              ? '先把这轮正式复习接上，再进入下一节课。'
+              : '复习之后再学新内容，记得会更稳。',
               en: isContinuingFormalReview
-                  ? 'Your formal review is already in progress. Finish it first, then move into the next lesson.'
-                  : 'Start with one short formal review pass, then move into the next lesson.',
+              ? 'Pick up this formal review first, then move into the next lesson.'
+              : 'Review first, then new learning will stay with you more steadily.',
             )
           : localizedText(
               context,
-              zh: '当前没有正式复习待办，可以直接进入下一节课。',
-              en: 'No formal review is waiting right now, so you can enter the next lesson directly.',
+            zh: '今天没有待复习内容，可以直接继续这一课。',
+            en: 'No review is waiting today, so you can continue straight into this lesson.',
             ),
       lessonLabel: localizedText(
         context,
@@ -818,8 +818,8 @@ class _HomePageState extends State<HomePage> {
                 ),
                 subtitle: localizedText(
                   context,
-                  zh: '少入口、低干扰、强反馈的阿语入门首页',
-                  en: 'A focused Arabic home that points to the next best step.',
+                  zh: '你的下一步，从这里开始。',
+                  en: 'Your next useful step starts here.',
                 ),
               ),
               const SizedBox(height: 20),
@@ -842,11 +842,11 @@ class _HomePageState extends State<HomePage> {
                   subtitle: localizedText(
                     context,
                     zh: reviewPlan.hasStarted
-                        ? '还有 ${reviewPlan.pendingCount} 项没看完，接着过一遍就好。'
-                        : '自动整理了 ${reviewPlan.totalCount} 项最近值得先回看的内容。',
+                      ? '还有 ${reviewPlan.pendingCount} 项没完成，接上这一轮就好。'
+                      : '今天先回顾这 ${reviewPlan.totalCount} 项，再继续学习会更顺。',
                     en: reviewPlan.hasStarted
-                        ? '${reviewPlan.pendingCount} items are still waiting. Pick it back up from where you left.'
-                        : '${reviewPlan.totalCount} recent items are ready for a gentle review pass.',
+                      ? '${reviewPlan.pendingCount} items are still waiting. Pick this pass back up.'
+                      : 'Review these ${reviewPlan.totalCount} items first, then continue learning with a clearer head.',
                   ),
                   tasks: reviewPlan.tasks.take(3).toList(growable: false),
                   actionLabel: localizedText(
@@ -869,8 +869,8 @@ class _HomePageState extends State<HomePage> {
                 ),
                 subtitle: localizedText(
                   context,
-                  zh: '回顾、查找、补充学习都在这里',
-                  en: 'Review, lookup, and support actions all live here.',
+                  zh: '复习、查找和补充学习都在这里。',
+                  en: 'Review, look things up, or continue learning from here.',
                 ),
                 actions: quickActions,
               ),
@@ -884,8 +884,8 @@ class _HomePageState extends State<HomePage> {
                   ),
                   subtitle: localizedText(
                     context,
-                    zh: '先完成核心入门内容，再决定是否继续完整课程。',
-                    en: 'Finish the core free lessons first, then decide whether to continue.',
+                    zh: '先学完入门内容，再决定是否继续完整课程。',
+                    en: 'Finish the beginner content first, then decide whether to continue.',
                   ),
                   onTap: _openUnlock,
                 ),

@@ -114,6 +114,7 @@ void main() {
       );
 
       expect(find.text('今天从这里开始'), findsOneWidget);
+      expect(find.text('你的下一步，从这里开始。'), findsOneWidget);
       expect(find.text('Start Here Today'), findsNothing);
       expect(find.text('Review Only'), findsNothing);
       expectNoVisibleMojibake(tester);
@@ -127,6 +128,7 @@ void main() {
       );
 
       expect(find.text('课程'), findsOneWidget);
+      expect(find.text('按当前进度继续，也可以随时回看已学内容。'), findsOneWidget);
       expect(find.text('Lessons'), findsNothing);
       expectNoVisibleMojibake(tester);
     });
@@ -250,6 +252,10 @@ void main() {
       );
 
       expect(find.text('我的'), findsOneWidget);
+      expect(find.text('学习状态'), findsOneWidget);
+      expect(find.text('学习偏好'), findsOneWidget);
+      expect(find.text('开始学习'), findsWidgets);
+      expect(find.text('管理学习体验、课程权益，以及反馈与帮助入口。'), findsNothing);
       expect(find.text('Profile'), findsNothing);
       expectNoVisibleMojibake(tester);
     });

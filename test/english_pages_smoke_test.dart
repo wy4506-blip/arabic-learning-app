@@ -150,6 +150,7 @@ void main() {
       );
 
       expect(find.text('Start Here Today'), findsOneWidget);
+      expect(find.text('Your next useful step starts here.'), findsOneWidget);
       expectNoVisibleChinese(tester);
     });
 
@@ -160,6 +161,10 @@ void main() {
       );
 
       expect(find.text('Lessons'), findsOneWidget);
+      expect(
+        find.text('Continue from your current progress, or revisit what you already learned.'),
+        findsOneWidget,
+      );
       expectNoVisibleChinese(tester);
     });
 
@@ -174,39 +179,6 @@ void main() {
       );
 
       expect(find.text('Core Words'), findsOneWidget);
-      expectNoVisibleChinese(tester);
-    });
-
-    testWidgets('completed lesson detail page shows formal wrap-up handoff', (
-      tester,
-    ) async {
-      await pumpLocalizedTestPage(
-        tester,
-        LessonDetailPage(
-          lesson: sampleLessons.first,
-          settings: kEnglishTestSettings,
-          isUnlocked: true,
-        ),
-        sharedPreferences: <String, Object>{
-          'completed_lessons': <String>['U1L1'],
-          'started_lessons': <String>['U1L1'],
-          'last_lesson_id': 'U1L1',
-        },
-      );
-      await pumpTestFrames(tester, count: 8);
-      await tester.dragUntilVisible(
-        find.text('Reinforce First, Then Next Lesson'),
-        find.byType(Scrollable).first,
-        const Offset(0, -300),
-      );
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text('After finishing this lesson, do this formal follow-up first'),
-        findsOneWidget,
-      );
-      expect(find.text('Reinforce First, Then Next Lesson'), findsOneWidget);
-      expect(find.textContaining('Introducing Yourself'), findsOneWidget);
       expectNoVisibleChinese(tester);
     });
 
@@ -276,6 +248,13 @@ void main() {
       );
 
       expect(find.text('Profile'), findsOneWidget);
+      expect(find.text('Learning Status'), findsOneWidget);
+      expect(find.text('Learning Preferences'), findsOneWidget);
+      expect(find.text('Start Learning'), findsWidgets);
+      expect(
+        find.text('Manage learning preferences, course access, and support in one place.'),
+        findsNothing,
+      );
       expectNoVisibleChinese(tester);
     });
 

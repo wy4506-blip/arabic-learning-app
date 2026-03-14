@@ -387,8 +387,8 @@ class _CourseListPageState extends State<CourseListPage> {
                 title: _copy(language, zh: '当前单元', en: 'Current Unit'),
                 subtitle: _copy(
                   language,
-                  zh: '先把当前最相关的这一组学完。',
-                  en: 'Start with the unit that matters most right now.',
+                  zh: '先把当前最该继续的这一组学完。',
+                  en: 'Finish the unit that matters most right now.',
                 ),
               ),
               const SizedBox(height: 10),
@@ -420,9 +420,8 @@ class _CourseListPageState extends State<CourseListPage> {
                 ),
                 description: _copy(
                   language,
-                  zh: '一次解锁，继续剩余 13 节课程，首页和课程页后续都会自然衔接。',
-                  en:
-                      'Unlock once and continue the remaining 13 lessons with no extra friction later.',
+                  zh: '解锁后可继续学习剩余课程内容。',
+                  en: 'Unlock to continue the remaining course content.',
                 ),
                 buttonText: _copy(language, zh: '立即解锁', en: 'Unlock Now'),
                 onTap: _openUnlock,
@@ -434,8 +433,8 @@ class _CourseListPageState extends State<CourseListPage> {
                 title: _copy(language, zh: '其他单元', en: 'Other Units'),
                 subtitle: _copy(
                   language,
-                  zh: '按单元查看完整结构，但默认保持轻量。',
-                  en: 'See the full course structure without making it feel heavy.',
+                  zh: '按单元查看完整课程结构。',
+                  en: 'Browse the rest of the course by unit.',
                 ),
               ),
               const SizedBox(height: 10),
@@ -861,15 +860,13 @@ class _FreeTrialProgressBanner extends StatelessWidget {
     final subtitle = completedAllFreeLessons
         ? _copy(
             language,
-            zh: '前三节体验课已完成，解锁后可继续剩余 13 节课程。',
-            en:
-                'You finished the first 3 trial lessons. Unlock to continue the remaining 13.',
+        zh: '体验内容已经完成，解锁后可继续后面的课程。',
+        en: 'The trial content is done. Unlock to continue the remaining lessons.',
           )
         : _copy(
             language,
-            zh: '已完成 $completed/$total 节，再完成几节就能走完整个入门闭环。',
-            en:
-                'You completed $completed/$total trial lessons. Finish a few more to experience the full learning loop.',
+        zh: '已完成 $completed/$total 节，继续把入门内容学完。',
+        en: 'You completed $completed/$total trial lessons. Keep going and finish the beginner content.',
           );
 
     return Container(

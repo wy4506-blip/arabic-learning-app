@@ -16,7 +16,10 @@ import '../services/unlock_service.dart';
 import '../theme/app_theme.dart';
 import '../view_models/learning_path_view_models.dart' as vm;
 import '../widgets/app_widgets.dart';
+import 'course_list_page.dart';
 import 'feedback_board_page.dart';
+import 'lesson_detail_page.dart';
+import 'review_page.dart';
 import 'static_info_page.dart';
 import 'unlock_page.dart';
 
@@ -41,17 +44,23 @@ class _LearningOverviewData {
   final String title;
   final String suggestion;
   final List<String> stats;
+  final String actionText;
+  final vm.ProfileLearningActionType actionType;
+  final Lesson? lesson;
 
   const _LearningOverviewData({
     required this.icon,
     required this.title,
     required this.suggestion,
     required this.stats,
+    required this.actionText,
+    required this.actionType,
+    this.lesson,
   });
 }
 
 class _CurrentPlanData {
-  final String badge;
+  final String? badge;
   final String title;
   final String description;
   final String footnote;
@@ -59,7 +68,7 @@ class _CurrentPlanData {
   final bool unlocked;
 
   const _CurrentPlanData({
-    required this.badge,
+    this.badge,
     required this.title,
     required this.description,
     required this.footnote,
@@ -337,6 +346,9 @@ ${strings.t('profile.about_version')}: $_appVersion
       title: viewModel.title,
       suggestion: viewModel.suggestion,
       stats: viewModel.stats,
+      actionText: viewModel.actionText,
+      actionType: viewModel.actionType,
+      lesson: viewModel.lesson,
     );
   }
 
@@ -344,13 +356,59 @@ ${strings.t('profile.about_version')}: $_appVersion
     vm.CurrentPlanViewModel viewModel,
   ) {
     return _CurrentPlanData(
-      badge: viewModel.badge,
+      badge: viewModel.badge.isEmpty ? null : viewModel.badge,
       title: viewModel.title,
       description: viewModel.description,
       footnote: viewModel.footnote,
       unlocked: viewModel.unlocked,
       actionText: viewModel.actionText,
     );
+  }
+
+  Future<void> _openLearningOverviewAction(_LearningOverviewData data) async {
+    switch (data.actionType) {
+      case vm.ProfileLearningActionType.startReview:
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ReviewPage()),
+        );
+        break;
+      case vm.ProfileLearningActionType.reviewLessons:
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CourseListPage(settings: widget.settings),
+          ),
+        );
+        break;
+      case vm.ProfileLearningActionType.startLearning:
+      case vm.ProfileLearningActionType.continueLearning:
+        final lesson = data.lesson;
+        if (lesson != null) {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => LessonDetailPage(
+                lesson: lesson,
+                settings: widget.settings,
+                isUnlocked: _unlocked,
+              ),
+            ),
+          );
+        } else {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CourseListPage(settings: widget.settings),
+            ),
+          );
+        }
+        break;
+    }
+
+    if (mounted) {
+      await _load();
+    }
   }
 
   @override
@@ -387,26 +445,30 @@ ${strings.t('profile.about_version')}: $_appVersion
           children: [
             SectionTitle(
               title: strings.t('profile.title'),
-              subtitle: strings.t('profile.page_intro'),
             ),
             const SizedBox(height: 16),
-            _LearningOverviewCard(data: overview),
-            const SizedBox(height: 14),
-            _CurrentPlanCard(
-              data: plan,
-              onActionTap: plan.unlocked ? null : _openUnlockPage,
+            Text(
+              strings.t('profile.section_learning_state'),
+              style: Theme.of(context).textTheme.titleSmall,
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 8),
+            _LearningOverviewCard(
+              data: overview,
+              onActionTap: () => _openLearningOverviewAction(overview),
+            ),
+            const SizedBox(height: 12),
             _SettingsSection(
-              title: strings.t('profile.section_language_text'),
+              title: strings.t('profile.section_learning_preferences'),
               children: [
                 _SettingsValueItem(
                   title: strings.t('profile.interface_language'),
+                  subtitle: strings.t('profile.interface_language_subtitle'),
                   value: _interfaceLanguageLabel(widget.settings.appLanguage),
                   onTap: () => _showInterfaceLanguageSheet(context),
                 ),
                 _SettingsValueItem(
                   title: strings.t('profile.meaning_language'),
+                  subtitle: strings.t('profile.meaning_language_subtitle'),
                   value: _meaningLanguageLabel(widget.settings.meaningLanguage),
                   onTap: () => _showMeaningLanguageSheet(context),
                 ),
@@ -423,12 +485,6 @@ ${strings.t('profile.about_version')}: $_appVersion
                   onChanged: (value) => widget.onSettingsChanged(
                     widget.settings.copyWith(showTransliteration: value),
                   ),
-                ),
-                _SettingsValueItem(
-                  title: strings.t('profile.arabic_font_size'),
-                  value: _fontScaleLabel(widget.settings.arabicFontScale),
-                  subtitle: strings.t('profile.font_size_subtitle'),
-                  onTap: () => _showArabicFontScaleSheet(context),
                 ),
                 _SettingsValueItem(
                   title: strings.t('profile.voice_preference'),
@@ -474,49 +530,39 @@ ${strings.t('profile.about_version')}: $_appVersion
             ),
             const SizedBox(height: 12),
             _SettingsSection(
-              title: strings.t('profile.section_content_purchase'),
-              children: [
-                _SettingsValueItem(
-                  title: strings.t('profile.content_pack_title'),
-                  value: _unlocked
-                      ? strings.t('profile.content_pack_full_value')
-                      : strings.t('profile.content_pack_trial_value'),
-                  subtitle: _unlocked
-                      ? strings.t(
-                          'profile.content_pack_full_subtitle',
-                          params: <String, String>{
-                            'count': '${_lessons.length}',
-                          },
-                        )
-                      : strings.t(
-                          'profile.content_pack_trial_subtitle',
-                          params: <String, String>{
-                            'free': '$_freeLessonCount',
-                            'total': '${_lessons.length}',
-                          },
-                        ),
-                ),
-                _SettingsValueItem(
-                  title: strings.t('profile.unlock_full_title'),
-                  value: _unlocked
-                      ? strings.t('profile.unlocked_value')
-                      : strings.t('profile.unlock_full_value'),
-                  subtitle: _unlocked
-                      ? strings.t('profile.unlocked_subtitle')
-                      : strings.t('profile.unlock_full_subtitle'),
-                  onTap: _unlocked ? null : _openUnlockPage,
-                ),
-                _SettingsNavItem(
-                  title: strings.t('profile.restore_purchase'),
-                  subtitle: strings.t('profile.restore_purchase_subtitle'),
-                  onTap: _restorePurchase,
-                ),
-              ],
+              title: strings.t('profile.section_course_access'),
+              children: _unlocked
+                  ? <Widget>[
+                      _CurrentPlanCard(data: plan),
+                    ]
+                  : <Widget>[
+                      _SettingsValueItem(
+                        title: strings.t('profile.content_pack_title'),
+                        value: strings.t('profile.content_pack_trial_value'),
+                        subtitle: strings.t('profile.content_pack_trial_subtitle'),
+                      ),
+                      _SettingsValueItem(
+                        title: strings.t('profile.unlock_full_title'),
+                        value: strings.t('profile.unlock_full_value'),
+                        subtitle: strings.t('profile.unlock_full_subtitle'),
+                        onTap: _openUnlockPage,
+                      ),
+                      _SettingsNavItem(
+                        title: strings.t('profile.restore_purchase'),
+                        subtitle: strings.t('profile.restore_purchase_subtitle'),
+                        onTap: _restorePurchase,
+                      ),
+                    ],
             ),
             const SizedBox(height: 12),
             _SettingsSection(
-              title: strings.t('profile.section_help_feedback'),
+              title: strings.t('profile.section_developer_support'),
               children: [
+                _SettingsNavItem(
+                  title: strings.t('profile.developer_note'),
+                  subtitle: strings.t('profile.developer_note_subtitle'),
+                  onTap: _openDeveloperNotePage,
+                ),
                 _SettingsNavItem(
                   title: strings.t('profile.submit_suggestion'),
                   subtitle: strings.t('profile.submit_suggestion_subtitle'),
@@ -537,11 +583,13 @@ ${strings.t('profile.about_version')}: $_appVersion
             ),
             const SizedBox(height: 12),
             _SettingsSection(
-              title: strings.t('profile.section_about'),
+              title: strings.t('profile.section_about_info'),
               children: [
                 _SettingsValueItem(
                   title: strings.t('profile.about_version'),
-                  value: _appVersion,
+                  value: _appVersion == '--'
+                      ? strings.t('profile.about_version_unavailable_value')
+                      : _appVersion,
                   subtitle: strings.t('profile.about_version_subtitle'),
                 ),
                 _SettingsNavItem(
@@ -646,6 +694,9 @@ ${strings.t('profile.about_version')}: $_appVersion
       title: title,
       suggestion: suggestion,
       stats: stats,
+      actionText: strings.t('profile.overview_action_continue_learning'),
+      actionType: vm.ProfileLearningActionType.continueLearning,
+      lesson: _resolveContinuationLesson(),
     );
   }
 
@@ -772,6 +823,22 @@ ${strings.t('profile.about_version')}: $_appVersion
             strings.t('profile.privacy_body_1'),
             strings.t('profile.privacy_body_2'),
             strings.t('profile.privacy_body_3'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openDeveloperNotePage() {
+    final strings = context.strings;
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => StaticInfoPage(
+          title: strings.t('profile.developer_note'),
+          paragraphs: <String>[
+            strings.t('profile.developer_note_body_1'),
+            strings.t('profile.developer_note_body_2'),
           ],
         ),
       ),
@@ -986,8 +1053,12 @@ ${strings.t('profile.about_version')}: $_appVersion
 
 class _LearningOverviewCard extends StatelessWidget {
   final _LearningOverviewData data;
+  final VoidCallback onActionTap;
 
-  const _LearningOverviewCard({required this.data});
+  const _LearningOverviewCard({
+    required this.data,
+    required this.onActionTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -1040,6 +1111,14 @@ class _LearningOverviewCard extends StatelessWidget {
             children: data.stats
                 .map((item) => _OverviewStatChip(label: item))
                 .toList(),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: onActionTap,
+              child: Text(data.actionText),
+            ),
           ),
         ],
       ),
@@ -1096,20 +1175,24 @@ class _CurrentPlanCard extends StatelessWidget {
                   style: text.titleMedium,
                 ),
               ),
-              Pill(
-                label: data.badge,
-                backgroundColor:
-                    data.unlocked ? AppTheme.softAccent : AppTheme.bgCardSoft,
-                foregroundColor: AppTheme.accentMintDark,
-              ),
+              if (data.badge != null)
+                Pill(
+                  label: data.badge!,
+                  backgroundColor: data.unlocked
+                      ? AppTheme.softAccent
+                      : AppTheme.bgCardSoft,
+                  foregroundColor: AppTheme.accentMintDark,
+                ),
             ],
           ),
           const SizedBox(height: 12),
           Text(data.title, style: text.titleLarge),
           const SizedBox(height: 8),
           Text(data.description, style: text.bodyMedium),
-          const SizedBox(height: 10),
-          Text(data.footnote, style: text.bodySmall),
+          if (data.footnote.trim().isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Text(data.footnote, style: text.bodySmall),
+          ],
           if (data.actionText != null) ...[
             const SizedBox(height: 14),
             SizedBox(

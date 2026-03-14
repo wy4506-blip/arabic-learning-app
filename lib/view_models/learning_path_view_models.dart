@@ -18,6 +18,13 @@ enum CoursePrimaryActionType {
   reviewDone,
 }
 
+enum ProfileLearningActionType {
+  startLearning,
+  continueLearning,
+  startReview,
+  reviewLessons,
+}
+
 class LearningPathSnapshot {
   final List<Lesson> lessons;
   final bool unlocked;
@@ -128,11 +135,17 @@ class LearningOverviewViewModel {
   final String title;
   final String suggestion;
   final List<String> stats;
+  final String actionText;
+  final ProfileLearningActionType actionType;
+  final Lesson? lesson;
 
   const LearningOverviewViewModel({
     required this.title,
     required this.suggestion,
     required this.stats,
+    required this.actionText,
+    required this.actionType,
+    this.lesson,
   });
 }
 
@@ -250,12 +263,12 @@ class LearningPathViewModels {
     if (snapshot.pendingReviewCount > 0 && snapshot.completedLessonCount > 0) {
       return HomeMainLearningViewModel(
         badgeText: _copy(language, zh: '今日建议', en: 'Today\'s Tip'),
-        title: _copy(language, zh: '先复习一下', en: 'Review First'),
+        title: _copy(language, zh: '先完成今天的复习', en: 'Finish Today\'s Review First'),
         arabicPreview: 'راجع الآن',
         description: _copy(
           language,
-          zh: '花 2 分钟，回顾刚学过的重点。',
-          en: 'Take two minutes to refresh the most recent points.',
+          zh: '复习之后再学新内容，记得会更稳。',
+          en: 'Review first, then new learning will stay with you more steadily.',
         ),
         progressText:
             'Completed ${snapshot.completedLessonCount}/${snapshot.totalLessonCount} lessons',
@@ -272,12 +285,12 @@ class LearningPathViewModels {
     if (onboardingCompleted && !snapshot.hasStartedAny) {
       return HomeMainLearningViewModel(
         badgeText: _copy(language, zh: '今日主线', en: 'Today\'s Focus'),
-        title: _copy(language, zh: '继续字母学习', en: 'Continue Alphabet Learning'),
+        title: _copy(language, zh: '开始你的阿语学习', en: 'Start Your Arabic Learning'),
         arabicPreview: 'تابع الحروف',
         description: _copy(
           language,
-          zh: '再学 1 个字母，继续打好基础。',
-          en: 'Learn one more letter and keep strengthening the base.',
+          zh: '从字母与发音开始，先完成第一步内容。',
+          en: 'Start with letters and sounds, then finish the first small step.',
         ),
         progressText:
             _copy(language, zh: '已完成首学体验', en: 'First experience completed'),
@@ -297,8 +310,8 @@ class LearningPathViewModels {
         arabicPreview: 'أكمل المسار',
         description: _copy(
           language,
-          zh: '你已完成免费部分，继续后续内容。',
-          en: 'You finished the free part. Continue the rest of the path.',
+          zh: '解锁后可继续学习后面的课程内容。',
+          en: 'Unlock to continue the remaining course content.',
         ),
         progressText: _copy(language, zh: '已完成前 3 课', en: 'First 3 lessons completed'),
         reviewText: snapshot.pendingReviewCount > 0
@@ -322,14 +335,14 @@ class LearningPathViewModels {
         badgeText: _copy(language, zh: '今日主线', en: 'Today\'s Focus'),
         title: _copy(
           language,
-          zh: '继续${LessonLocalizer.title(lesson, language)}',
-          en: 'Continue ${LessonLocalizer.title(lesson, language)}',
+          zh: '继续你的学习',
+          en: 'Continue Your Learning',
         ),
         arabicPreview: lesson.titleAr,
         description: _copy(
           language,
-          zh: '今天建议先完成这一小节。',
-          en: 'This is the most useful next step for today.',
+          zh: '保持节奏，比学得快更重要。',
+          en: 'Keeping a rhythm matters more than moving fast.',
         ),
         progressText: _copy(
           language,
@@ -359,8 +372,8 @@ class LearningPathViewModels {
       arabicPreview: 'ابدأ من الحروف',
       description: _copy(
         language,
-        zh: '先建立字母识别和发音基础，再进入课程。',
-        en: 'Build letter recognition and sound first, then move into lessons.',
+        zh: '从字母与发音开始，先完成第一步内容。',
+        en: 'Start with letters and sounds, then finish the first small step.',
       ),
       primaryButtonText: _copy(language, zh: '开始', en: 'Start'),
       secondaryText: _copy(language, zh: '查看字母表', en: 'Browse Alphabet'),
@@ -395,8 +408,8 @@ class LearningPathViewModels {
         arabicPreview: snapshot.recommendedLesson?.titleAr,
         description: _copy(
           language,
-          zh: '16 节课程都已学完，现在更适合回看熟悉内容。',
-          en: 'All 16 lessons are done. This is a good time to revisit what you learned.',
+          zh: '主线课程已经完成，现在更适合按需回看和复习。',
+          en: 'The main course is complete. Now it makes more sense to revisit and review as needed.',
         ),
         progressText: progressText,
         reviewText: reviewText,
@@ -413,8 +426,8 @@ class LearningPathViewModels {
         title: _copy(language, zh: '继续完整课程', en: 'Continue the Full Course'),
         description: _copy(
           language,
-          zh: '前三节体验课已经完成，解锁后可继续剩余 13 节正式课程。',
-          en: 'You finished the free trial. Unlock to continue the remaining 13 lessons.',
+          zh: '体验内容已经完成，解锁后可继续后面的课程。',
+          en: 'The trial content is done. Unlock to continue the remaining lessons.',
         ),
         progressText: progressText,
         reviewText: reviewText,
@@ -432,8 +445,8 @@ class LearningPathViewModels {
         title: _copy(language, zh: '从第一课开始', en: 'Start with Lesson 1'),
         description: _copy(
           language,
-          zh: '课程数据已准备好，先完成一个轻量的学习闭环。',
-          en: 'Your lessons are ready. Start with one light and complete learning loop.',
+          zh: '从第一节开始，先完成今天这一课。',
+          en: 'Start with lesson 1 and finish today\'s first lesson.',
         ),
         progressText: progressText,
         primaryButtonText:
@@ -454,11 +467,11 @@ class LearningPathViewModels {
       description: _copy(
         language,
         zh: snapshot.hasStartedAny
-            ? '优先把这节课学完，页面会继续沿着当前进度推进。'
-            : '从这一节开始，先完成一次完整、轻量的学习体验。',
+          ? '保持节奏，把这一课继续学完。'
+          : '从这一课开始，先完成第一节内容。',
         en: snapshot.hasStartedAny
-            ? 'Finish this lesson next to keep your learning continuous.'
-            : 'Start here for a light, complete first lesson experience.',
+          ? 'Keep your rhythm and finish this lesson next.'
+          : 'Start here and finish the first lesson.',
       ),
       progressText: progressText,
       reviewText: reviewText,
@@ -482,63 +495,74 @@ class LearningPathViewModels {
     required AppStrings strings,
     required LearningPathSnapshot snapshot,
   }) {
-    final title = snapshot.completedLessonCount == 0
-        ? strings.t('profile.overview_title_new')
-        : snapshot.hasCompletedAllLessons
-            ? strings.t('profile.overview_title_completed')
-            : strings.t(
-                'profile.overview_title_unit',
-                params: <String, String>{
-                  'unit': unitTitle(snapshot.currentUnitId, strings),
-                },
-              );
+    final lesson = snapshot.recommendedLesson;
 
-    String suggestion;
-    if (!snapshot.unlocked && snapshot.isTrialComplete) {
-      suggestion = strings.t('profile.overview_suggestion_unlock');
-    } else if (snapshot.pendingReviewCount > 0) {
-      suggestion = strings.t(
-        'profile.overview_suggestion_review',
-        params: <String, String>{'count': '${snapshot.pendingReviewCount}'},
+    if (snapshot.pendingReviewCount > 0) {
+      return LearningOverviewViewModel(
+        title: strings.t('profile.overview_title_review_first'),
+        suggestion: strings.t('profile.overview_suggestion_review_first'),
+        stats: <String>[
+          strings.t(
+            'profile.overview_review',
+            params: <String, String>{'count': '${snapshot.pendingReviewCount}'},
+          ),
+          strings.t('profile.overview_lesson_not_finished'),
+        ],
+        actionText: strings.t('profile.overview_action_review'),
+        actionType: ProfileLearningActionType.startReview,
+        lesson: lesson,
       );
-    } else if (snapshot.recommendedLesson != null) {
-      suggestion = strings.t(
-        snapshot.completedLessonCount == 0
-            ? 'profile.overview_suggestion_first_lesson'
-            : 'profile.overview_suggestion_continue',
-        params: <String, String>{
-          'lesson':
-              LessonLocalizer.title(snapshot.recommendedLesson!, language),
-        },
-      );
-    } else {
-      suggestion = strings.t('profile.overview_suggestion_keep_going');
     }
 
-    final streakText = snapshot.streakDays == 0
-        ? strings.t('profile.overview_streak_start')
-        : strings.t(
-            'profile.overview_streak_days',
-            params: <String, String>{'days': '${snapshot.streakDays}'},
-          );
+    if (!snapshot.hasStartedAny ||
+        (snapshot.completedLessonCount == 0 && snapshot.startedLessonCount == 0)) {
+      return LearningOverviewViewModel(
+        title: strings.t('profile.overview_title_start_learning'),
+        suggestion: strings.t('profile.overview_suggestion_start_learning'),
+        stats: <String>[
+          strings.t('profile.overview_stage_beginner'),
+          strings.t('profile.overview_first_step_progress'),
+        ],
+        actionText: strings.t('profile.overview_action_start_learning'),
+        actionType: ProfileLearningActionType.startLearning,
+        lesson: lesson,
+      );
+    }
 
-    final stageText = !snapshot.unlocked
-        ? (snapshot.isTrialComplete
-            ? strings.t('profile.overview_stage_trial_done')
-            : strings.t('profile.overview_stage_trial'))
-        : snapshot.currentUnitId != null
-            ? strings.t(
-                'profile.overview_stage_unit',
-                params: <String, String>{
-                  'unit': unitTitle(snapshot.currentUnitId, strings),
-                },
-              )
-            : strings.t('profile.overview_stage_full');
+    if (snapshot.hasCompletedAllLessons) {
+      return LearningOverviewViewModel(
+        title: strings.t('profile.overview_title_completed'),
+        suggestion: strings.t('profile.overview_suggestion_completed'),
+        stats: <String>[
+          strings.t(
+            'profile.overview_completed',
+            params: <String, String>{
+              'completed': '${snapshot.completedLessonCount}',
+              'total': '${snapshot.totalLessonCount}',
+            },
+          ),
+          strings.t('profile.overview_stage_full'),
+          if (snapshot.streakDays > 0)
+            strings.t(
+              'profile.overview_streak_days',
+              params: <String, String>{'days': '${snapshot.streakDays}'},
+            ),
+        ],
+        actionText: strings.t('profile.overview_action_review_lessons'),
+        actionType: ProfileLearningActionType.reviewLessons,
+        lesson: lesson,
+      );
+    }
 
     return LearningOverviewViewModel(
-      title: title,
-      suggestion: suggestion,
+      title: strings.t('profile.overview_title_continue_learning'),
+      suggestion: strings.t('profile.overview_suggestion_continue_learning'),
       stats: <String>[
+        if (lesson != null)
+          strings.t(
+            'profile.overview_lesson_in_progress',
+            params: <String, String>{'lesson': '${lesson.sequence}'},
+          ),
         strings.t(
           'profile.overview_completed',
           params: <String, String>{
@@ -546,14 +570,15 @@ class LearningPathViewModels {
             'total': '${snapshot.totalLessonCount}',
           },
         ),
-        stageText,
-        streakText,
-        if (snapshot.pendingReviewCount > 0)
+        if (snapshot.streakDays > 0)
           strings.t(
-            'profile.overview_review',
-            params: <String, String>{'count': '${snapshot.pendingReviewCount}'},
+            'profile.overview_streak_days',
+            params: <String, String>{'days': '${snapshot.streakDays}'},
           ),
       ],
+      actionText: strings.t('profile.overview_action_continue_learning'),
+      actionType: ProfileLearningActionType.continueLearning,
+      lesson: lesson,
     );
   }
 
@@ -563,15 +588,10 @@ class LearningPathViewModels {
   }) {
     if (snapshot.unlocked || !snapshot.hasLockedLessons) {
       return CurrentPlanViewModel(
-        badge: strings.t('profile.plan_full_badge'),
+        badge: '',
         title: strings.t('profile.plan_full_title'),
         description: strings.t('profile.plan_full_description'),
-        footnote: strings.t(
-          'profile.plan_full_footnote',
-          params: <String, String>{
-            'remaining': '${snapshot.remainingLessonCount}',
-          },
-        ),
+        footnote: '',
         unlocked: true,
       );
     }

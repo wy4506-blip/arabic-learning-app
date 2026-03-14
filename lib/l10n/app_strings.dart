@@ -208,8 +208,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Lessons',
   },
   'course.subtitle': <String, String>{
-    'zh': '完整课程共 16 节，前 3 节可直接体验，后续内容解锁后会无缝展开。',
-    'en': 'A 16-lesson path. The first 3 lessons are free and later content opens seamlessly after unlocking.',
+    'zh': '按当前进度继续，也可以随时回看已学内容。',
+    'en': 'Continue from your current progress, or revisit what you already learned.',
   },
   'course.completed_summary': <String, String>{
     'zh': '已完成 {completed} / {total} 课时',
@@ -383,21 +383,29 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'zh': '界面语言',
     'en': 'Interface Language',
   },
+  'profile.interface_language_subtitle': <String, String>{
+    'zh': '设置应用界面的显示语言。',
+    'en': 'Set the display language of the app interface.',
+  },
   'profile.meaning_language': <String, String>{
     'zh': '释义语言',
     'en': 'Meaning Language',
   },
+  'profile.meaning_language_subtitle': <String, String>{
+    'zh': '设置单词和句子的解释语言。',
+    'en': 'Set the explanation language for words and sentences.',
+  },
   'profile.text_mode': <String, String>{
     'zh': '文本显示模式',
-    'en': 'Arabic Display Mode',
+    'en': 'Text Display Mode',
   },
   'profile.show_transliteration': <String, String>{
     'zh': '显示转写',
     'en': 'Show Transliteration',
   },
   'profile.arabic_font_size': <String, String>{
-    'zh': '阿语字体大小',
-    'en': 'Arabic Font Size',
+    'zh': '阿文字号',
+    'en': 'Arabic Text Size',
   },
   'profile.theme_mode': <String, String>{
     'zh': '外观模式',
@@ -455,6 +463,14 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'zh': '管理学习体验、课程权益，以及反馈与帮助入口。',
     'en': 'Manage learning preferences, course access, and support in one place.',
   },
+  'profile.section_learning_state': <String, String>{
+    'zh': '学习状态',
+    'en': 'Learning Status',
+  },
+  'profile.section_learning_preferences': <String, String>{
+    'zh': '学习偏好',
+    'en': 'Learning Preferences',
+  },
   'profile.section_language_text': <String, String>{
     'zh': '语言与文本',
     'en': 'Language & Text',
@@ -463,21 +479,45 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'zh': '外观与提醒',
     'en': 'Appearance & Reminder',
   },
+  'profile.section_course_access': <String, String>{
+    'zh': '课程权益',
+    'en': 'Course Access',
+  },
   'profile.section_content_purchase': <String, String>{
     'zh': '内容与购买',
     'en': 'Content & Purchase',
   },
+  'profile.section_developer_support': <String, String>{
+    'zh': '开发者与支持',
+    'en': 'Developer & Support',
+  },
   'profile.section_help_feedback': <String, String>{
     'zh': '帮助与反馈',
     'en': 'Help & Feedback',
+  },
+  'profile.section_about_info': <String, String>{
+    'zh': '关于与说明',
+    'en': 'About & Info',
   },
   'profile.section_about': <String, String>{
     'zh': '关于',
     'en': 'About',
   },
   'profile.overview_title_new': <String, String>{
-    'zh': '刚开始学习',
-    'en': 'Just Getting Started',
+    'zh': '开始你的阿语学习',
+    'en': 'Start Your Arabic Learning',
+  },
+  'profile.overview_title_start_learning': <String, String>{
+    'zh': '开始你的阿语学习',
+    'en': 'Start Your Arabic Learning',
+  },
+  'profile.overview_title_continue_learning': <String, String>{
+    'zh': '继续你的学习',
+    'en': 'Continue Your Learning',
+  },
+  'profile.overview_title_review_first': <String, String>{
+    'zh': '先完成今天的复习',
+    'en': 'Finish Today\'s Review First',
   },
   'profile.overview_title_completed': <String, String>{
     'zh': '已完成全部课程',
@@ -490,6 +530,22 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   'profile.overview_suggestion_first_lesson': <String, String>{
     'zh': '今天完成第 1 节，先建立一个轻量的学习节奏。',
     'en': 'Finish lesson 1 today and start a light learning rhythm.',
+  },
+  'profile.overview_suggestion_start_learning': <String, String>{
+    'zh': '从字母与发音开始，先完成第一节内容。',
+    'en': 'Start with letters and sounds, then finish the first lesson.',
+  },
+  'profile.overview_suggestion_continue_learning': <String, String>{
+    'zh': '保持节奏，比学得快更重要。',
+    'en': 'Keeping a rhythm matters more than moving fast.',
+  },
+  'profile.overview_suggestion_review_first': <String, String>{
+    'zh': '复习之后再学新内容，记得会更稳。',
+    'en': 'Review first, then new learning will stay with you more steadily.',
+  },
+  'profile.overview_suggestion_completed': <String, String>{
+    'zh': '主线课程已经完成，现在更适合按需回看和复习。',
+    'en': 'The main course is done. Now it makes more sense to revisit and review as needed.',
   },
   'profile.overview_suggestion_continue': <String, String>{
     'zh': '继续上一节内容：{lesson}',
@@ -506,6 +562,38 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   'profile.overview_suggestion_keep_going': <String, String>{
     'zh': '继续保持当前节奏，回看已学内容也很有价值。',
     'en': 'Keep your rhythm going. Revisiting learned content still matters.',
+  },
+  'profile.overview_first_step_progress': <String, String>{
+    'zh': '已完成 0/1 节',
+    'en': '0/1 lessons completed',
+  },
+  'profile.overview_stage_beginner': <String, String>{
+    'zh': '入门阶段',
+    'en': 'Beginner Stage',
+  },
+  'profile.overview_lesson_in_progress': <String, String>{
+    'zh': '第 {lesson} 课学习中',
+    'en': 'Lesson {lesson} In Progress',
+  },
+  'profile.overview_lesson_not_finished': <String, String>{
+    'zh': '本课未完成',
+    'en': 'Current Lesson Not Finished',
+  },
+  'profile.overview_action_start_learning': <String, String>{
+    'zh': '开始学习',
+    'en': 'Start Learning',
+  },
+  'profile.overview_action_continue_learning': <String, String>{
+    'zh': '继续学习',
+    'en': 'Continue Learning',
+  },
+  'profile.overview_action_review': <String, String>{
+    'zh': '去复习',
+    'en': 'Go Review',
+  },
+  'profile.overview_action_review_lessons': <String, String>{
+    'zh': '回看课程',
+    'en': 'Review Lessons',
   },
   'profile.overview_completed': <String, String>{
     'zh': '已完成 {completed}/{total} 节',
@@ -540,8 +628,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': '{count} items to review',
   },
   'profile.plan_card_title': <String, String>{
-    'zh': '当前权益',
-    'en': 'Current Plan',
+    'zh': '当前状态',
+    'en': 'Current Status',
   },
   'profile.plan_trial_badge': <String, String>{
     'zh': '体验版',
@@ -572,44 +660,44 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Current Plan: Full',
   },
   'profile.plan_full_description': <String, String>{
-    'zh': '已解锁全部课程内容，后续学习不再出现额外阻断。',
-    'en': 'All lessons are unlocked and later learning continues without extra friction.',
+    'zh': '已解锁全部课程内容。',
+    'en': 'All course content is unlocked.',
   },
   'profile.plan_full_footnote': <String, String>{
     'zh': '剩余 {remaining} 节可继续推进',
     'en': '{remaining} lessons left to continue',
   },
   'profile.text_mode_subtitle': <String, String>{
-    'zh': '按学习阶段选择带音符、对照或更接近原文的显示方式。',
-    'en': 'Choose the reading style that best matches your current learning stage.',
+    'zh': '选择更适合当前阶段的阿文显示方式。',
+    'en': 'Choose the Arabic display style that best fits your current stage.',
   },
   'profile.show_transliteration_subtitle': <String, String>{
-    'zh': '显示阿语对应的拼读辅助，适合初学阶段理解发音。',
-    'en': 'Show pronunciation support under Arabic text for early-stage learning.',
+    'zh': '显示拼读辅助，适合初学阶段。',
+    'en': 'Show pronunciation support for the early learning stage.',
   },
   'profile.font_size_subtitle': <String, String>{
-    'zh': '统一调整学习内容里的阿语字号。',
-    'en': 'Adjust Arabic text size across learning content.',
+    'zh': '调整阿文内容的显示大小。',
+    'en': 'Adjust the display size of Arabic content.',
   },
   'profile.voice_preference': <String, String>{
     'zh': '配音偏好',
     'en': 'Voice Preference',
   },
   'profile.voice_preference_subtitle': <String, String>{
-    'zh': '选择 AI 配音或人工配音（人工配音逐步覆盖中）。',
-    'en': 'Choose AI or human voice (human recordings being added).',
+    'zh': '选择更适合你的发音播放方式。',
+    'en': 'Choose the pronunciation playback style that suits you better.',
   },
   'profile.theme_mode_subtitle': <String, String>{
-    'zh': '控制应用整体的明暗外观。',
-    'en': 'Control the overall appearance of the app.',
+    'zh': '设置应用整体外观风格。',
+    'en': 'Set the overall appearance style of the app.',
   },
   'profile.reminder_off_subtitle': <String, String>{
-    'zh': '开启后可按固定时间提醒学习。',
-    'en': 'Turn this on to get a reminder at a fixed time.',
+    'zh': '按设定时间提醒你学习。',
+    'en': 'Get reminded to study at the set time.',
   },
   'profile.reminder_on_subtitle': <String, String>{
-    'zh': '已开启，每天 {time} 提醒学习。',
-    'en': 'On. You will be reminded daily at {time}.',
+    'zh': '已开启，每天 {time} 提醒你学习。',
+    'en': 'On. You will be reminded to study each day at {time}.',
   },
   'profile.reminder_time_subtitle': <String, String>{
     'zh': '选择每天接收学习提醒的时间。',
@@ -636,24 +724,24 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Full',
   },
   'profile.content_pack_trial_subtitle': <String, String>{
-    'zh': '前 {free}/{total} 节可直接学习，先完成入门闭环。',
-    'en': 'The first {free} of {total} lessons are open for a complete beginner flow.',
+    'zh': '当前可体验入门内容。',
+    'en': 'The beginner content is currently available to try.',
   },
   'profile.content_pack_full_subtitle': <String, String>{
     'zh': '已解锁全部 {count} 节课程内容。',
     'en': 'All {count} lessons are unlocked.',
   },
   'profile.unlock_full_title': <String, String>{
-    'zh': '完整课程权益',
-    'en': 'Full Course Access',
+    'zh': '解锁完整课程',
+    'en': 'Unlock Full Course',
   },
   'profile.unlock_full_value': <String, String>{
     'zh': '去解锁',
     'en': 'Unlock',
   },
   'profile.unlock_full_subtitle': <String, String>{
-    'zh': '一次购买后，后续课程会自然继续打开。',
-    'en': 'Unlock once and later lessons will open naturally.',
+    'zh': '解锁后可继续学习全部课程内容。',
+    'en': 'Unlock to continue learning all course content.',
   },
   'profile.unlocked_value': <String, String>{
     'zh': '已解锁',
@@ -664,36 +752,52 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Full lesson access is already available.',
   },
   'profile.restore_purchase_subtitle': <String, String>{
-    'zh': '更换设备后恢复已购内容，用于找回已解锁课程权益。',
-    'en': 'Restore purchased access after switching devices.',
+    'zh': '在新设备上恢复已购权益。',
+    'en': 'Restore your purchased access on a new device.',
   },
   'profile.restore_purchase_current': <String, String>{
     'zh': '当前已经是完整版，无需恢复购买。',
     'en': 'Full access is already active. No restore is needed.',
   },
   'profile.submit_suggestion': <String, String>{
-    'zh': '提交建议',
-    'en': 'Submit Suggestions',
+    'zh': '提建议',
+    'en': 'Suggestions',
   },
   'profile.submit_suggestion_subtitle': <String, String>{
-    'zh': '把想优化的体验、文案或结构直接发给开发者。',
-    'en': 'Send product ideas, wording feedback, or design improvements.',
+    'zh': '把想法告诉我们，帮助产品持续变好。',
+    'en': 'Share your ideas to help the product keep improving.',
   },
   'profile.report_issue': <String, String>{
     'zh': '问题反馈',
     'en': 'Report an Issue',
   },
   'profile.report_issue_subtitle': <String, String>{
-    'zh': '反馈音频、显示、跳转或购买相关问题。',
-    'en': 'Report audio, layout, navigation, or purchase issues.',
+    'zh': '反馈音频、显示或使用中的问题。',
+    'en': 'Report audio, display, or general usage issues.',
   },
   'profile.contact_support': <String, String>{
     'zh': '联系支持',
     'en': 'Contact Support',
   },
   'profile.contact_support_subtitle': <String, String>{
-    'zh': '需要人工协助时，直接发送一封支持邮件。',
-    'en': 'Open a support email when you need direct help.',
+    'zh': '需要帮助时，可以直接联系我们。',
+    'en': 'Contact us directly when you need help.',
+  },
+  'profile.developer_note': <String, String>{
+    'zh': '开发者的话',
+    'en': 'A Note from the Developer',
+  },
+  'profile.developer_note_subtitle': <String, String>{
+    'zh': '想和你说说这款 App 为什么会开始。',
+    'en': 'A short note about why this app began.',
+  },
+  'profile.developer_note_body_1': <String, String>{
+    'zh': '这款 App 的起点很简单：希望把阿拉伯语入门做得更轻一些，让第一次接触这门语言的人也能顺着学下去。',
+    'en': 'This app started from a simple goal: make beginner Arabic feel lighter, so first-time learners can keep going without being pushed out early.',
+  },
+  'profile.developer_note_body_2': <String, String>{
+    'zh': '如果你愿意持续用它学习、也愿意告诉我们哪些地方还不够顺，这款产品就会继续一点点变得更好。',
+    'en': 'If you keep learning with it and tell us where the experience still feels rough, the product can keep getting better step by step.',
   },
   'profile.contact_support_body': <String, String>{
     'zh': '请描述你遇到的问题、出现页面以及复现步骤，我们会据此继续排查。',
@@ -712,24 +816,28 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Current Version',
   },
   'profile.about_version_subtitle': <String, String>{
-    'zh': '读取应用当前安装版本。',
-    'en': 'Read from the installed app version.',
+    'zh': '查看当前安装版本。',
+    'en': 'View the currently installed version.',
+  },
+  'profile.about_version_unavailable_value': <String, String>{
+    'zh': '版本信息暂不可用',
+    'en': 'Version unavailable',
   },
   'profile.about_privacy': <String, String>{
     'zh': '隐私说明',
     'en': 'Privacy Notice',
   },
   'profile.about_privacy_subtitle': <String, String>{
-    'zh': '查看首发版本的基础隐私说明。',
-    'en': 'Read the privacy notice for the first release.',
+    'zh': '查看应用的基础隐私说明。',
+    'en': 'View the basic privacy notice for the app.',
   },
   'profile.about_terms': <String, String>{
     'zh': '使用条款',
     'en': 'Terms of Use',
   },
   'profile.about_terms_subtitle': <String, String>{
-    'zh': '查看应用的基础使用说明与责任范围。',
-    'en': 'Read the basic terms and usage responsibilities.',
+    'zh': '查看应用的基础使用说明。',
+    'en': 'View the basic usage notes for the app.',
   },
   'profile.privacy_body_1': <String, String>{
     'zh': '本应用首发版本主要在本地保存学习进度、设置项和解锁状态，用于改善学习体验与恢复使用状态。',
@@ -828,28 +936,28 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'AI Voice',
   },
   'settings.voice_human': <String, String>{
-    'zh': '人工配音',
-    'en': 'Human Voice',
+    'zh': '真人优先',
+    'en': 'Prefer Human',
   },
   'settings.voice_ai_desc': <String, String>{
     'zh': '使用 AI 合成语音朗读，覆盖所有内容。',
     'en': 'AI-synthesized voice, covers all content.',
   },
   'settings.voice_human_desc': <String, String>{
-    'zh': '优先使用人工录制配音，未覆盖部分自动回退到 AI。',
-    'en': 'Prefer human recordings; falls back to AI for uncovered content.',
+    'zh': '优先使用真人录音，未覆盖部分自动回退到 AI。',
+    'en': 'Prefer human recordings and fall back to AI where needed.',
   },
   'settings.theme_system': <String, String>{
     'zh': '跟随系统',
-    'en': 'System',
+    'en': 'Follow System',
   },
   'settings.theme_light': <String, String>{
-    'zh': '浅色',
-    'en': 'Light',
+    'zh': '浅色模式',
+    'en': 'Light Mode',
   },
   'settings.theme_dark': <String, String>{
-    'zh': '深色',
-    'en': 'Dark',
+    'zh': '深色模式',
+    'en': 'Dark Mode',
   },
   'settings.text_mode_smart': <String, String>{
     'zh': '智能注音',
