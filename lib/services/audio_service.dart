@@ -148,6 +148,8 @@ class AudioService {
   static Future<void> speakLetter(String text) async {
     final String normalized = text.trim();
 
+    debugPrint('[Audio] speakLetter preference: $_voicePreference');
+
     final assets = await AudioManifestService.findAlphabetAssets(
       type: 'letter',
       speed: 'normal',
@@ -157,7 +159,10 @@ class AudioService {
     );
 
     if (assets.isNotEmpty) {
-      debugPrint('[Audio] manifest hit(letter): ${assets.first}');
+      debugPrint('[Audio] manifest hit(letter): ${assets.first} (count: ${assets.length})');
+      if (assets.length > 1) {
+        debugPrint('[Audio]   all results: $assets');
+      }
     } else {
       debugPrint('[Audio] manifest miss(letter): $normalized');
     }
