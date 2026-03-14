@@ -67,7 +67,10 @@ class AlphabetForms {
 class AlphabetLetter {
   final String arabic;
   final String name;
+  final String arabicName;
+  final String latinName;
   final String pronunciation;
+  final String phoneme;
   final String soundHint;
   final String hint;
   final AlphabetExample example;
@@ -79,7 +82,10 @@ class AlphabetLetter {
   AlphabetLetter({
     required this.arabic,
     required this.name,
+    required this.arabicName,
+    required this.latinName,
     required this.pronunciation,
+    required this.phoneme,
     required this.soundHint,
     required this.hint,
     required this.example,
@@ -93,7 +99,11 @@ class AlphabetLetter {
     return AlphabetLetter(
       arabic: json['arabic'] as String,
       name: json['name'] as String,
+      arabicName: (json['arabicName'] ?? json['arabic']) as String,
+      latinName:
+          (json['latinName'] ?? json['name'] ?? json['pronunciation']) as String,
       pronunciation: json['pronunciation'] as String,
+      phoneme: (json['phoneme'] ?? json['pronunciation']) as String,
       soundHint: json['soundHint'] as String,
       hint: json['hint'] as String,
       example: AlphabetExample.fromJson(
@@ -111,6 +121,8 @@ class AlphabetLetter {
       tip: json['tip'] as String,
     );
   }
+
+  String get fullNameLabel => '$arabicName · $latinName';
 }
 
 class AlphabetGroup {

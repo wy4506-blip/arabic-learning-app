@@ -1,18 +1,35 @@
 import 'package:flutter/material.dart';
-import '../data/alphabet_quiz_data.dart';
-import 'generic_quiz_page.dart';
 
-class AlphabetCompareQuizPage extends StatelessWidget {
-  const AlphabetCompareQuizPage({super.key});
+import '../l10n/localized_text.dart';
+import 'alphabet_compare_quiz_page.dart';
+
+class AlphabetComparePage extends StatelessWidget {
+  const AlphabetComparePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return GenericQuizPage(
-      levelTitle: '第 2 级：字母辨析',
-      subtitle: '区分易混淆字母',
-      resultTitle: '第 2 级完成',
-      emptyText: '暂无字母辨析练习内容',
-      questions: AlphabetQuizData.compareQuestions,
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: FilledButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AlphabetCompareQuizPage(),
+                ),
+              );
+            },
+            child: Text(
+              localizedText(
+                context,
+                zh: '开始字母辨析练习',
+                en: 'Start Letter Contrast Drill',
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

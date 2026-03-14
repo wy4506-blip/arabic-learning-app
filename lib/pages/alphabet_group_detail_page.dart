@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+
+import '../app_scope.dart';
+import '../l10n/alphabet_content_localizer.dart';
+import '../l10n/localized_text.dart';
 import '../models/alphabet_group.dart';
+import '../theme/app_arabic_typography.dart';
 import '../theme/app_theme.dart';
 import 'alphabet_letter_home_page.dart';
 
@@ -25,18 +30,28 @@ class AlphabetGroupDetailPage extends StatelessWidget {
               children: [
                 _buildTopButton(
                   icon: Icons.arrow_back_ios_new_rounded,
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
+                  onTap: () => Navigator.pop(context),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(group.title, style: text.titleLarge),
+                      Text(
+                        AlphabetContentLocalizer.groupTitle(
+                          group,
+                          context.appSettings.appLanguage,
+                        ),
+                        style: text.titleLarge,
+                      ),
                       const SizedBox(height: 2),
-                      Text(group.subtitle, style: text.bodySmall),
+                      Text(
+                        AlphabetContentLocalizer.groupSubtitle(
+                          group,
+                          context.appSettings.meaningLanguage,
+                        ),
+                        style: text.bodySmall,
+                      ),
                     ],
                   ),
                 ),
@@ -82,11 +97,21 @@ class AlphabetGroupDetailPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('这一组共 ${group.letters.length} 个字母',
-                            style: text.titleMedium),
+                        Text(
+                          localizedText(
+                            context,
+                            zh: '这一组共 ${group.letters.length} 个字母',
+                            en: '${group.letters.length} letters in this group',
+                          ),
+                          style: text.titleMedium,
+                        ),
                         const SizedBox(height: 4),
                         Text(
-                          '先点进单个字母主页，再选择听读或书写。',
+                          localizedText(
+                            context,
+                            zh: '先点进单个字母主页，再选择听读或书写。',
+                            en: 'Open a single letter first, then choose listening or writing.',
+                          ),
                           style: text.bodySmall,
                         ),
                       ],
@@ -95,11 +120,88 @@ class AlphabetGroupDetailPage extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(height: 14),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                _buildGuideChip(
+                  label: localizedText(
+                    context,
+                    zh: '先认字形',
+                    en: 'See the Shape',
+                  ),
+                  icon: Icons.visibility_rounded,
+                ),
+                _buildGuideChip(
+                  label: localizedText(
+                    context,
+                    zh: '再听发音',
+                    en: 'Hear the Sound',
+                  ),
+                  icon: Icons.hearing_rounded,
+                ),
+                _buildGuideChip(
+                  label: localizedText(
+                    context,
+                    zh: '最后练书写',
+                    en: 'Finish with Writing',
+                  ),
+                  icon: Icons.edit_rounded,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+              ),
+              child: Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: group.letters
+                    .map(
+                      (letter) => Container(
+                        width: 64,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF4FBF8),
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Center(
+                          child: ArabicText.word(
+                            letter.arabic,
+                            style: text.titleLarge?.copyWith(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w700,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
             const SizedBox(height: 24),
-            Text('本组字母', style: text.titleLarge),
+            Text(
+              localizedText(
+                context,
+                zh: '本组字母',
+                en: 'Letters in This Group',
+              ),
+              style: text.titleLarge,
+            ),
             const SizedBox(height: 6),
             Text(
-              '每次先学少量内容，更适合初学者。',
+              localizedText(
+                context,
+                zh: '每次先学少量内容，更适合初学者。',
+                en: 'Small batches work better for beginners.',
+              ),
               style: text.bodyMedium,
             ),
             const SizedBox(height: 16),
@@ -108,6 +210,35 @@ class AlphabetGroupDetailPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  static Widget _buildGuideChip({
+    required String label,
+    required IconData icon,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: AppTheme.deepAccent),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.primaryText,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -185,13 +316,13 @@ class AlphabetGroupDetailPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Center(
-                    child: Text(
+                    child: ArabicText.word(
                       letter.arabic,
                       style: text.titleLarge?.copyWith(
                         fontSize: 28,
                         fontWeight: FontWeight.w700,
                       ),
-                      textDirection: TextDirection.rtl,
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),
@@ -200,12 +331,50 @@ class AlphabetGroupDetailPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '${letter.name} · ${letter.pronunciation}',
+                      ArabicText.word(
+                        letter.arabicName,
                         style: text.titleMedium,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        letter.latinName,
+                        style: text.labelLarge?.copyWith(
+                          color: AppTheme.deepAccent,
+                        ),
                       ),
                       const SizedBox(height: 4),
-                      Text(letter.hint, style: text.bodySmall),
+                      Text(
+                        AlphabetContentLocalizer.hint(
+                          letter,
+                          context.appSettings.meaningLanguage,
+                        ),
+                        style: text.bodySmall,
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          _buildMetaTag(
+                            context,
+                            localizedText(
+                              context,
+                              zh: '基础音值 ${letter.phoneme}',
+                              en: 'Core Sound ${letter.phoneme}',
+                            ),
+                          ),
+                          _buildMetaTag(
+                            context,
+                            localizedText(
+                              context,
+                              zh: '示例 ${letter.example.arabic}',
+                              en: 'Example ${letter.example.arabic}',
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -217,6 +386,24 @@ class AlphabetGroupDetailPage extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMetaTag(BuildContext context, String label) {
+    final text = Theme.of(context).textTheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF4F6F8),
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: text.labelMedium?.copyWith(
+          color: AppTheme.textSecondary,
         ),
       ),
     );

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+
+import '../l10n/localized_text.dart';
 import '../models/quiz_question.dart';
+import '../services/audio_service.dart';
 import 'quiz_scaffold.dart';
 
 class GenericQuizPage extends StatefulWidget {
@@ -39,20 +42,27 @@ class _GenericQuizPageState extends State<GenericQuizPage> {
     _loadQuestions();
   }
 
+  @override
+  void dispose() {
+    AudioService.stop();
+    super.dispose();
+  }
+
   Future<void> _loadQuestions() async {
     List<QuizQuestion> questions;
-    
+
     if (widget.questionsLoader != null) {
       questions = await widget.questionsLoader!() ?? [];
     } else {
       questions = widget.questions;
     }
-    
+
     if (mounted) {
       setState(() {
         _questions = questions;
         _isLoading = false;
       });
+      _autoplayCurrentPromptIfNeeded();
     }
   }
 
@@ -71,14 +81,17 @@ class _GenericQuizPageState extends State<GenericQuizPage> {
   }
 
   void _nextQuestion() {
-    if (widget.questions.isEmpty) return;
+    if (_questions.isEmpty) return;
 
-    if (_currentIndex + 1 < widget.questions.length) {
+    AudioService.stop();
+
+    if (_currentIndex + 1 < _questions.length) {
       setState(() {
         _currentIndex++;
         _selectedAnswer = null;
         _answered = false;
       });
+      _autoplayCurrentPromptIfNeeded();
     } else {
       _showResultDialog();
     }
@@ -91,14 +104,49 @@ class _GenericQuizPageState extends State<GenericQuizPage> {
       _selectedAnswer = null;
       _answered = false;
     });
+    _autoplayCurrentPromptIfNeeded();
+  }
+
+  QuizQuestion get _currentQuestion => _questions[_currentIndex];
+
+  bool _isAudioPrompt(QuizQuestion question) {
+    return question.promptType == 'letter_audio' ||
+        question.promptType == 'pronunciation_audio';
+  }
+
+  Future<void> _playPromptAudio() async {
+    if (_questions.isEmpty) return;
+
+    final question = _currentQuestion;
+    switch (question.promptType) {
+      case 'letter_audio':
+        await AudioService.speakLetter(question.prompt);
+        return;
+      case 'pronunciation_audio':
+        await AudioService.speakPronunciation(question.prompt);
+        return;
+      default:
+        return;
+    }
+  }
+
+  void _autoplayCurrentPromptIfNeeded() {
+    if (_questions.isEmpty || !_isAudioPrompt(_currentQuestion)) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || _questions.isEmpty) return;
+      if (!_isAudioPrompt(_currentQuestion)) return;
+      await _playPromptAudio();
+    });
   }
 
   void _showResultDialog() {
+    AudioService.stop();
     final text = Theme.of(context).textTheme;
-    final total = widget.questions.length;
+    final total = _questions.length;
     final rate = total == 0 ? 0 : ((_score / total) * 100).round();
 
-    showDialog(
+    showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
@@ -110,13 +158,21 @@ class _GenericQuizPageState extends State<GenericQuizPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '你本次答对了 $_score / $total 题。',
+              localizedText(
+                context,
+                zh: '本次答对 $_score / $total 题',
+                en: 'You answered $_score / $total correctly',
+              ),
               style: text.bodyMedium,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              '正确率：$rate%',
+              localizedText(
+                context,
+                zh: '正确率：$rate%',
+                en: 'Accuracy: $rate%',
+              ),
               style: text.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -130,14 +186,26 @@ class _GenericQuizPageState extends State<GenericQuizPage> {
               Navigator.pop(dialogContext);
               _restartQuiz();
             },
-            child: const Text('再练一次'),
+            child: Text(
+              localizedText(
+                context,
+                zh: '再练一次',
+                en: 'Retry',
+              ),
+            ),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(dialogContext);
               Navigator.pop(context);
             },
-            child: const Text('返回'),
+            child: Text(
+              localizedText(
+                context,
+                zh: '返回',
+                en: 'Back',
+              ),
+            ),
           ),
         ],
       ),
@@ -178,6 +246,7 @@ class _GenericQuizPageState extends State<GenericQuizPage> {
       answered: _answered,
       onSelect: _selectAnswer,
       onNext: _nextQuestion,
+      onPlayPromptAudio: _isAudioPrompt(q) ? _playPromptAudio : null,
     );
   }
 }

@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-03-13T22:19:33.033Z",
+  "outputRoot": "D:\\APP\\arabic_learning_app\\docs\\recording_task_packages\\字母首批录音任务包_V1",
+  "packages": [
+    {
+      "id": "01_letter_names",
+      "count": 28
+    },
+    {
+      "id": "02_letter_sounds",
+      "count": 28
+    },
+    {
+      "id": "03_letter_examples_basic",
+      "count": 28
+    }
+  ],
+  "total": 84
+}

@@ -1,0 +1,14 @@
+本目录用于 02_letter_sounds（字母基础发音）。
+条目数：28
+请将该包录好的 mp3 直接保存到本目录。
+文件名以根目录 task_sheet.xlsx 为准，不要自行改名。
+统一录音版本：teaching_clear / normal
+
+示例文件名：
+- alpha_p_001_normal.mp3
+- alpha_p_014_normal.mp3
+- alpha_p_027_normal.mp3
+- alpha_p_040_normal.mp3
+- alpha_p_053_normal.mp3
+
+完整清单请查看根目录 task_sheet.xlsx。

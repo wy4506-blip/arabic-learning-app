@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../l10n/localized_text.dart';
+import '../theme/app_arabic_typography.dart';
 import '../theme/app_theme.dart';
 
 class QuizScaffold extends StatelessWidget {
@@ -15,6 +18,7 @@ class QuizScaffold extends StatelessWidget {
   final bool answered;
   final ValueChanged<String> onSelect;
   final VoidCallback onNext;
+  final VoidCallback? onPlayPromptAudio;
 
   const QuizScaffold({
     super.key,
@@ -31,6 +35,7 @@ class QuizScaffold extends StatelessWidget {
     required this.answered,
     required this.onSelect,
     required this.onNext,
+    this.onPlayPromptAudio,
   });
 
   @override
@@ -38,8 +43,8 @@ class QuizScaffold extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     final media = MediaQuery.of(context);
     final width = media.size.width;
-    final bool isSmallScreen = width < 360;
-    final double progress = total <= 0 ? 0 : (currentIndex + 1) / total;
+    final isSmallScreen = width < 360;
+    final progress = total <= 0 ? 0 : (currentIndex + 1) / total;
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -107,7 +112,17 @@ class QuizScaffold extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    total > 0 ? '第 ${currentIndex + 1} 题 / 共 $total 题' : '暂无题目',
+                    total > 0
+                        ? localizedText(
+                            context,
+                            zh: '第 ${currentIndex + 1} 题 / 共 $total 题',
+                            en: 'Question ${currentIndex + 1} of $total',
+                          )
+                        : localizedText(
+                            context,
+                            zh: '暂无题目',
+                            en: 'No Questions',
+                          ),
                     style: text.labelLarge?.copyWith(
                       color: AppTheme.deepAccent,
                     ),
@@ -116,7 +131,7 @@ class QuizScaffold extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(999),
                     child: LinearProgressIndicator(
-                      value: progress.clamp(0.0, 1.0),
+                      value: progress.clamp(0.0, 1.0).toDouble(),
                       minHeight: 8,
                       backgroundColor: const Color(0xFFE5E7EB),
                       valueColor: const AlwaysStoppedAnimation<Color>(
@@ -149,7 +164,7 @@ class QuizScaffold extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 18),
-                  _buildPrompt(text, isSmallScreen),
+                  _buildPrompt(context, text, isSmallScreen),
                 ],
               ),
             ),
@@ -184,7 +199,11 @@ class QuizScaffold extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '请选择一个答案后查看结果',
+                        localizedText(
+                          context,
+                          zh: '请先选择一个答案，再查看结果。',
+                          en: 'Choose one answer first, then check the result.',
+                        ),
                         style: text.bodySmall?.copyWith(
                           color: const Color(0xFF667085),
                         ),
@@ -207,7 +226,19 @@ class QuizScaffold extends StatelessWidget {
                     ),
                   ),
                   onPressed: onNext,
-                  child: Text(currentIndex == total - 1 ? '查看结果' : '下一题'),
+                  child: Text(
+                    currentIndex == total - 1
+                        ? localizedText(
+                            context,
+                            zh: '查看结果',
+                            en: 'View Result',
+                          )
+                        : localizedText(
+                            context,
+                            zh: '下一题',
+                            en: 'Next Question',
+                          ),
+                  ),
                 ),
               ),
           ],
@@ -216,18 +247,65 @@ class QuizScaffold extends StatelessWidget {
     );
   }
 
-  Widget _buildPrompt(TextTheme text, bool isSmallScreen) {
+  Widget _buildPrompt(
+    BuildContext context,
+    TextTheme text,
+    bool isSmallScreen,
+  ) {
+    if (promptType == 'letter_audio' || promptType == 'pronunciation_audio') {
+      final helper = promptType == 'letter_audio'
+          ? localizedText(
+              context,
+              zh: '点击播放字母发音，再选择答案。',
+              en: 'Play the letter sound, then choose the answer.',
+            )
+          : localizedText(
+              context,
+              zh: '点击播放读音形式，再选择答案。',
+              en: 'Play the sound form, then choose the answer.',
+            );
+
+      return Column(
+        children: [
+          InkWell(
+            borderRadius: BorderRadius.circular(28),
+            onTap: onPlayPromptAudio,
+            child: Ink(
+              width: isSmallScreen ? 76 : 84,
+              height: isSmallScreen ? 76 : 84,
+              decoration: BoxDecoration(
+                color: const Color(0xFFEAF8F3),
+                borderRadius: BorderRadius.circular(28),
+              ),
+              child: const Icon(
+                Icons.volume_up_rounded,
+                color: AppTheme.deepAccent,
+                size: 36,
+              ),
+            ),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            helper,
+            style: text.bodyMedium?.copyWith(
+              color: AppTheme.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      );
+    }
+
     if (promptType == 'arabic') {
       return FittedBox(
         fit: BoxFit.scaleDown,
-        child: Text(
+        child: ArabicText.word(
           prompt,
           style: text.headlineLarge?.copyWith(
             fontSize: isSmallScreen ? 52 : 60,
             fontWeight: FontWeight.w700,
             color: AppTheme.primaryText,
           ),
-          textDirection: TextDirection.rtl,
           textAlign: TextAlign.center,
         ),
       );
@@ -282,12 +360,12 @@ class QuizScaffold extends StatelessWidget {
   }) {
     final text = Theme.of(context).textTheme;
 
-    final bool isSelected = selectedAnswer == option;
-    final bool isCorrect = option == correct;
+    final isSelected = selectedAnswer == option;
+    final isCorrect = option == correct;
 
-    Color bgColor = Colors.white;
-    Color borderColor = const Color(0xFFE5E7EB);
-    Color textColor = AppTheme.primaryText;
+    var bgColor = Colors.white;
+    var borderColor = const Color(0xFFE5E7EB);
+    var textColor = AppTheme.primaryText;
     IconData? trailingIcon;
 
     if (answered) {
@@ -326,10 +404,15 @@ class QuizScaffold extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
-                  child: Text(
-                    option,
-                    style: text.titleMedium?.copyWith(color: textColor),
-                  ),
+                  child: AppArabicTypography.isArabic(option)
+                      ? ArabicText.word(
+                          option,
+                          style: text.titleMedium?.copyWith(color: textColor),
+                        )
+                      : Text(
+                          option,
+                          style: text.titleMedium?.copyWith(color: textColor),
+                        ),
                 ),
                 if (trailingIcon != null) ...[
                   const SizedBox(width: 12),

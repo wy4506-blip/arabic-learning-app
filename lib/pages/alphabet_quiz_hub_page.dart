@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
+
 import '../data/alphabet_quiz_data.dart';
-import 'alphabet_recognition_quiz_page.dart';
-import 'alphabet_compare_quiz_page.dart';
-import 'alphabet_sound_quiz_page.dart';
+import '../l10n/localized_text.dart';
+import '../theme/app_theme.dart';
 import 'alabic_pronunciation_quiz_page.dart';
+import 'alphabet_compare_quiz_page.dart';
+import 'alphabet_recognition_quiz_page.dart';
+import 'alphabet_sound_quiz_page.dart';
 
 class AlphabetQuizHubPage extends StatefulWidget {
   const AlphabetQuizHubPage({super.key});
@@ -25,27 +27,18 @@ class _AlphabetQuizHubPageState extends State<AlphabetQuizHubPage> {
 
   Future<void> _loadQuizData() async {
     try {
-      debugPrint('开始加载字母练习数据');
-
-      await AlphabetQuizData.ensureLoaded().timeout(
-        const Duration(seconds: 8),
-      );
-
-      debugPrint('字母练习数据加载成功');
+      await AlphabetQuizData.ensureLoaded().timeout(const Duration(seconds: 8));
 
       if (!mounted) return;
       setState(() {
         _isLoading = false;
         _error = null;
       });
-    } catch (e, s) {
-      debugPrint('字母练习数据加载失败: $e');
-      debugPrint('$s');
-
+    } catch (error) {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _error = e.toString();
+        _error = error.toString();
       });
     }
   }
@@ -54,7 +47,7 @@ class _AlphabetQuizHubPageState extends State<AlphabetQuizHubPage> {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final width = MediaQuery.of(context).size.width;
-    final bool isSmallScreen = width < 360;
+    final isSmallScreen = width < 360;
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -68,18 +61,20 @@ class _AlphabetQuizHubPageState extends State<AlphabetQuizHubPage> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Text(
-                            '字母练习页加载失败',
-                            style: TextStyle(
+                          Text(
+                            localizedText(
+                              context,
+                              zh: '字母练习页加载失败',
+                              en: 'Alphabet drills failed to load',
+                            ),
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            _error!,
                             textAlign: TextAlign.center,
                           ),
+                          const SizedBox(height: 12),
+                          Text(_error!, textAlign: TextAlign.center),
                           const SizedBox(height: 16),
                           ElevatedButton(
                             onPressed: () {
@@ -89,7 +84,13 @@ class _AlphabetQuizHubPageState extends State<AlphabetQuizHubPage> {
                               });
                               _loadQuizData();
                             },
-                            child: const Text('重试'),
+                            child: Text(
+                              localizedText(
+                                context,
+                                zh: '重试',
+                                en: 'Retry',
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -114,10 +115,21 @@ class _AlphabetQuizHubPageState extends State<AlphabetQuizHubPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('字母练习', style: text.titleLarge),
+                                Text(
+                                  localizedText(
+                                    context,
+                                    zh: '字母练习',
+                                    en: 'Alphabet Practice',
+                                  ),
+                                  style: text.titleLarge,
+                                ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  '按难度逐级练习，从认字母到 13 音位',
+                                  localizedText(
+                                    context,
+                                    zh: '按难度逐级练习，从认字母到 13 音位',
+                                    en: 'Practice progressively from letter recognition to the 13 sound forms.',
+                                  ),
                                   style: text.bodySmall,
                                 ),
                               ],
@@ -146,10 +158,21 @@ class _AlphabetQuizHubPageState extends State<AlphabetQuizHubPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('逐级提高难度', style: text.headlineMedium),
+                            Text(
+                              localizedText(
+                                context,
+                                zh: '逐级提高难度',
+                                en: 'Build Difficulty Step by Step',
+                              ),
+                              style: text.headlineMedium,
+                            ),
                             const SizedBox(height: 8),
                             Text(
-                              '先认字母，再做辨析、基础发音，最后进入 13 个标准读音位练习。',
+                              localizedText(
+                                context,
+                                zh: '先认字母，再做辨析、基础发音，最后进入 13 个标准读音位练习。',
+                                en: 'Start with recognition, then contrast, core sounds, and finally the 13 sound forms.',
+                              ),
                               style: text.bodyMedium,
                             ),
                           ],
@@ -161,14 +184,22 @@ class _AlphabetQuizHubPageState extends State<AlphabetQuizHubPage> {
                         icon: Icons.looks_one_rounded,
                         iconBg: const Color(0xFFE8F5F0),
                         iconColor: AppTheme.deepAccent,
-                        title: '第 1 级：字母识别',
-                        subtitle: '看字母选名称、看名称选字母',
+                        title: localizedText(
+                          context,
+                          zh: '第 1 级：字母识别',
+                          en: 'Level 1: Letter Recognition',
+                        ),
+                        subtitle: localizedText(
+                          context,
+                          zh: '看字母选名称、看名称选字母',
+                          en: 'Match letters and names in both directions.',
+                        ),
                         count: AlphabetQuizData.recognitionQuestions.length,
                         onTap: () async {
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
+                              builder: (_) =>
                                   const AlphabetRecognitionQuizPage(),
                             ),
                           );
@@ -179,15 +210,22 @@ class _AlphabetQuizHubPageState extends State<AlphabetQuizHubPage> {
                         icon: Icons.looks_two_rounded,
                         iconBg: const Color(0xFFFFF1E6),
                         iconColor: const Color(0xFFF08A24),
-                        title: '第 2 级：字母辨析',
-                        subtitle: '区分易混淆字母，如 ب / ت / ث',
+                        title: localizedText(
+                          context,
+                          zh: '第 2 级：字母辨析',
+                          en: 'Level 2: Letter Contrast',
+                        ),
+                        subtitle: localizedText(
+                          context,
+                          zh: '区分易混淆字母，如 ب / ت / ث',
+                          en: 'Separate look-alike letters such as ب / ت / ث.',
+                        ),
                         count: AlphabetQuizData.compareQuestions.length,
                         onTap: () async {
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  const AlphabetCompareQuizPage(),
+                              builder: (_) => const AlphabetCompareQuizPage(),
                             ),
                           );
                         },
@@ -197,15 +235,22 @@ class _AlphabetQuizHubPageState extends State<AlphabetQuizHubPage> {
                         icon: Icons.looks_3_rounded,
                         iconBg: const Color(0xFFE8F3FF),
                         iconColor: const Color(0xFF4C7CF0),
-                        title: '第 3 级：基础发音',
-                        subtitle: '把字母和基础音值建立对应关系',
+                        title: localizedText(
+                          context,
+                          zh: '第 3 级：基础发音',
+                          en: 'Level 3: Core Sounds',
+                        ),
+                        subtitle: localizedText(
+                          context,
+                          zh: '把字母和基础音值建立对应关系',
+                          en: 'Map each letter to its core sound value.',
+                        ),
                         count: AlphabetQuizData.soundQuestions.length,
                         onTap: () async {
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  const AlphabetSoundQuizPage(),
+                              builder: (_) => const AlphabetSoundQuizPage(),
                             ),
                           );
                         },
@@ -215,14 +260,22 @@ class _AlphabetQuizHubPageState extends State<AlphabetQuizHubPage> {
                         icon: Icons.looks_4_rounded,
                         iconBg: const Color(0xFFEEEAFE),
                         iconColor: const Color(0xFF7D58E6),
-                        title: '第 4 级：13 音位',
-                        subtitle: '进入短音、长音、静音、重音与尾音训练',
+                        title: localizedText(
+                          context,
+                          zh: '第 4 级：13 音位',
+                          en: 'Level 4: 13 Sound Forms',
+                        ),
+                        subtitle: localizedText(
+                          context,
+                          zh: '进入短音、长音、静音、重音与尾音训练',
+                          en: 'Work through short vowels, long vowels, sukun, shadda, and tanwin.',
+                        ),
                         count: AlphabetQuizData.pronunciationQuestions.length,
                         onTap: () async {
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
+                              builder: (_) =>
                                   const AlabicPronunciationQuizPage(),
                             ),
                           );
@@ -316,7 +369,11 @@ class _AlphabetQuizHubPageState extends State<AlphabetQuizHubPage> {
                       Text(subtitle, style: text.bodySmall),
                       const SizedBox(height: 4),
                       Text(
-                        '当前题数：$count',
+                        localizedText(
+                          context,
+                          zh: '当前题数：$count',
+                          en: '$count questions',
+                        ),
                         style: text.bodySmall?.copyWith(
                           color: AppTheme.deepAccent,
                         ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../app_scope.dart';
+import '../features/onboarding/models/onboarding_state.dart';
 import '../models/app_settings.dart';
 import 'course_list_page.dart';
 import 'home_page.dart';
@@ -9,11 +11,13 @@ import 'review_page.dart';
 class AppShell extends StatefulWidget {
   final AppSettings settings;
   final ValueChanged<AppSettings> onSettingsChanged;
+  final OnboardingState onboardingState;
 
   const AppShell({
     super.key,
     required this.settings,
     required this.onSettingsChanged,
+    required this.onboardingState,
   });
 
   @override
@@ -25,9 +29,11 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = context.strings;
     final pages = [
       HomePage(
         settings: widget.settings,
+        onboardingState: widget.onboardingState,
         onOpenTab: (index) => setState(() => _index = index),
       ),
       CourseListPage(settings: widget.settings),
@@ -57,10 +63,26 @@ class _AppShellState extends State<AppShell> {
           ),
           child: Row(
             children: [
-              _NavItem(icon: Icons.home_rounded, label: 'Home', active: _index == 0, onTap: () => setState(() => _index = 0)),
-              _NavItem(icon: Icons.menu_book_rounded, label: 'Lessons', active: _index == 1, onTap: () => setState(() => _index = 1)),
-              _NavItem(icon: Icons.refresh_rounded, label: 'Review', active: _index == 2, onTap: () => setState(() => _index = 2)),
-              _NavItem(icon: Icons.person_outline_rounded, label: 'Profile', active: _index == 3, onTap: () => setState(() => _index = 3)),
+              _NavItem(
+                  icon: Icons.home_rounded,
+                  label: strings.t('nav.home'),
+                  active: _index == 0,
+                  onTap: () => setState(() => _index = 0)),
+              _NavItem(
+                  icon: Icons.menu_book_rounded,
+                  label: strings.t('nav.lessons'),
+                  active: _index == 1,
+                  onTap: () => setState(() => _index = 1)),
+              _NavItem(
+                  icon: Icons.refresh_rounded,
+                  label: strings.t('nav.review'),
+                  active: _index == 2,
+                  onTap: () => setState(() => _index = 2)),
+              _NavItem(
+                  icon: Icons.person_outline_rounded,
+                  label: strings.t('nav.profile'),
+                  active: _index == 3,
+                  onTap: () => setState(() => _index = 3)),
             ],
           ),
         ),
@@ -75,7 +97,11 @@ class _NavItem extends StatelessWidget {
   final bool active;
   final VoidCallback onTap;
 
-  const _NavItem({required this.icon, required this.label, required this.active, required this.onTap});
+  const _NavItem(
+      {required this.icon,
+      required this.label,
+      required this.active,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -88,13 +114,18 @@ class _NavItem extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+          decoration:
+              BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon, color: fg),
               const SizedBox(height: 4),
-              Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: fg)),
+              Text(label,
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelSmall
+                      ?.copyWith(color: fg)),
             ],
           ),
         ),

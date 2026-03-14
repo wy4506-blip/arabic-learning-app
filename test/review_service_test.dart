@@ -1,0 +1,82 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:arabic_learning_app/models/review_models.dart';
+import 'package:arabic_learning_app/services/review_service.dart';
+
+import 'test_helpers.dart';
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  test('builds today plan and records review progress', () async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'completed_lessons': <String>['U1L1'],
+      'started_lessons': <String>['U1L1'],
+      'last_lesson_id': 'U1L1',
+    });
+
+    final plan = await ReviewService.getTodayPlan(kEnglishTestSettings);
+
+    expect(plan.tasks, isNotEmpty);
+    expect(plan.pendingCount, greaterThan(0));
+
+    final task = plan.tasks.first;
+    final completedToday = await ReviewService.recordTaskResult(
+      task,
+      remembered: false,
+      syncWithTodayPlan: true,
+    );
+
+    expect(completedToday, isFalse);
+
+    final dashboard = await ReviewService.buildDashboard(kEnglishTestSettings);
+    expect(dashboard.summary.todayPlan.completedCount, 1);
+    expect(
+      dashboard.weakTasks.any((item) => item.contentId == task.contentId),
+      isTrue,
+    );
+  });
+
+  test('creates a typed review session when content exists', () async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'completed_lessons': <String>['U1L1'],
+      'started_lessons': <String>['U1L1'],
+      'last_lesson_id': 'U1L1',
+    });
+
+    final session = await ReviewService.createTypeSession(
+      kEnglishTestSettings,
+      ReviewContentType.word,
+    );
+
+    expect(session, isNotNull);
+    expect(session!.tasks, isNotEmpty);
+    expect(
+      session.tasks.every((task) => task.type == ReviewContentType.word),
+      isTrue,
+    );
+  });
+
+  test('creates a short home warm-up session with lesson handoff config',
+      () async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'completed_lessons': <String>['U1L1'],
+      'started_lessons': <String>['U1L1'],
+      'last_lesson_id': 'U1L1',
+    });
+
+    final session = await ReviewService.createHomeTodayFlowSession(
+      kEnglishTestSettings,
+      nextLessonId: 'U1L2',
+    );
+
+    expect(session, isNotNull);
+    expect(session!.config.source, ReviewEntrySource.homeTodayPlan);
+    expect(session.config.autoContinueToLesson, isTrue);
+    expect(session.config.nextLessonId, 'U1L2');
+    expect(session.config.allowSkip, isTrue);
+    expect(session.config.headerTitle, 'Quick Warm-Up');
+    expect(session.tasks.length, inInclusiveRange(2, 5));
+  });
+}

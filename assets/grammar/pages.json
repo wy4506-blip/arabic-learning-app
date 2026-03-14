@@ -1,0 +1,763 @@
+[
+  {
+    "id": "alphabet_table",
+    "title": "阿拉伯字母总表||Arabic Alphabet Table",
+    "route": "/grammar/letters/alphabet_table",
+    "type": "table",
+    "category": "grammar_letters",
+    "summary": "28 个基础字母的名称、转写和基础发音一页速查。||A one-page review of the 28 core letters with names, transliteration, and basic sounds.",
+    "sections": [
+      {
+        "id": "alphabet_table_main",
+        "type": "table_card",
+        "title": "28 个基础字母||The 28 Core Letters",
+        "description": "先把名字、字形和基础音值连起来看。||See the shape, name, and core sound together first.",
+        "isExpandable": true,
+        "table": {
+          "columns": ["字母||Letter", "名称||Name", "转写||Translit.", "提示||Hint"],
+          "rows": [
+            ["ا", "Alif", "a / aa", "长音承载||long vowel carrier"],
+            ["ب", "Ba", "b", "下方 1 点||1 dot below"],
+            ["ت", "Ta", "t", "上方 2 点||2 dots above"],
+            ["ث", "Tha", "th", "上方 3 点||3 dots above"],
+            ["ج", "Jim", "j", "下方 1 点||1 dot below"],
+            ["ح", "Hha", "ḥ", "无点||no dots"],
+            ["خ", "Kha", "kh", "上方 1 点||1 dot above"],
+            ["د", "Dal", "d", "常断开||often breaks"],
+            ["ر", "Ra", "r", "常断开||often breaks"],
+            ["س", "Sin", "s", "三齿形||three-tooth shape"],
+            ["ش", "Shin", "sh", "三齿 + 3 点||three teeth + 3 dots"],
+            ["ص", "Sad", "ṣ", "厚音||heavy sound"],
+            ["ع", "Ayn", "ʿ", "咽音||pharyngeal"],
+            ["ف", "Fa", "f", "上方 1 点||1 dot above"],
+            ["ق", "Qaf", "q", "上方 2 点||2 dots above"],
+            ["ك", "Kaf", "k", "高频字母||high frequency"],
+            ["ل", "Lam", "l", "细长高频||slim and frequent"],
+            ["م", "Mim", "m", "圆润主体||rounded body"],
+            ["ن", "Nun", "n", "上方 1 点||1 dot above"],
+            ["و", "Waw", "w / uu", "常断开||often breaks"],
+            ["ي", "Ya", "y / ii", "下方 2 点||2 dots below"]
+          ]
+        }
+      },
+      {
+        "id": "alphabet_table_note",
+        "type": "note_card",
+        "title": "先看什么||What to Watch First",
+        "description": "初学阶段先抓三件事：点位、断连、基础音值。||At the beginning, focus on three things: dots, connection breaks, and core sounds.",
+        "bullets": [
+          "点位经常比主体更能帮助辨认。||Dot placement often matters more than the body shape.",
+          "不向后连写的字母会形成阅读断点。||Letters that do not connect forward create visible reading breaks.",
+          "长音字母常和短音组合一起看。||Long-vowel letters are best reviewed together with short vowels."
+        ]
+      }
+    ],
+    "relatedLessons": ["U1L1"],
+    "tags": ["字母||Letters", "基础必学||Core"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": "letter_forms",
+    "title": "字母位置变化||Letter Forms by Position",
+    "route": "/grammar/letters/forms",
+    "type": "table",
+    "category": "grammar_letters",
+    "summary": "独立、词首、词中、词尾四种常见字形总览。||A compact overview of isolated, initial, medial, and final forms.",
+    "sections": [
+      {
+        "id": "letter_forms_main",
+        "type": "table_card",
+        "title": "四种位置形态||Four Position Forms",
+        "description": "先看高频字母，再回去对照整组学习。||Review high-frequency letters first, then compare them back in the grouped lessons.",
+        "isExpandable": true,
+        "table": {
+          "columns": ["字母||Letter", "独立||Isolated", "词首||Initial", "词中||Medial", "词尾||Final"],
+          "rows": [
+            ["ب", "ب", "بـ", "ـبـ", "ـب"],
+            ["ت", "ت", "تـ", "ـتـ", "ـت"],
+            ["ث", "ث", "ثـ", "ـثـ", "ـث"],
+            ["ج", "ج", "جـ", "ـجـ", "ـج"],
+            ["س", "س", "سـ", "ـسـ", "ـس"],
+            ["ش", "ش", "شـ", "ـشـ", "ـش"],
+            ["م", "م", "مـ", "ـمـ", "ـم"],
+            ["ن", "ن", "نـ", "ـنـ", "ـن"],
+            ["ي", "ي", "يـ", "ـيـ", "ـي"]
+          ]
+        }
+      }
+    ],
+    "relatedLessons": ["U1L1"],
+    "tags": ["字形||Forms", "速查||Quick"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": "letter_joining_rules",
+    "title": "连写规则||Letter Joining Rules",
+    "route": "/grammar/letters/joining",
+    "type": "note",
+    "category": "grammar_letters",
+    "summary": "明确哪些字母可以继续连写，哪些字母后方会断开。||See clearly which letters continue and which letters break before the next one.",
+    "sections": [
+      {
+        "id": "joining_rules_table",
+        "type": "table_card",
+        "title": "断连重点||Where the Break Happens",
+        "description": "这些字母通常不向后连接。||These letters usually do not connect forward.",
+        "isExpandable": false,
+        "table": {
+          "columns": ["字母||Letter", "说明||Note"],
+          "rows": [
+            ["ا", "后方断开||breaks after it"],
+            ["د", "后方断开||breaks after it"],
+            ["ذ", "后方断开||breaks after it"],
+            ["ر", "后方断开||breaks after it"],
+            ["ز", "后方断开||breaks after it"],
+            ["و", "后方断开||breaks after it"]
+          ]
+        }
+      },
+      {
+        "id": "joining_rules_note",
+        "type": "note_card",
+        "title": "阅读提醒||Reading Tip",
+        "description": "看到断连字母时，后一个字母会重新起笔。||When you meet a break letter, the next letter begins with a fresh stroke.",
+        "bullets": [
+          "断连位置往往也是初学者最容易漏看的地方。||Break points are easy to miss for beginners.",
+          "把断连字母和高频词一起记，阅读会更稳。||Pair break letters with frequent words to stabilize reading."
+        ]
+      }
+    ],
+    "relatedLessons": ["U1L1"],
+    "tags": ["连写||Joining", "规则||Rules"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": "harakat_rules",
+    "title": "音符与发音规则||Harakat and Sound Rules",
+    "route": "/grammar/letters/harakat",
+    "type": "rule",
+    "category": "grammar_letters",
+    "summary": "短音、长音、静音和重音的首发速查页。||A compact first-reference page for short vowels, long vowels, sukun, and shadda.",
+    "sections": [
+      {
+        "id": "harakat_rules_main",
+        "type": "rule_group",
+        "title": "基础音符||Core Harakat",
+        "description": "先把符号和声音对起来。||Match the symbol to the sound first.",
+        "rules": [
+          {
+            "id": "fatha",
+            "title": "开口符||Fatha",
+            "symbol": "ـَ",
+            "summary": "让辅音带短促的 a 音。||Adds a short a sound to the consonant.",
+            "example": {
+              "id": "fatha_ba",
+              "arabicWithDiacritics": "بَ",
+              "arabicPlain": "ب",
+              "transliteration": "ba",
+              "translation": "短音 a||short a",
+              "audioPath": ""
+            }
+          },
+          {
+            "id": "kasra",
+            "title": "齐齿符||Kasra",
+            "symbol": "ـِ",
+            "summary": "让辅音带短促的 i 音。||Adds a short i sound to the consonant.",
+            "example": {
+              "id": "kasra_bi",
+              "arabicWithDiacritics": "بِ",
+              "arabicPlain": "ب",
+              "transliteration": "bi",
+              "translation": "短音 i||short i",
+              "audioPath": ""
+            }
+          },
+          {
+            "id": "damma",
+            "title": "合口符||Damma",
+            "symbol": "ـُ",
+            "summary": "让辅音带短促的 u 音。||Adds a short u sound to the consonant.",
+            "example": {
+              "id": "damma_bu",
+              "arabicWithDiacritics": "بُ",
+              "arabicPlain": "ب",
+              "transliteration": "bu",
+              "translation": "短音 u||short u",
+              "audioPath": ""
+            }
+          },
+          {
+            "id": "sukun",
+            "title": "静音符||Sukun",
+            "symbol": "ـْ",
+            "summary": "表示这个辅音不再带元音。||Shows that the consonant carries no following vowel.",
+            "example": {
+              "id": "sukun_b",
+              "arabicWithDiacritics": "بْ",
+              "arabicPlain": "ب",
+              "transliteration": "b",
+              "translation": "停住||stop the sound",
+              "audioPath": ""
+            }
+          },
+          {
+            "id": "shadda",
+            "title": "叠音符||Shadda",
+            "symbol": "ـّ",
+            "summary": "表示辅音重读或双写。||Marks consonant doubling or emphasis.",
+            "example": {
+              "id": "shadda_bba",
+              "arabicWithDiacritics": "بَّ",
+              "arabicPlain": "ب",
+              "transliteration": "bba",
+              "translation": "重读辅音||doubled consonant",
+              "audioPath": ""
+            }
+          }
+        ]
+      }
+    ],
+    "relatedLessons": ["U1L1"],
+    "tags": ["音符||Harakat", "发音||Pronunciation"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": "personal_pronouns",
+    "title": "独立人称代词||Personal Pronouns",
+    "route": "/grammar/pronouns/personal",
+    "type": "table",
+    "category": "grammar_pronouns",
+    "summary": "先掌握最常见的人称代词，再回到句子里使用。||Learn the core independent pronouns first, then return to sentence use.",
+    "sections": [
+      {
+        "id": "personal_pronouns_main",
+        "type": "table_card",
+        "title": "常用人称代词||Core Personal Pronouns",
+        "description": "首发先抓高频形式。||Start with the high-frequency forms first.",
+        "isExpandable": true,
+        "table": {
+          "columns": ["中文||Meaning", "阿语||Arabic", "转写||Translit.", "性||Gender", "数||Number"],
+          "rows": [
+            ["我||I", "أنا", "ana", "-", "单数||singular"],
+            ["你（男）||you (m.)", "أنتَ", "anta", "阳||m.", "单数||singular"],
+            ["你（女）||you (f.)", "أنتِ", "anti", "阴||f.", "单数||singular"],
+            ["他||he", "هو", "huwa", "阳||m.", "单数||singular"],
+            ["她||she", "هي", "hiya", "阴||f.", "单数||singular"],
+            ["我们||we", "نحن", "nahnu", "-", "复数||plural"],
+            ["他们||they (m.)", "هم", "hum", "阳||m.", "复数||plural"],
+            ["她们||they (f.)", "هنّ", "hunna", "阴||f.", "复数||plural"]
+          ]
+        }
+      }
+    ],
+    "relatedLessons": ["U1L2", "U2L1"],
+    "tags": ["代词||Pronouns", "基础必学||Core"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": "demonstratives",
+    "title": "指示代词||Demonstratives",
+    "route": "/grammar/pronouns/demonstratives",
+    "type": "table",
+    "category": "grammar_pronouns",
+    "summary": "近指和远指要和性数一起看。||Review near and far demonstratives together with gender and number.",
+    "sections": [
+      {
+        "id": "demonstratives_table",
+        "type": "table_card",
+        "title": "近指总表||Near Demonstratives",
+        "description": "先掌握最常见的单数形式。||Master the common singular forms first.",
+        "isExpandable": false,
+        "table": {
+          "columns": ["中文||Meaning", "阿语||Arabic", "转写||Translit."],
+          "rows": [
+            ["这个（阳）||this (m.)", "هذا", "hatha"],
+            ["这个（阴）||this (f.)", "هذه", "hadhihi"],
+            ["这些||these", "هؤلاء", "ha'ula'i"]
+          ]
+        }
+      },
+      {
+        "id": "demonstratives_examples",
+        "type": "example_group",
+        "title": "常见例句||Common Examples",
+        "description": "把代词放回完整短句里。||Put the demonstrative back into a short sentence.",
+        "examples": [
+          {
+            "id": "this_student",
+            "arabicWithDiacritics": "هٰذَا طَالِبٌ",
+            "arabicPlain": "هذا طالب",
+            "transliteration": "hatha talib",
+            "translation": "这是一个男学生。||This is a male student.",
+            "audioPath": "",
+            "highlightParts": ["هذا||this", "طالب||student"]
+          },
+          {
+            "id": "this_book",
+            "arabicWithDiacritics": "هٰذَا كِتَابٌ",
+            "arabicPlain": "هذا كتاب",
+            "transliteration": "hatha kitab",
+            "translation": "这是一本书。||This is a book.",
+            "audioPath": "",
+            "highlightParts": ["هذا||this", "كتاب||book"]
+          }
+        ]
+      }
+    ],
+    "relatedLessons": ["U1L3", "U1L4"],
+    "tags": ["指示||Demonstratives", "句型||Patterns"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": "question_words",
+    "title": "疑问词总表||Question Words",
+    "route": "/grammar/pronouns/questions",
+    "type": "table",
+    "category": "grammar_pronouns",
+    "summary": "常用疑问词先背高频，再回到句子里用。||Start with the most useful question words, then return to sentences.",
+    "sections": [
+      {
+        "id": "question_words_table",
+        "type": "table_card",
+        "title": "高频疑问词||High-Frequency Question Words",
+        "description": "首发先抓最常问的几类。||Focus first on the most common question types.",
+        "isExpandable": false,
+        "table": {
+          "columns": ["中文||Meaning", "阿语||Arabic", "转写||Translit.", "说明||Use"],
+          "rows": [
+            ["什么||what", "ما", "ma", "问事物||asks about things"],
+            ["谁||who", "من", "man", "问人||asks about people"],
+            ["哪里||where", "أين", "ayna", "问地点||asks about place"],
+            ["什么时候||when", "متى", "mata", "问时间||asks about time"],
+            ["怎么||how", "كيف", "kayfa", "问状态||asks about state"],
+            ["多少||how many", "كم", "kam", "问数量||asks about quantity"]
+          ]
+        }
+      }
+    ],
+    "relatedLessons": ["U1L2", "U3L2", "U4L3"],
+    "tags": ["疑问||Questions", "速查||Quick"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": "gender",
+    "title": "阴阳性总表||Gender Overview",
+    "route": "/grammar/nouns/gender",
+    "type": "compare",
+    "category": "grammar_nouns",
+    "summary": "先建立阳性 / 阴性的基本感觉，再看常见配对。||Build a basic sense of masculine and feminine first, then study common pairs.",
+    "sections": [
+      {
+        "id": "gender_pairs",
+        "type": "compare_group",
+        "title": "常见配对||Common Pairs",
+        "description": "很多职业和人物名词可以成对记。||Many profession and person nouns are easier to learn in pairs.",
+        "compares": [
+          {
+            "id": "student_pair",
+            "left": {"label": "阳性||Masculine", "value": "طالب"},
+            "right": {"label": "阴性||Feminine", "value": "طالبة"},
+            "note": "很多阴性名词常以 ة 结尾。||Many feminine nouns often end in ة."
+          },
+          {
+            "id": "teacher_pair",
+            "left": {"label": "阳性||Masculine", "value": "معلّم"},
+            "right": {"label": "阴性||Feminine", "value": "معلّمة"},
+            "note": "职业类词常可通过 ة 构成阴性。||Profession words often form the feminine with ة."
+          }
+        ]
+      }
+    ],
+    "relatedLessons": ["U1L2", "U2L2"],
+    "tags": ["阴阳性||Gender", "名词||Nouns"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": "number_forms",
+    "title": "单数 / 复数||Number Forms",
+    "route": "/grammar/nouns/number",
+    "type": "table",
+    "category": "grammar_nouns",
+    "summary": "先把单数和复数放在一起看，再慢慢进入双数。||Review singular and plural together first, then move into dual later.",
+    "sections": [
+      {
+        "id": "number_forms_table",
+        "type": "table_card",
+        "title": "常见数变化||Common Number Changes",
+        "description": "高频可数词最好一起记。||Countable words are easier to remember as form sets.",
+        "isExpandable": false,
+        "table": {
+          "columns": ["单数||Singular", "双数||Dual", "复数||Plural"],
+          "rows": [
+            ["طالب", "طالبان", "طلاب"],
+            ["سيارة", "سيارتان", "سيارات"],
+            ["كتاب", "كتابان", "كتب"]
+          ]
+        }
+      }
+    ],
+    "relatedLessons": ["U1L3", "U2L1"],
+    "tags": ["单复数||Number", "词形||Forms"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": "adjective_agreement",
+    "title": "形容词配合||Adjective Agreement",
+    "route": "/grammar/nouns/adjective",
+    "type": "example",
+    "category": "grammar_nouns",
+    "summary": "形容词会跟随名词的性和数变化。||Adjectives follow the noun in gender and number.",
+    "sections": [
+      {
+        "id": "adjective_examples",
+        "type": "example_group",
+        "title": "配合例句||Agreement Examples",
+        "description": "把规则放进最短的句子里看。||See the rule inside the shortest useful sentences.",
+        "examples": [
+          {
+            "id": "male_student_good",
+            "arabicWithDiacritics": "طَالِبٌ مُجْتَهِدٌ",
+            "arabicPlain": "طالب مجتهد",
+            "transliteration": "talib mujtahid",
+            "translation": "一个勤奋的男学生。||A hardworking male student.",
+            "audioPath": "",
+            "highlightParts": ["طالب||student", "مجتهد||hardworking"]
+          },
+          {
+            "id": "female_student_good",
+            "arabicWithDiacritics": "طَالِبَةٌ مُجْتَهِدَةٌ",
+            "arabicPlain": "طالبة مجتهدة",
+            "transliteration": "taliba mujtahida",
+            "translation": "一个勤奋的女学生。||A hardworking female student.",
+            "audioPath": "",
+            "highlightParts": ["طالبة||student", "مجتهدة||hardworking"]
+          }
+        ]
+      }
+    ],
+    "relatedLessons": ["U2L4"],
+    "tags": ["形容词||Adjectives", "配合||Agreement"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": "past_tense",
+    "title": "过去式样板||Past Tense Pattern",
+    "route": "/grammar/verbs/past",
+    "type": "table",
+    "category": "grammar_verbs",
+    "summary": "先看一个高频动词的过去式，再建立人称变化感觉。||Start with one high-frequency verb in the past tense.",
+    "sections": [
+      {
+        "id": "past_tense_table",
+        "type": "table_card",
+        "title": "动词：写||Verb: write",
+        "description": "过去式重点看词尾变化。||In the past tense, pay close attention to the endings.",
+        "isExpandable": false,
+        "table": {
+          "columns": ["中文||Person", "阿语||Arabic", "转写||Translit."],
+          "rows": [
+            ["我||I", "كَتَبْتُ", "katabtu"],
+            ["你（男）||you (m.)", "كَتَبْتَ", "katabta"],
+            ["你（女）||you (f.)", "كَتَبْتِ", "katabti"],
+            ["他||he", "كَتَبَ", "kataba"],
+            ["她||she", "كَتَبَتْ", "katabat"],
+            ["我们||we", "كَتَبْنَا", "katabna"]
+          ]
+        }
+      }
+    ],
+    "relatedLessons": ["U3L4"],
+    "tags": ["过去式||Past", "动词||Verbs"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": "present_tense",
+    "title": "现在式样板||Present Tense Pattern",
+    "route": "/grammar/verbs/present",
+    "type": "table",
+    "category": "grammar_verbs",
+    "summary": "现在式先看前缀，再看词尾。||In the present tense, watch the prefixes first, then the endings.",
+    "sections": [
+      {
+        "id": "present_tense_table",
+        "type": "table_card",
+        "title": "动词：学习||Verb: study",
+        "description": "现在式常通过前缀体现人称。||Person is often marked with prefixes in the present tense.",
+        "isExpandable": false,
+        "table": {
+          "columns": ["中文||Person", "阿语||Arabic", "转写||Translit."],
+          "rows": [
+            ["我||I", "أَدْرُسُ", "adrusu"],
+            ["你（男）||you (m.)", "تَدْرُسُ", "tadrusu"],
+            ["你（女）||you (f.)", "تَدْرُسِينَ", "tadrusina"],
+            ["他||he", "يَدْرُسُ", "yadrusu"],
+            ["她||she", "تَدْرُسُ", "tadrusu"],
+            ["我们||we", "نَدْرُسُ", "nadrusu"]
+          ]
+        }
+      }
+    ],
+    "relatedLessons": ["U3L4"],
+    "tags": ["现在式||Present", "动词||Verbs"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": "nominal_sentence",
+    "title": "名词句基础||Nominal Sentence Basics",
+    "route": "/grammar/sentences/nominal",
+    "type": "example",
+    "category": "grammar_sentences",
+    "summary": "没有明显动词时，也可以构成完整句子。||A full sentence can exist without an explicit verb in the present tense.",
+    "sections": [
+      {
+        "id": "nominal_examples",
+        "type": "example_group",
+        "title": "身份与描述句||Identity and Description",
+        "description": "初学先抓“是什么”和“怎么样”。||Start with “who/what it is” and “what it is like.”",
+        "examples": [
+          {
+            "id": "i_student",
+            "arabicWithDiacritics": "أَنَا طَالِبٌ",
+            "arabicPlain": "أنا طالب",
+            "transliteration": "ana talib",
+            "translation": "我是学生。||I am a student.",
+            "audioPath": "",
+            "highlightParts": ["أنا||I", "طالب||student"]
+          },
+          {
+            "id": "she_teacher",
+            "arabicWithDiacritics": "هِيَ مُعَلِّمَةٌ",
+            "arabicPlain": "هي معلمة",
+            "transliteration": "hiya muallima",
+            "translation": "她是老师。||She is a teacher.",
+            "audioPath": "",
+            "highlightParts": ["هي||she", "معلمة||teacher"]
+          }
+        ]
+      }
+    ],
+    "relatedLessons": ["U1L2", "U2L2"],
+    "tags": ["名词句||Nominal", "句型||Patterns"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": "verbal_sentence",
+    "title": "动词句基础||Verbal Sentence Basics",
+    "route": "/grammar/sentences/verbal",
+    "type": "example",
+    "category": "grammar_sentences",
+    "summary": "动词句常从动作开始，再跟执行者和补充信息。||Verbal sentences often start with the action, then the doer and extra information.",
+    "sections": [
+      {
+        "id": "verbal_examples",
+        "type": "example_group",
+        "title": "基础动词句||Basic Verbal Sentences",
+        "description": "先看最短、最稳定的结构。||Start with the shortest and most stable structure.",
+        "examples": [
+          {
+            "id": "he_studies",
+            "arabicWithDiacritics": "يَدْرُسُ أَحْمَدُ",
+            "arabicPlain": "يدرس أحمد",
+            "transliteration": "yadrusu Ahmad",
+            "translation": "艾哈迈德在学习。||Ahmad studies.",
+            "audioPath": "",
+            "highlightParts": ["يدرس||studies", "أحمد||Ahmad"]
+          },
+          {
+            "id": "i_write",
+            "arabicWithDiacritics": "أَكْتُبُ دَرْسِي",
+            "arabicPlain": "أكتب درسي",
+            "transliteration": "aktubu darsi",
+            "translation": "我在写我的课业。||I write my lesson work.",
+            "audioPath": "",
+            "highlightParts": ["أكتب||I write", "درسي||my lesson"]
+          }
+        ]
+      }
+    ],
+    "relatedLessons": ["U3L4"],
+    "tags": ["动词句||Verbal", "句型||Patterns"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": "negation",
+    "title": "否定表达||Negation",
+    "route": "/grammar/sentences/negation",
+    "type": "table",
+    "category": "grammar_sentences",
+    "summary": "首发先抓名词句和动词句里最常见的否定方式。||For the first release, focus on the most common negation patterns in nominal and verbal sentences.",
+    "sections": [
+      {
+        "id": "negation_table",
+        "type": "table_card",
+        "title": "常见否定形式||Common Negation Forms",
+        "description": "先记结构，再回到例句里使用。||Learn the structure first, then return to examples.",
+        "isExpandable": false,
+        "table": {
+          "columns": ["类型||Type", "阿语||Arabic", "说明||Use"],
+          "rows": [
+            ["名词句||Nominal", "لَيْسَ", "用于“不是……”||used for “is not ...”"],
+            ["现在式||Present", "لا", "用于一般否定||general negation"],
+            ["过去式||Past", "ما", "常见过去否定||common past negation"]
+          ]
+        }
+      },
+      {
+        "id": "negation_examples",
+        "type": "example_group",
+        "title": "短句例子||Short Examples",
+        "description": "把否定词放回完整句里看。||See the negation word inside a full sentence.",
+        "examples": [
+          {
+            "id": "not_student",
+            "arabicWithDiacritics": "لَسْتُ طَالِبًا",
+            "arabicPlain": "لست طالبا",
+            "transliteration": "lastu taliban",
+            "translation": "我不是学生。||I am not a student.",
+            "audioPath": "",
+            "highlightParts": ["لست||I am not", "طالبا||student"]
+          }
+        ]
+      }
+    ],
+    "relatedLessons": ["U2L2"],
+    "tags": ["否定||Negation", "句子||Sentences"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": "question_sentence",
+    "title": "疑问句结构||Question Sentences",
+    "route": "/grammar/sentences/question",
+    "type": "example",
+    "category": "grammar_sentences",
+    "summary": "是非问句和疑问词问句都要有最基本的模板。||Both yes/no questions and question-word questions need a basic template.",
+    "sections": [
+      {
+        "id": "question_examples",
+        "type": "example_group",
+        "title": "高频问句||High-Frequency Questions",
+        "description": "初学先掌握能直接复用的句型。||Start with the question patterns you can reuse directly.",
+        "examples": [
+          {
+            "id": "are_you_student",
+            "arabicWithDiacritics": "هَلْ أَنْتَ طَالِبٌ؟",
+            "arabicPlain": "هل أنت طالب؟",
+            "transliteration": "hal anta talib",
+            "translation": "你是学生吗？||Are you a student?",
+            "audioPath": "",
+            "highlightParts": ["هل||question marker", "أنت||you"]
+          },
+          {
+            "id": "where_from",
+            "arabicWithDiacritics": "مِنْ أَيْنَ أَنْتَ؟",
+            "arabicPlain": "من أين أنت؟",
+            "transliteration": "min ayna anta",
+            "translation": "你来自哪里？||Where are you from?",
+            "audioPath": "",
+            "highlightParts": ["من أين||from where", "أنت||you"]
+          }
+        ]
+      }
+    ],
+    "relatedLessons": ["U1L2", "U4L3"],
+    "tags": ["疑问句||Questions", "模板||Templates"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": "common_patterns",
+    "title": "常用句型总表||Common Sentence Patterns",
+    "route": "/grammar/sentences/patterns",
+    "type": "table",
+    "category": "grammar_sentences",
+    "summary": "把最值得背下来的基础句型放在一起。||Put the most reusable beginner patterns in one place.",
+    "sections": [
+      {
+        "id": "common_patterns_table",
+        "type": "table_card",
+        "title": "高频模板||High-Frequency Templates",
+        "description": "先背模板，再替换关键词。||Memorize the template first, then swap key words.",
+        "isExpandable": false,
+        "table": {
+          "columns": ["中文||Meaning", "阿语||Arabic", "转写||Translit."],
+          "rows": [
+            ["我是……||I am ...", "أَنَا ...", "ana ..."],
+            ["这是……||This is ...", "هٰذَا ...", "hatha ..."],
+            ["我有……||I have ...", "عِنْدِي ...", "indi ..."],
+            ["我想……||I want ...", "أُرِيدُ ...", "uridu ..."],
+            ["这是什么？||What is this?", "مَا هٰذَا؟", "ma hatha"]
+          ]
+        }
+      }
+    ],
+    "relatedLessons": ["U1L1", "U1L2", "U4L1"],
+    "tags": ["常用句型||Patterns", "速查||Quick"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": "prepositions",
+    "title": "介词总表||Prepositions",
+    "route": "/grammar/function_words/prepositions",
+    "type": "table",
+    "category": "grammar_function_words",
+    "summary": "空间、方向和来源类介词是前期高频。||Prepositions of place, direction, and source appear often early on.",
+    "sections": [
+      {
+        "id": "prepositions_table",
+        "type": "table_card",
+        "title": "高频介词||Common Prepositions",
+        "description": "先记住意思，再回到位置句里看。||Learn the meaning first, then revisit them inside location sentences.",
+        "isExpandable": false,
+        "table": {
+          "columns": ["中文||Meaning", "阿语||Arabic", "转写||Translit."],
+          "rows": [
+            ["在……里||in", "في", "fi"],
+            ["到 / 向||to / toward", "إلى", "ila"],
+            ["从||from", "من", "min"],
+            ["在……上||on", "على", "ala"],
+            ["和||with / and", "مع", "maa"]
+          ]
+        }
+      }
+    ],
+    "relatedLessons": ["U4L1", "U4L3"],
+    "tags": ["介词||Prepositions", "位置||Location"],
+    "difficulty": "beginner"
+  },
+  {
+    "id": "numbers_basic",
+    "title": "数词 0–10||Numbers 0–10",
+    "route": "/grammar/function_words/numbers",
+    "type": "table",
+    "category": "grammar_function_words",
+    "summary": "首发先掌握 0 到 10 的基础数词和读音。||Start by mastering the basic number words from 0 to 10.",
+    "sections": [
+      {
+        "id": "numbers_table",
+        "type": "table_card",
+        "title": "基础数词||Basic Numbers",
+        "description": "先记数字，再放回年龄、时间和数量表达里。||Learn the number words first, then place them back into age, time, and quantity expressions.",
+        "isExpandable": false,
+        "table": {
+          "columns": ["数字||Number", "阿语||Arabic", "转写||Translit."],
+          "rows": [
+            ["0", "صِفْر", "sifr"],
+            ["1", "وَاحِد", "wahid"],
+            ["2", "اِثْنَان", "ithnan"],
+            ["3", "ثَلَاثَة", "thalatha"],
+            ["4", "أَرْبَعَة", "arbaa"],
+            ["5", "خَمْسَة", "khamsa"],
+            ["6", "سِتَّة", "sitta"],
+            ["7", "سَبْعَة", "saba"],
+            ["8", "ثَمَانِيَة", "thamaniya"],
+            ["9", "تِسْعَة", "tisaa"],
+            ["10", "عَشَرَة", "ashara"]
+          ]
+        }
+      }
+    ],
+    "relatedLessons": ["U3L1"],
+    "tags": ["数词||Numbers", "基础必学||Core"],
+    "difficulty": "beginner"
+  }
+]

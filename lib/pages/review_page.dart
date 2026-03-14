@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 
-import '../models/word_item.dart';
-import '../services/progress_service.dart';
-import '../services/vocab_service.dart';
+import '../app_scope.dart';
+import '../l10n/localized_text.dart';
+import '../models/review_models.dart';
+import '../services/review_service.dart';
+import '../services/review_sync_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_widgets.dart';
+import '../widgets/review/review_item_sections.dart';
+import '../widgets/review/review_quick_actions.dart';
+import '../widgets/review/review_status_strip.dart';
+import '../widgets/review/review_today_card.dart';
+import 'course_list_page.dart';
+import 'review_session_page.dart';
 
 class ReviewPage extends StatefulWidget {
   const ReviewPage({super.key});
@@ -14,99 +22,521 @@ class ReviewPage extends StatefulWidget {
 }
 
 class _ReviewPageState extends State<ReviewPage> {
-  List<WordItem> _words = const [];
-  int _index = 0;
+  ReviewDashboardData? _dashboard;
   bool _loading = true;
+  bool _didLoadInitialDashboard = false;
+  String? _loadError;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    ReviewSyncService.changes.addListener(_handleReviewChanged);
   }
 
-  Future<void> _load() async {
-    final words = await VocabService.getFavoriteWords();
-    if (!mounted) return;
-    setState(() {
-      _words = words;
-      _loading = false;
-    });
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didLoadInitialDashboard) {
+      return;
+    }
+    _didLoadInitialDashboard = true;
+    _loadDashboard();
   }
 
-  Future<void> _next() async {
-    await ProgressService.incrementReviewCount();
-    if (!mounted) return;
-    setState(() => _index = (_index + 1) % (_words.isEmpty ? 1 : _words.length));
+  @override
+  void dispose() {
+    ReviewSyncService.changes.removeListener(_handleReviewChanged);
+    super.dispose();
+  }
+
+  void _handleReviewChanged() {
+    _loadDashboard(showSpinner: false);
+  }
+
+  Future<void> _loadDashboard({bool showSpinner = true}) async {
+    if (showSpinner && mounted) {
+      setState(() {
+        _loading = true;
+        _loadError = null;
+      });
+    }
+
+    try {
+      final dashboard = await ReviewService.buildDashboard(context.appSettings);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _dashboard = dashboard;
+        _loading = false;
+        _loadError = null;
+      });
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _loading = false;
+        _loadError = error.toString();
+      });
+    }
+  }
+
+  Future<void> _openSession(Future<ReviewSession?> Function() factory) async {
+    final session = await factory();
+    if (!mounted || session == null) {
+      return;
+    }
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ReviewSessionPage(session: session),
+      ),
+    );
+    if (result == true) {
+      await _loadDashboard(showSpinner: false);
+    }
+  }
+
+  Future<void> _showTypePicker(Map<ReviewContentType, int> counts) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            children: [
+              Text(
+                localizedText(
+                  context,
+                  zh: '按类型复习',
+                  en: 'Review by Type',
+                ),
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                localizedText(
+                  context,
+                  zh: '按你当下最想补的那一类来，不需要一次看很多。',
+                  en: 'Choose just the type you want to reinforce right now.',
+                ),
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 16),
+              ...ReviewContentType.values.map(
+                (type) => ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(_typeLabel(type)),
+                  subtitle: Text(
+                    localizedText(
+                      context,
+                      zh: '可回顾 ${counts[type] ?? 0} 项',
+                      en: '${counts[type] ?? 0} items available',
+                    ),
+                  ),
+                  trailing: const Icon(Icons.chevron_right_rounded),
+                  onTap: (counts[type] ?? 0) == 0
+                      ? null
+                      : () async {
+                          Navigator.of(context).pop();
+                          await _openSession(
+                            () => ReviewService.createTypeSession(
+                              context.appSettings,
+                              type,
+                            ),
+                          );
+                        },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _openSingleTask(ReviewTask task) async {
+    final session = ReviewService.createSingleTaskSession(
+      context.appSettings,
+      task,
+    );
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ReviewSessionPage(session: session),
+      ),
+    );
+    if (result == true) {
+      await _loadDashboard(showSpinner: false);
+    }
+  }
+
+  Future<void> _openLessons() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => CourseListPage(settings: context.appSettings),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_loading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    final word = _words.isEmpty ? null : _words[_index];
-    return Scaffold(
-      body: SafeArea(
-        child: ListView(
-          padding: AppTheme.pagePadding,
-          children: [
-            SectionTitle(title: 'Review', subtitle: '清晰答题、降低压力，优先复习已收藏内容'),
-            const SizedBox(height: 16),
-            if (word == null)
-              AppSurface(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 8),
-                    const Icon(Icons.celebration_outlined, size: 42, color: AppTheme.accentMintDark),
-                    const SizedBox(height: 12),
-                    Text('当前没有待复习内容', style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 6),
-                    Text('先去课程详情页或单词本收藏几个重点词。', style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),
-                  ],
-                ),
-              )
-            else ...[
-              AppSurface(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Pill(label: '今日复习'),
-                        const Spacer(),
-                        Text('${_index + 1} / ${_words.length}', style: Theme.of(context).textTheme.labelMedium),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    Text(word.arabic, style: const TextStyle(fontSize: 34, height: 1.4, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 8),
-                    Text(word.pronunciation, style: Theme.of(context).textTheme.bodyMedium),
-                    const SizedBox(height: 8),
-                    Text(word.meaning, style: Theme.of(context).textTheme.titleMedium),
-                  ],
+    if (_dashboard == null) {
+      return Scaffold(
+        body: SafeArea(
+          child: ListView(
+            padding: AppTheme.pagePadding,
+            children: [
+              SectionTitle(
+                title: localizedText(context, zh: '复习', en: 'Review'),
+                subtitle: localizedText(
+                  context,
+                  zh: '回顾一下最近学过的重点，轻松接上下一步。',
+                  en: 'Revisit recent highlights and slip back into learning with less effort.',
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 18),
               AppSurface(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('复习提示', style: Theme.of(context).textTheme.titleSmall),
-                    const SizedBox(height: 8),
-                    Text('一次只服务一个决策：看 → 想 → 记 → 下一步。', style: Theme.of(context).textTheme.bodyMedium),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(child: OutlinedButton(onPressed: _next, child: const Text('稍后复习'))),
-                  const SizedBox(width: 12),
-                  Expanded(child: FilledButton(onPressed: _next, child: const Text('我记住了'))),
-                ],
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+                child: _loading
+                    ? Row(
+                        children: [
+                          const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2.4),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Text(
+                              localizedText(
+                                context,
+                                zh: '正在整理今天适合顺手回顾的内容…',
+                                en: 'Preparing a light review set for today...',
+                              ),
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            localizedText(
+                              context,
+                              zh: '这次没有顺利取到复习内容',
+                              en: 'The review set could not be loaded this time',
+                            ),
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _loadError ??
+                                localizedText(
+                                  context,
+                                  zh: '可以再试一次，或先继续主线学习。',
+                                  en: 'Try again, or continue with lessons for now.',
+                                ),
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          const SizedBox(height: 14),
+                          FilledButton(
+                            onPressed: _loadDashboard,
+                            child: Text(
+                              localizedText(context, zh: '重新加载', en: 'Try Again'),
+                            ),
+                          ),
+                        ],
+                      ),
               ),
             ],
-          ],
+          ),
+        ),
+      );
+    }
+
+    final dashboard = _dashboard!;
+    final summary = dashboard.summary;
+    final todayPlan = summary.todayPlan;
+    final typeCounts = summary.typeCounts;
+
+    return Scaffold(
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: _loadDashboard,
+          child: ListView(
+            padding: AppTheme.pagePadding,
+            children: [
+              SectionTitle(
+                title: localizedText(context, zh: '复习', en: 'Review'),
+                subtitle: localizedText(
+                  context,
+                  zh: '回顾一下最近学过的重点，轻松接上下一步。',
+                  en: 'Revisit recent highlights and slip back into learning with less effort.',
+                ),
+              ),
+              const SizedBox(height: 18),
+              ReviewStatusStrip(
+                title: localizedText(
+                  context,
+                  zh: '今天的状态',
+                  en: 'Today\'s Snapshot',
+                ),
+                metrics: [
+                  ReviewStatusMetric(
+                    label: localizedText(context, zh: '待复习', en: 'Pending'),
+                    value: '${todayPlan.pendingCount}',
+                    icon: Icons.refresh_rounded,
+                  ),
+                  ReviewStatusMetric(
+                    label: localizedText(context, zh: '已完成', en: 'Done'),
+                    value: '${todayPlan.completedCount}',
+                    icon: Icons.check_circle_outline_rounded,
+                  ),
+                  ReviewStatusMetric(
+                    label: localizedText(context, zh: '连续天数', en: 'Streak'),
+                    value: localizedText(
+                      context,
+                      zh: '${summary.streakDays} 天',
+                      en: '${summary.streakDays} days',
+                    ),
+                    icon: Icons.local_fire_department_outlined,
+                  ),
+                  ReviewStatusMetric(
+                    label: localizedText(context, zh: '本周次数', en: 'This Week'),
+                    value: '${summary.weeklyReviewCount}',
+                    icon: Icons.calendar_today_outlined,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              ReviewTodayCard(
+                badge: localizedText(
+                  context,
+                  zh: summary.todayPlan.isCompleted ? '今天已完成' : '今日复习',
+                  en: summary.todayPlan.isCompleted ? 'Done for Today' : 'Today\'s Review',
+                ),
+                title: todayPlan.tasks.isEmpty
+                    ? localizedText(
+                        context,
+                        zh: '今天先轻松往前学就好',
+                        en: 'You Can Keep Learning Lightly Today',
+                      )
+                    : todayPlan.isCompleted
+                        ? localizedText(
+                            context,
+                            zh: '这轮内容已经顺手回顾完了',
+                            en: 'This Review Set Is Already Done',
+                          )
+                        : summary.todayPlan.hasStarted
+                            ? localizedText(
+                                context,
+                                zh: '继续今天这轮回顾',
+                                en: 'Continue Today\'s Review',
+                              )
+                            : localizedText(
+                                context,
+                                zh: '先回顾一下最近最值得看的内容',
+                                en: 'Start with the most helpful recent review items',
+                              ),
+                subtitle: todayPlan.tasks.isEmpty
+                    ? localizedText(
+                        context,
+                        zh: '如果刚学完新内容，回头这里会自动出现今天适合顺手复习的内容。',
+                        en: 'Once you learn something new, suitable review items will show up here automatically.',
+                      )
+                    : todayPlan.isCompleted
+                        ? localizedText(
+                            context,
+                            zh: '今天这组内容已经过完了。你可以回到课程继续推进，也可以挑一类内容再练。',
+                            en: 'Today\'s set is complete. You can return to lessons or practice one content type again.',
+                          )
+                        : localizedText(
+                            context,
+                            zh: '内容会优先从最近学过、待复习和需要再巩固的地方里自动整理。',
+                            en: 'The set is automatically built from recent lessons, due items, and anything that needs another pass.',
+                          ),
+                composition: _compositionLabels(typeCounts, todayPlan.tasks),
+                metaText: todayPlan.tasks.isEmpty
+                    ? localizedText(
+                        context,
+                        zh: '当前没有待复习任务',
+                        en: 'No review task is waiting right now',
+                      )
+                    : localizedText(
+                        context,
+                        zh:
+                            '${todayPlan.totalCount} 项 · 约 ${_estimatedMinutes(todayPlan)} 分钟',
+                        en:
+                            '${todayPlan.totalCount} items · about ${_estimatedMinutes(todayPlan)} min',
+                      ),
+                primaryActionLabel: todayPlan.tasks.isEmpty
+                    ? localizedText(context, zh: '刷新看看', en: 'Refresh')
+                    : todayPlan.isCompleted
+                        ? localizedText(context, zh: '再来一轮快复习', en: 'Start a Quick Review')
+                        : summary.todayPlan.hasStarted
+                            ? localizedText(context, zh: '继续复习', en: 'Continue Review')
+                            : localizedText(context, zh: '开始复习', en: 'Start Review'),
+                onPrimaryTap: todayPlan.tasks.isEmpty
+                    ? () => _loadDashboard()
+                    : todayPlan.isCompleted
+                        ? () => _openSession(
+                              () => ReviewService.createQuickSession(
+                                context.appSettings,
+                              ),
+                            )
+                        : () => _openSession(
+                              () => ReviewService.createTodaySession(
+                                context.appSettings,
+                              ),
+                            ),
+                secondaryActionLabel: todayPlan.tasks.isEmpty
+                    ? localizedText(
+                        context,
+                        zh: '去看课程',
+                        en: 'Go to Lessons',
+                      )
+                    : localizedText(
+                        context,
+                        zh: '按类型复习',
+                        en: 'Review by Type',
+                      ),
+                onSecondaryTap: todayPlan.tasks.isEmpty
+                    ? _openLessons
+                    : () => _showTypePicker(typeCounts),
+              ),
+              const SizedBox(height: 18),
+              ReviewQuickActions(
+                title: localizedText(context, zh: '快捷入口', en: 'Quick Actions'),
+                subtitle: localizedText(
+                  context,
+                  zh: '先做一小轮，或者只补最需要再看一遍的地方。',
+                  en: 'Run one light pass or focus only on the items that still need another look.',
+                ),
+                actions: [
+                  ReviewQuickActionItem(
+                    title: localizedText(context, zh: '5 分钟快复习', en: '5-Minute Review'),
+                    subtitle: localizedText(
+                      context,
+                      zh: '快速清几个最值得先看的点，不打断主学习节奏。',
+                      en: 'Clear a few high-value items without interrupting your lesson flow.',
+                    ),
+                    badge: todayPlan.tasks.isEmpty ? null : '${todayPlan.pendingCount}',
+                    icon: Icons.bolt_rounded,
+                    tintColor: const Color(0xFFFFF1E5),
+                    iconColor: const Color(0xFFB56D45),
+                    onTap: () => _openSession(
+                      () => ReviewService.createQuickSession(context.appSettings),
+                    ),
+                  ),
+                  ReviewQuickActionItem(
+                    title: localizedText(context, zh: '薄弱项再练', en: 'Weak Spots'),
+                    subtitle: localizedText(
+                      context,
+                      zh: '把还不稳的内容温和地再过一遍，降低遗忘感。',
+                      en: 'Give your less stable items one more calm pass.',
+                    ),
+                    badge: '${dashboard.weakTasks.length}',
+                    icon: Icons.track_changes_rounded,
+                    tintColor: const Color(0xFFE9F6EF),
+                    iconColor: AppTheme.accentMintDark,
+                    onTap: () => _openSession(
+                      () => ReviewService.createWeakSession(context.appSettings),
+                    ),
+                  ),
+                  ReviewQuickActionItem(
+                    title: localizedText(context, zh: '按类型复习', en: 'By Type'),
+                    subtitle: localizedText(
+                      context,
+                      zh: '按单词、句子、语法或字母分别看，更适合补单点。',
+                      en: 'Stay inside one content type when you only need one focused pass.',
+                    ),
+                    icon: Icons.tune_rounded,
+                    tintColor: const Color(0xFFEAF1FB),
+                    iconColor: const Color(0xFF5B7FA8),
+                    onTap: () => _showTypePicker(typeCounts),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              ReviewTaskSection(
+                title: localizedText(context, zh: '需要再看一遍', en: 'Worth Another Look'),
+                subtitle: localizedText(
+                  context,
+                  zh: '这些内容还不够稳，回顾一次会更安心。',
+                  en: 'These items are not fully stable yet, so one more pass helps.',
+                ),
+                tasks: dashboard.weakTasks,
+                emptyTitle: localizedText(context, zh: '目前没有特别薄弱的内容', en: 'No obvious weak spots right now'),
+                emptySubtitle: localizedText(
+                  context,
+                  zh: '当你在复习里点“再看一遍”时，这里会自动留下来方便继续补。',
+                  en: 'When you choose “review again”, the item will stay here for an easy follow-up.',
+                ),
+                onTaskTap: _openSingleTask,
+              ),
+              const SizedBox(height: 18),
+              ReviewTaskSection(
+                title: localizedText(context, zh: '最近学过，建议回看', en: 'Recently Learned'),
+                subtitle: localizedText(
+                  context,
+                  zh: '查完或学完后能顺着回到这里，少找路，少切换。',
+                  en: 'Items you recently learned or checked stay here for a quick return.',
+                ),
+                tasks: dashboard.recentTasks,
+                emptyTitle: localizedText(context, zh: '最近还没有形成回看内容', en: 'No recent review items yet'),
+                emptySubtitle: localizedText(
+                  context,
+                  zh: '学完一节课、看过语法或打开过字母页后，这里会慢慢长出来。',
+                  en: 'After lessons, grammar lookups, or letter pages, this area will start filling in naturally.',
+                ),
+                onTaskTap: _openSingleTask,
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  List<String> _compositionLabels(
+    Map<ReviewContentType, int> counts,
+    List<ReviewTask> tasks,
+  ) {
+    if (tasks.isEmpty) {
+      return const <String>[];
+    }
+
+    final labels = <String>[];
+    for (final type in ReviewContentType.values) {
+      final count = counts[type] ?? 0;
+      if (count == 0) {
+        continue;
+      }
+      labels.add('${_typeLabel(type)} $count');
+    }
+    return labels.take(4).toList(growable: false);
+  }
+
+  int _estimatedMinutes(DailyReviewPlan plan) {
+    final seconds = plan.estimatedSeconds;
+    return (seconds / 60).ceil().clamp(1, 99);
+  }
+
+  String _typeLabel(ReviewContentType type) {
+    switch (type) {
+      case ReviewContentType.word:
+        return localizedText(context, zh: '单词', en: 'Words');
+      case ReviewContentType.sentence:
+        return localizedText(context, zh: '句子', en: 'Sentences');
+      case ReviewContentType.grammar:
+        return localizedText(context, zh: '语法', en: 'Grammar');
+      case ReviewContentType.alphabet:
+        return localizedText(context, zh: '字母', en: 'Letters');
+    }
   }
 }

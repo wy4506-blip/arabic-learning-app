@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+
+import '../l10n/localized_text.dart';
 import '../theme/app_theme.dart';
+import 'alabic_pronunciation_quiz_page.dart';
+import 'alphabet_compare_quiz_page.dart';
 import 'alphabet_page.dart';
 import 'alphabet_recognition_quiz_page.dart';
-import 'alphabet_compare_quiz_page.dart';
 import 'alphabet_sound_quiz_page.dart';
-import 'alabic_pronunciation_quiz_page.dart';
 
 class AlphabetHubPage extends StatelessWidget {
   const AlphabetHubPage({super.key});
@@ -13,7 +15,7 @@ class AlphabetHubPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final width = MediaQuery.of(context).size.width;
-    final bool isSmallScreen = width < 360;
+    final isSmallScreen = width < 360;
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -37,10 +39,21 @@ class AlphabetHubPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('字母练习', style: text.titleLarge),
+                      Text(
+                        localizedText(
+                          context,
+                          zh: '字母练习',
+                          en: 'Alphabet Practice',
+                        ),
+                        style: text.titleLarge,
+                      ),
                       const SizedBox(height: 2),
                       Text(
-                        '学完字母后，来这里逐级挑战',
+                        localizedText(
+                          context,
+                          zh: '28 个字母学完后，在这里逐级巩固',
+                          en: 'Reinforce the 28 letters here, level by level.',
+                        ),
                         style: text.bodySmall,
                       ),
                     ],
@@ -51,10 +64,21 @@ class AlphabetHubPage extends StatelessWidget {
             const SizedBox(height: 22),
             _buildLearnReminderCard(context),
             const SizedBox(height: 24),
-            Text('练习关卡', style: text.titleLarge),
+            Text(
+              localizedText(
+                context,
+                zh: '练习关卡',
+                en: 'Practice Levels',
+              ),
+              style: text.titleLarge,
+            ),
             const SizedBox(height: 6),
             Text(
-              '完成学习后，通过练习来巩固记忆。',
+              localizedText(
+                context,
+                zh: '完成学习后，通过练习来巩固记忆。',
+                en: 'Use short drills after study to lock the patterns in.',
+              ),
               style: text.bodyMedium,
             ),
             const SizedBox(height: 16),
@@ -63,8 +87,16 @@ class AlphabetHubPage extends StatelessWidget {
               icon: Icons.looks_one_rounded,
               iconBg: const Color(0xFFE8F5F0),
               iconColor: AppTheme.deepAccent,
-              title: '第 1 级：字母识别',
-              subtitle: '看字母选名称、看名称选字母',
+              title: localizedText(
+                context,
+                zh: '第 1 级：字母识别',
+                en: 'Level 1: Letter Recognition',
+              ),
+              subtitle: localizedText(
+                context,
+                zh: '看字母选名称、看名称选字母',
+                en: 'Match letters and names in both directions.',
+              ),
               onTap: () async {
                 await Navigator.push(
                   context,
@@ -79,8 +111,16 @@ class AlphabetHubPage extends StatelessWidget {
               icon: Icons.looks_two_rounded,
               iconBg: const Color(0xFFFFF1E6),
               iconColor: const Color(0xFFF08A24),
-              title: '第 2 级：字母辨析',
-              subtitle: '区分易混淆字母，如 ب / ت / ث',
+              title: localizedText(
+                context,
+                zh: '第 2 级：字母辨析',
+                en: 'Level 2: Letter Contrast',
+              ),
+              subtitle: localizedText(
+                context,
+                zh: '区分易混淆字母，如 ب / ت / ث',
+                en: 'Separate look-alike letters such as ب / ت / ث.',
+              ),
               onTap: () async {
                 await Navigator.push(
                   context,
@@ -95,8 +135,16 @@ class AlphabetHubPage extends StatelessWidget {
               icon: Icons.looks_3_rounded,
               iconBg: const Color(0xFFE8F3FF),
               iconColor: const Color(0xFF4C7CF0),
-              title: '第 3 级：基础发音',
-              subtitle: '把字母和基础音值建立对应关系',
+              title: localizedText(
+                context,
+                zh: '第 3 级：基础发音',
+                en: 'Level 3: Core Sounds',
+              ),
+              subtitle: localizedText(
+                context,
+                zh: '听字母发音，判断基础音值或对应字母',
+                en: 'Hear a letter sound, then identify the sound or letter.',
+              ),
               onTap: () async {
                 await Navigator.push(
                   context,
@@ -111,8 +159,16 @@ class AlphabetHubPage extends StatelessWidget {
               icon: Icons.looks_4_rounded,
               iconBg: const Color(0xFFEEEAFE),
               iconColor: const Color(0xFF7D58E6),
-              title: '第 4 级：13 音位',
-              subtitle: '进入短音、长音、静音、重音和尾音训练',
+              title: localizedText(
+                context,
+                zh: '第 4 级：13 音位',
+                en: 'Level 4: 13 Sound Forms',
+              ),
+              subtitle: localizedText(
+                context,
+                zh: '听 13 音位形式，判断转写和读音类别',
+                en: 'Hear the 13 sound forms and identify transliteration or type.',
+              ),
               onTap: () async {
                 await Navigator.push(
                   context,
@@ -125,10 +181,15 @@ class AlphabetHubPage extends StatelessWidget {
             const SizedBox(height: 24),
             Center(
               child: Text(
-                '💡 提示：学完记得回来挑战所有关卡！',
+                localizedText(
+                  context,
+                  zh: '学完分组内容后，按 1 到 4 级顺序刷一遍会更稳。',
+                  en: 'After finishing the groups, a full pass from level 1 to 4 works best.',
+                ),
                 style: text.bodySmall?.copyWith(
                   color: AppTheme.secondaryText,
                 ),
+                textAlign: TextAlign.center,
               ),
             ),
             const SizedBox(height: 16),
@@ -206,14 +267,56 @@ class AlphabetHubPage extends StatelessWidget {
               ),
               const SizedBox(width: 14),
               Expanded(
-                child: Text('还没学字母？', style: text.headlineMedium),
+                child: Text(
+                  localizedText(
+                    context,
+                    zh: '完整学习路径',
+                    en: 'Full Learning Path',
+                  ),
+                  style: text.headlineMedium,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 12),
           Text(
-            '先去字母入门学习字母的读写和发音，然后再来挑战这些练习关卡。',
+            localizedText(
+              context,
+              zh: '先完成 7 组字母学习，再回到这里做 4 类练习，识别、发音和 13 音位都会更稳。',
+              en: 'Finish the 7 study groups first, then come back for the 4 drill types.',
+            ),
             style: text.bodyMedium,
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              _PathChip(
+                label: localizedText(
+                  context,
+                  zh: '7 个分组',
+                  en: '7 Groups',
+                ),
+                icon: Icons.layers_rounded,
+              ),
+              _PathChip(
+                label: localizedText(
+                  context,
+                  zh: '28 个字母',
+                  en: '28 Letters',
+                ),
+                icon: Icons.sort_by_alpha_rounded,
+              ),
+              _PathChip(
+                label: localizedText(
+                  context,
+                  zh: '4 关练习',
+                  en: '4 Drill Levels',
+                ),
+                icon: Icons.rocket_launch_rounded,
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -234,7 +337,13 @@ class AlphabetHubPage extends StatelessWidget {
                   ),
                 );
               },
-              child: const Text('去字母入门学习'),
+              child: Text(
+                localizedText(
+                  context,
+                  zh: '去字母入门学习',
+                  en: 'Open Alphabet Basics',
+                ),
+              ),
             ),
           ),
         ],
@@ -304,6 +413,42 @@ class AlphabetHubPage extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _PathChip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+
+  const _PathChip({
+    required this.label,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.82),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: AppTheme.deepAccent),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.primaryText,
+            ),
+          ),
+        ],
       ),
     );
   }

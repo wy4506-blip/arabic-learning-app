@@ -1,15 +1,30 @@
-enum ArabicTextMode { withDiacritics, dual, withoutDiacritics }
+enum ArabicTextMode { withDiacritics, dual, withoutDiacritics, smart }
+
 enum AppThemePreference { system, light, dark }
+
+enum AppLanguage { zh, en }
+
+enum ContentLanguage { zh, en }
+
+enum ArabicFontScale { standard, large }
 
 class AppSettings {
   final ArabicTextMode textMode;
   final AppThemePreference themePreference;
+  final AppLanguage appLanguage;
+  final ContentLanguage meaningLanguage;
+  final bool showTransliteration;
+  final ArabicFontScale arabicFontScale;
   final bool reminderEnabled;
   final String reminderTime;
 
   const AppSettings({
-    this.textMode = ArabicTextMode.dual,
+    this.textMode = ArabicTextMode.smart,
     this.themePreference = AppThemePreference.system,
+    this.appLanguage = AppLanguage.zh,
+    this.meaningLanguage = ContentLanguage.zh,
+    this.showTransliteration = true,
+    this.arabicFontScale = ArabicFontScale.standard,
     this.reminderEnabled = false,
     this.reminderTime = '20:00',
   });
@@ -17,12 +32,20 @@ class AppSettings {
   AppSettings copyWith({
     ArabicTextMode? textMode,
     AppThemePreference? themePreference,
+    AppLanguage? appLanguage,
+    ContentLanguage? meaningLanguage,
+    bool? showTransliteration,
+    ArabicFontScale? arabicFontScale,
     bool? reminderEnabled,
     String? reminderTime,
   }) {
     return AppSettings(
       textMode: textMode ?? this.textMode,
       themePreference: themePreference ?? this.themePreference,
+      appLanguage: appLanguage ?? this.appLanguage,
+      meaningLanguage: meaningLanguage ?? this.meaningLanguage,
+      showTransliteration: showTransliteration ?? this.showTransliteration,
+      arabicFontScale: arabicFontScale ?? this.arabicFontScale,
       reminderEnabled: reminderEnabled ?? this.reminderEnabled,
       reminderTime: reminderTime ?? this.reminderTime,
     );

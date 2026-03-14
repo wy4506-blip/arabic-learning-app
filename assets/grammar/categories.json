@@ -1,0 +1,81 @@
+[
+  {
+    "id": "grammar_letters",
+    "title": "字母与读写||Letters & Reading",
+    "subtitle": "查看字母、音符、连写和拼读规则||Review letters, harakat, joining, and reading rules",
+    "icon": "spellcheck",
+    "themeColor": "#E9F3FF",
+    "route": "/grammar/letters",
+    "children": [
+      "alphabet_table",
+      "letter_forms",
+      "letter_joining_rules",
+      "harakat_rules"
+    ]
+  },
+  {
+    "id": "grammar_pronouns",
+    "title": "代词与指示||Pronouns & Demonstratives",
+    "subtitle": "查看人称代词、指示代词和疑问词||Review personal pronouns, demonstratives, and question words",
+    "icon": "person_outline",
+    "themeColor": "#E8F7EF",
+    "route": "/grammar/pronouns",
+    "children": [
+      "personal_pronouns",
+      "demonstratives",
+      "question_words"
+    ]
+  },
+  {
+    "id": "grammar_nouns",
+    "title": "名词与形容词||Nouns & Adjectives",
+    "subtitle": "查看阴阳性、单双复和形容词配合||Review gender, number, and adjective agreement",
+    "icon": "badge",
+    "themeColor": "#FFF2E3",
+    "route": "/grammar/nouns",
+    "children": [
+      "gender",
+      "number_forms",
+      "adjective_agreement"
+    ]
+  },
+  {
+    "id": "grammar_verbs",
+    "title": "动词变化||Verb Patterns",
+    "subtitle": "查看动词变位和高频样板||Review verb conjugation and high-frequency models",
+    "icon": "bolt",
+    "themeColor": "#F2EDFF",
+    "route": "/grammar/verbs",
+    "children": [
+      "past_tense",
+      "present_tense"
+    ]
+  },
+  {
+    "id": "grammar_sentences",
+    "title": "句子结构||Sentence Structure",
+    "subtitle": "查看名词句、动词句、否定和疑问句||Review nominal, verbal, negative, and question sentences",
+    "icon": "format_align_left",
+    "themeColor": "#F9EEF2",
+    "route": "/grammar/sentences",
+    "children": [
+      "nominal_sentence",
+      "verbal_sentence",
+      "negation",
+      "question_sentence",
+      "common_patterns"
+    ]
+  },
+  {
+    "id": "grammar_function_words",
+    "title": "常用功能词||Function Words",
+    "subtitle": "查看介词、数词和高频功能词||Review prepositions, numbers, and common function words",
+    "icon": "tune",
+    "themeColor": "#EAF5F4",
+    "route": "/grammar/function_words",
+    "children": [
+      "prepositions",
+      "numbers_basic"
+    ]
+  }
+]

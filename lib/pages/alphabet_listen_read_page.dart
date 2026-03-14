@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+
+import '../app_scope.dart';
+import '../l10n/alphabet_content_localizer.dart';
+import '../l10n/localized_text.dart';
 import '../models/alphabet_group.dart';
 import '../services/audio_service.dart';
+import '../theme/app_arabic_typography.dart';
 import '../theme/app_theme.dart';
 
 class AlphabetListenReadPage extends StatefulWidget {
@@ -18,6 +23,8 @@ class AlphabetListenReadPage extends StatefulWidget {
 class _AlphabetListenReadPageState extends State<AlphabetListenReadPage> {
   String? _playingForm;
   bool _isPlayingAll = false;
+  bool _isShadowing = false;
+  String? _shadowingLabel;
 
   @override
   void initState() {
@@ -112,6 +119,78 @@ class _AlphabetListenReadPageState extends State<AlphabetListenReadPage> {
     }
   }
 
+  Future<void> _startShadowing() async {
+    if (_isShadowing) {
+      await AudioService.stop();
+      if (!mounted) return;
+      setState(() {
+        _isShadowing = false;
+        _shadowingLabel = null;
+        _playingForm = null;
+      });
+      return;
+    }
+
+    final steps = <({String form, String label, Future<void> Function() play})>[
+      (
+        form: widget.letter.arabic,
+        label: localizedText(
+          context,
+          zh: '先跟读字母本体',
+          en: 'Repeat the letter itself first',
+        ),
+        play: _playLetter,
+      ),
+      for (final item in widget.letter.pronunciations.take(3))
+        (
+          form: item.form,
+          label: localizedText(
+            context,
+            zh: '跟读 ${item.label}',
+            en:
+                'Repeat ${AlphabetContentLocalizer.pronunciationLabel(item.label, context.appSettings.appLanguage)}',
+          ),
+          play: () => _playPronunciation(item.form),
+        ),
+      (
+        form: widget.letter.example.arabic,
+        label: localizedText(
+          context,
+          zh: '最后跟读示例词',
+          en: 'Finish by repeating the example word',
+        ),
+        play: _playExampleWord,
+      ),
+    ];
+
+    setState(() {
+      _isShadowing = true;
+      _shadowingLabel = localizedText(
+        context,
+        zh: '准备开始跟读',
+        en: 'Getting ready to shadow',
+      );
+    });
+
+    for (final step in steps) {
+      if (!mounted || !_isShadowing) break;
+      setState(() {
+        _shadowingLabel = step.label;
+        _playingForm = step.form;
+      });
+      await step.play();
+      if (!mounted || !_isShadowing) break;
+      await Future.delayed(const Duration(milliseconds: 900));
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _isShadowing = false;
+      _shadowingLabel = null;
+      _playingForm = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
@@ -152,11 +231,22 @@ class _AlphabetListenReadPageState extends State<AlphabetListenReadPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('听读', style: text.titleMedium),
-                      const SizedBox(height: 1),
                       Text(
-                        '${widget.letter.name} · ${widget.letter.pronunciation}',
-                        style: text.bodySmall,
+                        localizedText(context, zh: '听读', en: 'Listen'),
+                        style: text.titleMedium,
+                      ),
+                      const SizedBox(height: 1),
+                      ArabicText.word(
+                        widget.letter.arabicName,
+                        style: text.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        widget.letter.latinName,
+                        style: text.bodySmall?.copyWith(
+                          color: AppTheme.deepAccent,
+                        ),
                       ),
                     ],
                   ),
@@ -186,19 +276,37 @@ class _AlphabetListenReadPageState extends State<AlphabetListenReadPage> {
               ),
               child: Column(
                 children: [
-                  Text(
+                  ArabicText.word(
                     widget.letter.arabic,
                     style: text.headlineLarge?.copyWith(
                       fontSize: letterFontSize,
                       fontWeight: FontWeight.w700,
                     ),
-                    textDirection: TextDirection.rtl,
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 4),
-                  Text(widget.letter.name, style: text.titleMedium),
+                  ArabicText.word(
+                    widget.letter.arabicName,
+                    style: text.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 2),
                   Text(
-                    '基础发音：${widget.letter.pronunciation}',
+                    widget.letter.latinName,
+                    style: text.bodySmall?.copyWith(
+                      color: AppTheme.deepAccent,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    localizedText(
+                      context,
+                      zh: '基础发音：${widget.letter.pronunciation}',
+                      en: 'Core sound: ${widget.letter.pronunciation}',
+                    ),
                     style: text.bodySmall?.copyWith(
                       color: AppTheme.deepAccent,
                     ),
@@ -230,8 +338,16 @@ class _AlphabetListenReadPageState extends State<AlphabetListenReadPage> {
                           : const Icon(Icons.volume_up_rounded),
                       label: Text(
                         _playingForm == widget.letter.arabic
-                            ? '播放中...'
-                            : '播放字母发音',
+                            ? localizedText(
+                                context,
+                                zh: '播放中...',
+                                en: 'Playing...',
+                              )
+                            : localizedText(
+                                context,
+                                zh: '播放字母发音',
+                                en: 'Play Letter Audio',
+                              ),
                       ),
                     ),
                   ),
@@ -243,9 +359,53 @@ class _AlphabetListenReadPageState extends State<AlphabetListenReadPage> {
                 ],
               ),
             ),
+            if (_isShadowing) ...[
+              SizedBox(height: sectionGap),
+              Container(
+                padding: EdgeInsets.all(isSmallScreen ? 12 : 14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x10000000),
+                      blurRadius: 12,
+                      offset: Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.record_voice_over_rounded,
+                      color: AppTheme.deepAccent,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        _shadowingLabel ??
+                            localizedText(
+                              context,
+                              zh: '正在跟读',
+                              en: 'Shadowing now',
+                            ),
+                        style: text.bodyMedium?.copyWith(
+                          color: AppTheme.deepAccent,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             SizedBox(height: sectionGap),
             Text(
-              '13个标准读音',
+              localizedText(
+                context,
+                zh: '13个标准读音',
+                en: '13 Standard Sound Forms',
+              ),
               style: text.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -276,7 +436,7 @@ class _AlphabetListenReadPageState extends State<AlphabetListenReadPage> {
             ),
             SizedBox(height: sectionGap),
             Text(
-              '示例词',
+              localizedText(context, zh: '示例词', en: 'Example Word'),
               style: text.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -314,13 +474,12 @@ class _AlphabetListenReadPageState extends State<AlphabetListenReadPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        ArabicText.word(
                           widget.letter.example.arabic,
                           style: text.titleLarge?.copyWith(
                             fontSize: isSmallScreen ? 20 : 22,
                             fontWeight: FontWeight.w700,
                           ),
-                          textDirection: TextDirection.rtl,
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -331,7 +490,10 @@ class _AlphabetListenReadPageState extends State<AlphabetListenReadPage> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          widget.letter.example.meaning,
+                          AlphabetContentLocalizer.exampleMeaning(
+                            widget.letter.example,
+                            context.appSettings.meaningLanguage,
+                          ),
                           style: text.bodySmall,
                         ),
                       ],
@@ -372,13 +534,21 @@ class _AlphabetListenReadPageState extends State<AlphabetListenReadPage> {
                         borderRadius: BorderRadius.circular(16),
                       ),
                     ),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('跟读功能开发中...')),
-                      );
-                    },
+                    onPressed: _startShadowing,
                     icon: const Icon(Icons.mic_rounded),
-                    label: const Text('跟读'),
+                    label: Text(
+                      _isShadowing
+                          ? localizedText(
+                              context,
+                              zh: '停止跟读',
+                              en: 'Stop Shadowing',
+                            )
+                          : localizedText(
+                              context,
+                              zh: '跟读模式',
+                              en: 'Shadowing Mode',
+                            ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -397,7 +567,15 @@ class _AlphabetListenReadPageState extends State<AlphabetListenReadPage> {
                     icon: _isPlayingAll
                         ? const Icon(Icons.stop_rounded)
                         : const Icon(Icons.play_arrow_rounded),
-                    label: Text(_isPlayingAll ? '停止' : '播放全部'),
+                    label: Text(
+                      _isPlayingAll
+                          ? localizedText(context, zh: '停止', en: 'Stop')
+                          : localizedText(
+                              context,
+                              zh: '播放全部',
+                              en: 'Play All',
+                            ),
+                    ),
                   ),
                 ),
               ],
@@ -460,7 +638,7 @@ class _AlphabetListenReadPageState extends State<AlphabetListenReadPage> {
             children: [
               Expanded(
                 child: _buildZone(
-                  label: '双唇',
+                  label: localizedText(context, zh: '双唇', en: 'Lips'),
                   color: const Color(0xFFFFD9C7),
                   compact: compact,
                 ),
@@ -468,7 +646,7 @@ class _AlphabetListenReadPageState extends State<AlphabetListenReadPage> {
               const SizedBox(width: 6),
               Expanded(
                 child: _buildZone(
-                  label: '舌尖',
+                  label: localizedText(context, zh: '舌尖', en: 'Tongue Tip'),
                   color: const Color(0xFFFFF0B8),
                   compact: compact,
                 ),
@@ -476,7 +654,7 @@ class _AlphabetListenReadPageState extends State<AlphabetListenReadPage> {
               const SizedBox(width: 6),
               Expanded(
                 child: _buildZone(
-                  label: '喉部',
+                  label: localizedText(context, zh: '喉部', en: 'Throat'),
                   color: const Color(0xFFD8F0E6),
                   compact: compact,
                 ),
@@ -485,7 +663,11 @@ class _AlphabetListenReadPageState extends State<AlphabetListenReadPage> {
           ),
           const SizedBox(height: 6),
           Text(
-            '发音部位示意',
+            localizedText(
+              context,
+              zh: '发音部位示意',
+              en: 'Sound Placement Guide',
+            ),
             style: text.labelMedium?.copyWith(
               color: AppTheme.deepAccent,
             ),
@@ -557,14 +739,13 @@ class _AlphabetListenReadPageState extends State<AlphabetListenReadPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
+              ArabicText.label(
                 form,
                 style: text.titleLarge?.copyWith(
                   fontSize: compact ? 19 : 22,
                   fontWeight: FontWeight.w700,
                   color: isPlaying ? AppTheme.deepAccent : null,
                 ),
-                textDirection: TextDirection.rtl,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 3),
@@ -581,7 +762,10 @@ class _AlphabetListenReadPageState extends State<AlphabetListenReadPage> {
               ),
               const SizedBox(height: 2),
               Text(
-                label,
+                AlphabetContentLocalizer.pronunciationLabel(
+                  label,
+                  context.appSettings.appLanguage,
+                ),
                 style: text.bodySmall?.copyWith(
                   fontSize: compact ? 10 : 11,
                 ),

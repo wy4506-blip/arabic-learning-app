@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+
+import '../app_scope.dart';
+import '../l10n/alphabet_content_localizer.dart';
+import '../l10n/localized_text.dart';
 import '../models/alphabet_group.dart';
+import '../theme/app_arabic_typography.dart';
 import '../theme/app_theme.dart';
 
 class AlphabetDetailPage extends StatelessWidget {
@@ -33,7 +38,14 @@ class AlphabetDetailPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('字母详情', style: text.titleLarge),
+                      Text(
+                        localizedText(
+                          context,
+                          zh: '字母详情',
+                          en: 'Letter Detail',
+                        ),
+                        style: text.titleLarge,
+                      ),
                       const SizedBox(height: 2),
                       Text(
                         '${letter.name} · ${letter.pronunciation}',
@@ -67,42 +79,60 @@ class AlphabetDetailPage extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  Text(
+                  ArabicText.word(
                     letter.arabic,
                     style: text.headlineLarge?.copyWith(
                       fontSize: 54,
                       fontWeight: FontWeight.w700,
                     ),
-                    textDirection: TextDirection.rtl,
+                    textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 10),
                   Text(letter.name, style: text.titleLarge),
                   const SizedBox(height: 4),
                   Text(
-                    '基础发音：${letter.pronunciation}',
+                    localizedText(
+                      context,
+                      zh: '基础发音：${letter.pronunciation}',
+                      en: 'Core sound: ${letter.pronunciation}',
+                    ),
                     style: text.bodyMedium?.copyWith(
                       color: AppTheme.deepAccent,
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    letter.soundHint,
+                    AlphabetContentLocalizer.soundHint(
+                      letter,
+                      context.appSettings.meaningLanguage,
+                    ),
                     style: text.bodyMedium,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
                   _buildAudioPlaceholder(
                     context,
-                    title: '播放字母发音',
+                    title: localizedText(
+                      context,
+                      zh: '播放字母发音',
+                      en: 'Play Letter Audio',
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            Text('听读练习', style: text.titleLarge),
+            Text(
+              localizedText(context, zh: '听读练习', en: 'Listening Practice'),
+              style: text.titleLarge,
+            ),
             const SizedBox(height: 6),
             Text(
-              '这里完整展示这个字母的 13 个标准读音位。',
+              localizedText(
+                context,
+                zh: '这里完整展示这个字母的 13 个标准读音位。',
+                en: 'This page shows all 13 standard sound forms for this letter.',
+              ),
               style: text.bodyMedium,
             ),
             const SizedBox(height: 14),
@@ -116,7 +146,10 @@ class AlphabetDetailPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            Text('示例词', style: text.titleLarge),
+            Text(
+              localizedText(context, zh: '示例词', en: 'Example Word'),
+              style: text.titleLarge,
+            ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(18),
@@ -150,13 +183,12 @@ class AlphabetDetailPage extends StatelessWidget {
                       ),
                       const SizedBox(width: 14),
                       Expanded(
-                        child: Text(
+                        child: ArabicText.word(
                           letter.example.arabic,
                           style: text.titleLarge?.copyWith(
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
                           ),
-                          textDirection: TextDirection.rtl,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -175,42 +207,55 @@ class AlphabetDetailPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    letter.example.meaning,
+                    AlphabetContentLocalizer.exampleMeaning(
+                      letter.example,
+                      context.appSettings.meaningLanguage,
+                    ),
                     style: text.titleMedium,
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            Text('书写形态', style: text.titleLarge),
+            Text(
+              localizedText(context, zh: '书写形态', en: 'Writing Forms'),
+              style: text.titleLarge,
+            ),
             const SizedBox(height: 6),
             Text(
-              '阿拉伯字母在词中不同位置会有不同写法。',
+              localizedText(
+                context,
+                zh: '阿拉伯字母在词中不同位置会有不同写法。',
+                en: 'Arabic letters take different shapes depending on their position in a word.',
+              ),
               style: text.bodyMedium,
             ),
             const SizedBox(height: 14),
             _buildFormCard(
               context,
-              title: '独立形',
+              title: localizedText(context, zh: '独立形', en: 'Isolated'),
               value: letter.forms.isolated,
             ),
             _buildFormCard(
               context,
-              title: '词首形',
+              title: localizedText(context, zh: '词首形', en: 'Initial'),
               value: letter.forms.initial,
             ),
             _buildFormCard(
               context,
-              title: '词中形',
+              title: localizedText(context, zh: '词中形', en: 'Medial'),
               value: letter.forms.medial,
             ),
             _buildFormCard(
               context,
-              title: '词尾形',
+              title: localizedText(context, zh: '词尾形', en: 'Final'),
               value: letter.forms.finalForm,
             ),
             const SizedBox(height: 24),
-            Text('连写规则', style: text.titleLarge),
+            Text(
+              localizedText(context, zh: '连写规则', en: 'Connection Rule'),
+              style: text.titleLarge,
+            ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(18),
@@ -240,8 +285,16 @@ class AlphabetDetailPage extends StatelessWidget {
                   Expanded(
                     child: Text(
                       letter.connectsAfter
-                          ? '这个字母通常可以与后面的字母继续连接。'
-                          : '这个字母通常不向后连接，后一个字母会重新起笔。',
+                          ? localizedText(
+                              context,
+                              zh: '这个字母通常可以与后面的字母继续连接。',
+                              en: 'This letter usually keeps connecting to the next letter.',
+                            )
+                          : localizedText(
+                              context,
+                              zh: '这个字母通常不向后连接，后一个字母会重新起笔。',
+                              en: 'This letter usually does not connect forward, so the next letter starts fresh.',
+                            ),
                       style: text.bodyMedium,
                     ),
                   ),
@@ -249,7 +302,10 @@ class AlphabetDetailPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            Text('学习提示', style: text.titleLarge),
+            Text(
+              localizedText(context, zh: '学习提示', en: 'Learning Note'),
+              style: text.titleLarge,
+            ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(18),
@@ -278,7 +334,10 @@ class AlphabetDetailPage extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      letter.tip,
+                      AlphabetContentLocalizer.tip(
+                        letter,
+                        context.appSettings.meaningLanguage,
+                      ),
                       style: text.bodyMedium,
                     ),
                   ),
@@ -286,7 +345,10 @@ class AlphabetDetailPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            Text('学习动作', style: text.titleLarge),
+            Text(
+              localizedText(context, zh: '学习动作', en: 'Next Actions'),
+              style: text.titleLarge,
+            ),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -300,7 +362,9 @@ class AlphabetDetailPage extends StatelessWidget {
                       ),
                     ),
                     onPressed: () {},
-                    child: const Text('跟读练习'),
+                    child: Text(
+                      localizedText(context, zh: '跟读练习', en: 'Shadowing'),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -314,7 +378,9 @@ class AlphabetDetailPage extends StatelessWidget {
                       ),
                     ),
                     onPressed: () {},
-                    child: const Text('开始书写'),
+                    child: Text(
+                      localizedText(context, zh: '开始书写', en: 'Start Writing'),
+                    ),
                   ),
                 ),
               ],
@@ -423,13 +489,13 @@ class AlphabetDetailPage extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
             ),
             child: Center(
-              child: Text(
+              child: ArabicText.label(
                 form,
                 style: text.titleLarge?.copyWith(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
                 ),
-                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.center,
               ),
             ),
           ),
@@ -438,7 +504,13 @@ class AlphabetDetailPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: text.titleMedium),
+                Text(
+                  AlphabetContentLocalizer.pronunciationLabel(
+                    label,
+                    context.appSettings.appLanguage,
+                  ),
+                  style: text.titleMedium,
+                ),
                 const SizedBox(height: 4),
                 Text(
                   latin,
@@ -448,7 +520,10 @@ class AlphabetDetailPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  hint,
+                  AlphabetContentLocalizer.pronunciationHint(
+                    hint,
+                    context.appSettings.meaningLanguage,
+                  ),
                   style: text.bodySmall,
                 ),
               ],
@@ -490,13 +565,12 @@ class AlphabetDetailPage extends StatelessWidget {
           Expanded(
             child: Text(title, style: text.titleMedium),
           ),
-          Text(
+          ArabicText.word(
             value,
             style: text.titleLarge?.copyWith(
               fontSize: 24,
               fontWeight: FontWeight.w700,
             ),
-            textDirection: TextDirection.rtl,
           ),
         ],
       ),
