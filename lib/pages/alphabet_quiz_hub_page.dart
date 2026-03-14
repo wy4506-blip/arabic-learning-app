@@ -267,8 +267,8 @@ class _AlphabetQuizHubPageState extends State<AlphabetQuizHubPage> {
                         ),
                         subtitle: localizedText(
                           context,
-                          zh: '进入短音、长音、静音、重音与尾音训练',
-                          en: 'Work through short vowels, long vowels, sukun, shadda, and tanwin.',
+                          zh: '进入 13 项标准发音训练：静符、长音、软音、鼻音与叠音。',
+                          en: 'Work through the 13 standard forms: Sukūn, long vowels, soft sounds, tanwīn, and Shadda.',
                         ),
                         count: AlphabetQuizData.pronunciationQuestions.length,
                         onTap: () async {

@@ -55,20 +55,44 @@ class AlphabetContentLocalizer {
         LessonContentLocalizer.meaning(example.meaning, language);
   }
 
-  static String pronunciationLabel(
-    String value,
+  static String pronunciationShortTitle(
+    AlphabetPronunciationItem item,
     AppLanguage language,
   ) {
-    if (language != AppLanguage.en) return value;
-    return _pronunciationLabels[value] ?? value;
+    if (language != AppLanguage.en) return item.shortTitle;
+    return _pronunciationShortTitles[item.key] ?? item.shortTitle;
   }
 
-  static String pronunciationHint(
-    String value,
+  static String pronunciationFullTitle(
+    AlphabetPronunciationItem item,
+    AppLanguage language,
+  ) {
+    if (language != AppLanguage.en) return item.fullTitle;
+    return _pronunciationFullTitles[item.key] ?? item.fullTitle;
+  }
+
+  static String pronunciationShortSubtitle(
+    AlphabetPronunciationItem item,
     ContentLanguage language,
   ) {
-    if (language != ContentLanguage.en) return value;
-    return _pronunciationHints[value] ?? value;
+    if (language != ContentLanguage.en) return item.shortSubtitle;
+    return _pronunciationShortSubtitles[item.key] ?? item.shortSubtitle;
+  }
+
+  static String pronunciationDetailDescription(
+    AlphabetPronunciationItem item,
+    ContentLanguage language,
+  ) {
+    if (language != ContentLanguage.en) return item.detailDescription;
+    return _pronunciationDetailDescriptions[item.key] ?? item.detailDescription;
+  }
+
+  static String pronunciationValue(
+    AlphabetPronunciationItem item,
+    AppLanguage language,
+  ) {
+    if (language != AppLanguage.en) return item.pronunciationValue;
+    return _pronunciationValues[item.key] ?? item.pronunciationValue;
   }
 
   static String quizText(
@@ -243,38 +267,84 @@ const Map<String, String> _exampleMeanings = <String, String>{
   'يَد': 'hand',
 };
 
-const Map<String, String> _pronunciationLabels = <String, String>{
-  '短音 a': 'Short a',
-  '短音 i': 'Short i',
-  '短音 u': 'Short u',
-  '长音 aa': 'Long aa',
-  '长音 ii': 'Long ii',
-  '长音 uu': 'Long uu',
-  '静音 / sukun': 'Sukun',
-  '重音 + a': 'Shadda + a',
-  '重音 + i': 'Shadda + i',
-  '重音 + u': 'Shadda + u',
-  '尾音 an': 'Ending an',
-  '尾音 in': 'Ending in',
-  '尾音 un': 'Ending un',
+const Map<String, String> _pronunciationShortTitles = <String, String>{
+  'sukun': 'Sukūn',
+  'fatha': 'Fatḥa',
+  'kasra': 'Kasra',
+  'damma': 'Ḍamma',
+  'long_a': 'Long ā',
+  'long_i': 'Long ī',
+  'long_u': 'Long ū',
+  'soft_ay': 'Soft ay',
+  'soft_aw': 'Soft aw',
+  'tanwin_an': 'Tanwīn an',
+  'tanwin_in': 'Tanwīn in',
+  'tanwin_un': 'Tanwīn un',
+  'shadda': 'Shadda',
 };
 
-const Map<String, String> _pronunciationHints = <String, String>{
-  '短促开口音。': 'A short open vowel.',
-  '短促前元音。': 'A short front vowel.',
-  '短促圆唇音。': 'A short rounded vowel.',
-  '把 a 拉长。': 'Lengthen the a sound.',
-  '把 i 拉长。': 'Lengthen the i sound.',
-  '把 u 拉长。': 'Lengthen the u sound.',
-  '只停住，不再带元音。': 'Stop the sound without adding a vowel.',
-  '不再附带元音。': 'No extra vowel is added.',
-  '强调后再接 a。': 'Add emphasis, then connect to a.',
-  '强调后再接 i。': 'Add emphasis, then connect to i.',
-  '强调后再接 u。': 'Add emphasis, then connect to u.',
-  '强调辅音后再接 a。': 'Double the consonant, then add a.',
-  '强调辅音后再接 i。': 'Double the consonant, then add i.',
-  '强调辅音后再接 u。': 'Double the consonant, then add u.',
-  '常见名词尾音。': 'A common noun ending.',
+const Map<String, String> _pronunciationFullTitles = <String, String>{
+  'sukun': 'Sukūn',
+  'fatha': 'Fatḥa',
+  'kasra': 'Kasra',
+  'damma': 'Ḍamma',
+  'long_a': 'Long ā',
+  'long_i': 'Long ī',
+  'long_u': 'Long ū',
+  'soft_ay': 'Soft ay',
+  'soft_aw': 'Soft aw',
+  'tanwin_an': 'Tanwīn an',
+  'tanwin_in': 'Tanwīn in',
+  'tanwin_un': 'Tanwīn un',
+  'shadda': 'Shadda',
+};
+
+const Map<String, String> _pronunciationValues = <String, String>{
+  'sukun': 'No vowel',
+  'fatha': 'a',
+  'kasra': 'i',
+  'damma': 'u',
+  'long_a': 'aa',
+  'long_i': 'ii',
+  'long_u': 'uu',
+  'soft_ay': 'ay',
+  'soft_aw': 'aw',
+  'tanwin_an': 'an',
+  'tanwin_in': 'in',
+  'tanwin_un': 'un',
+  'shadda': 'Doubled consonant',
+};
+
+const Map<String, String> _pronunciationShortSubtitles = <String, String>{
+  'sukun': 'No vowel',
+  'fatha': 'Sounds a',
+  'kasra': 'Sounds i',
+  'damma': 'Sounds u',
+  'long_a': 'Sounds aa',
+  'long_i': 'Sounds ii',
+  'long_u': 'Sounds uu',
+  'soft_ay': 'Sounds ay',
+  'soft_aw': 'Sounds aw',
+  'tanwin_an': 'Sounds an',
+  'tanwin_in': 'Sounds in',
+  'tanwin_un': 'Sounds un',
+  'shadda': 'Doubled consonant',
+};
+
+const Map<String, String> _pronunciationDetailDescriptions = <String, String>{
+  'sukun': 'The consonant carries no following vowel.',
+  'fatha': 'Short a.',
+  'kasra': 'Short i.',
+  'damma': 'Short u.',
+  'long_a': 'Long a.',
+  'long_i': 'Long i.',
+  'long_u': 'Long u.',
+  'soft_ay': 'Built from fatḥa plus yāʾ with sukūn.',
+  'soft_aw': 'Built from fatḥa plus wāw with sukūn.',
+  'tanwin_an': 'Ending an.',
+  'tanwin_in': 'Ending in.',
+  'tanwin_un': 'Ending un.',
+  'shadda': 'Marks consonant doubling or gemination.',
 };
 
 const Map<String, String> _quizText = <String, String>{
@@ -284,6 +354,19 @@ const Map<String, String> _quizText = <String, String>{
   '听字母发音，选择对应的字母': 'Listen to the letter sound and choose the matching letter.',
   '听读音形式，选择正确的转写': 'Listen to the sound form and choose the correct transliteration.',
   '听读音形式，选择正确的类别': 'Listen to the sound form and choose the correct label.',
+  '静符': 'Sukūn',
+  '开口符': 'Fatḥa',
+  '齐齿符': 'Kasra',
+  '合口符': 'Ḍamma',
+  '开口长音符': 'Long ā',
+  '齐齿长音符': 'Long ī',
+  '合口长音符': 'Long ū',
+  '软音符（ـَيْ）': 'Soft ay',
+  '软音符（ـَوْ）': 'Soft aw',
+  '开口鼻音符': 'Tanwīn an',
+  '齐齿鼻音符': 'Tanwīn in',
+  '合口鼻音符': 'Tanwīn un',
+  '叠音符': 'Shadda',
   '根据提示选字母': 'Choose the letter from the hint.',
   '下方 1 个点': 'One dot below',
   '上方 2 个点': 'Two dots above',

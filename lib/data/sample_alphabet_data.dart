@@ -1,5 +1,6 @@
 import '../models/alphabet_group.dart';
 import '../models/quiz_question.dart';
+import 'alphabet_pronunciation_standards.dart';
 
 class _AlphabetNameData {
   final String arabicName;
@@ -68,57 +69,8 @@ AlphabetExample _example(String arabic, String latin, String meaning) {
   return AlphabetExample(arabic: arabic, latin: latin, meaning: meaning);
 }
 
-AlphabetPronunciationItem _pronunciation(
-  String form,
-  String latin,
-  String label,
-  String hint,
-) {
-  return AlphabetPronunciationItem(
-    form: form,
-    latin: latin,
-    label: label,
-    hint: hint,
-  );
-}
-
-List<AlphabetPronunciationItem> _pronunciations(
-  String letter,
-  String phoneme,
-) {
-  if (letter == 'ا') {
-    return <AlphabetPronunciationItem>[
-      _pronunciation('أَ', 'a', '短音 a', '短促开口音。'),
-      _pronunciation('إِ', 'i', '短音 i', '短促前元音。'),
-      _pronunciation('أُ', 'u', '短音 u', '短促圆唇音。'),
-      _pronunciation('آ', 'aa', '长音 aa', '把 a 拉长。'),
-      _pronunciation('إِي', 'ii', '长音 ii', '把 i 拉长。'),
-      _pronunciation('أُو', 'uu', '长音 uu', '把 u 拉长。'),
-      _pronunciation('اْ', 'a', '静音 / sukun', '只停住，不再带元音。'),
-      _pronunciation('أَّ', 'a', '重音 + a', '强调后再接 a。'),
-      _pronunciation('إِّ', 'i', '重音 + i', '强调后再接 i。'),
-      _pronunciation('أُّ', 'u', '重音 + u', '强调后再接 u。'),
-      _pronunciation('أً', 'an', '尾音 an', '常见名词尾音。'),
-      _pronunciation('إٍ', 'in', '尾音 in', '常见名词尾音。'),
-      _pronunciation('أٌ', 'un', '尾音 un', '常见名词尾音。'),
-    ];
-  }
-
-  return <AlphabetPronunciationItem>[
-    _pronunciation('$letterَ', '${phoneme}a', '短音 a', '短促开口音。'),
-    _pronunciation('$letterِ', '${phoneme}i', '短音 i', '短促前元音。'),
-    _pronunciation('$letterُ', '${phoneme}u', '短音 u', '短促圆唇音。'),
-    _pronunciation('$letterَا', '${phoneme}aa', '长音 aa', '把 a 拉长。'),
-    _pronunciation('$letterِي', '${phoneme}ii', '长音 ii', '把 i 拉长。'),
-    _pronunciation('$letterُو', '${phoneme}uu', '长音 uu', '把 u 拉长。'),
-    _pronunciation('$letterْ', phoneme, '静音 / sukun', '不再附带元音。'),
-    _pronunciation('$letterَّ', '$phoneme${phoneme}a', '重音 + a', '强调辅音后再接 a。'),
-    _pronunciation('$letterِّ', '$phoneme${phoneme}i', '重音 + i', '强调辅音后再接 i。'),
-    _pronunciation('$letterُّ', '$phoneme${phoneme}u', '重音 + u', '强调辅音后再接 u。'),
-    _pronunciation('$letterً', '${phoneme}an', '尾音 an', '常见名词尾音。'),
-    _pronunciation('$letterٍ', '${phoneme}in', '尾音 in', '常见名词尾音。'),
-    _pronunciation('$letterٌ', '${phoneme}un', '尾音 un', '常见名词尾音。'),
-  ];
+List<AlphabetPronunciationItem> _pronunciations(String letter) {
+  return buildAlphabetPronunciations(letter);
 }
 
 AlphabetLetter _letter({
@@ -144,7 +96,7 @@ AlphabetLetter _letter({
     soundHint: soundHint,
     hint: hint,
     example: example,
-    pronunciations: _pronunciations(arabic, phoneme),
+    pronunciations: _pronunciations(arabic),
     forms: _forms(arabic, connectsAfter: connectsAfter),
     connectsAfter: connectsAfter,
     tip: tip,
@@ -311,7 +263,7 @@ final List<AlphabetGroup> sampleAlphabetGroups = <AlphabetGroup>[
   _group(
     id: 4,
     title: '第四组：齿龈连续组',
-    subtitle: '这一组进入更高频的连续字母与重音字母。',
+    subtitle: '这一组进入更高频的连续字母与常见结构字母。',
     letters: <AlphabetLetter>[
       _letter(
         arabic: 'س',
@@ -504,7 +456,7 @@ final List<AlphabetGroup> sampleAlphabetGroups = <AlphabetGroup>[
         name: 'Waw',
         pronunciation: 'w / uu',
         phoneme: 'w',
-        soundHint: '既可作辅音 w，也常承担长音 uu。',
+        soundHint: '既可作辅音 w，也常承担合口长音符中的长音 uu。',
         hint: '圆润的小弯形，不向后连接。',
         example: _example('وَرْد', 'ward', '玫瑰'),
         connectsAfter: false,
@@ -515,7 +467,7 @@ final List<AlphabetGroup> sampleAlphabetGroups = <AlphabetGroup>[
         name: 'Ya',
         pronunciation: 'y / ii',
         phoneme: 'y',
-        soundHint: '既可作辅音 y，也常承担长音 ii。',
+        soundHint: '既可作辅音 y，也常承担齐齿长音符中的长音 ii。',
         hint: '下方 2 个点，词尾形很常见。',
         example: _example('يَد', 'yad', '手'),
         connectsAfter: true,
@@ -625,13 +577,15 @@ List<QuizQuestion> _buildSoundQuestions(List<AlphabetLetter> letters) {
 }
 
 List<QuizQuestion> _buildPronunciationQuestions(List<AlphabetLetter> letters) {
-  const focusIndices = <int>[0, 3, 6, 10];
+  const focusIndices = <int>[1, 4, 7, 12];
   final latinPool = letters
-      .expand((letter) => letter.pronunciations.map((item) => item.latin))
+      .expand(
+        (letter) => letter.pronunciations.map((item) => item.transliteration),
+      )
       .toSet()
       .toList(growable: false);
   final labelPool = letters
-      .expand((letter) => letter.pronunciations.map((item) => item.label))
+      .expand((letter) => letter.pronunciations.map((item) => item.fullTitle))
       .toSet()
       .toList(growable: false);
   final questions = <QuizQuestion>[];
@@ -647,10 +601,10 @@ List<QuizQuestion> _buildPronunciationQuestions(List<AlphabetLetter> letters) {
           title: '听读音形式，选择正确的转写',
           prompt: item.form,
           promptType: 'pronunciation_audio',
-          correct: item.latin,
+          correct: item.transliteration,
           options: _rotatingOptions(
             pool: latinPool,
-            correct: item.latin,
+            correct: item.transliteration,
             index: index,
           ),
         ),
@@ -661,10 +615,10 @@ List<QuizQuestion> _buildPronunciationQuestions(List<AlphabetLetter> letters) {
           title: '听读音形式，选择正确的类别',
           prompt: item.form,
           promptType: 'pronunciation_audio',
-          correct: item.label,
+          correct: item.fullTitle,
           options: _rotatingOptions(
             pool: labelPool,
-            correct: item.label,
+            correct: item.fullTitle,
             index: index,
           ),
         ),

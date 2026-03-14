@@ -250,9 +250,10 @@ List<_AudioManifestItem> _buildAlphabetItems(_GeneratorConfig config) {
             type: 'pronunciation',
             sourceType: 'alphabet_pronunciation',
             sourceId: 'alphabet_pronunciation_$pronunciationIndex',
-            textAr: pronunciation.form,
-            textPlain: _stripArabicDiacritics(pronunciation.form),
-            textZh: pronunciation.label,
+            textAr: pronunciation.audioQueryText,
+            textPlain: _stripArabicDiacritics(pronunciation.audioQueryText),
+            textZh: pronunciation.fullTitle,
+            audioKey: pronunciation.audioKey,
             speed: 'normal',
             fileName:
                 'alpha_p_${pronunciationIndex.toString().padLeft(3, '0')}_normal.${config.fileExtension}',
@@ -556,6 +557,7 @@ class _AudioManifestItem {
   final String fileName;
   final String assetPath;
   final String relativeAssetPath;
+  final String? audioKey;
   final String? speaker;
 
   const _AudioManifestItem({
@@ -573,6 +575,7 @@ class _AudioManifestItem {
     required this.fileName,
     required this.assetPath,
     required this.relativeAssetPath,
+    this.audioKey,
     this.speaker,
   });
 
@@ -592,6 +595,7 @@ class _AudioManifestItem {
       'fileName': fileName,
       'assetPath': assetPath,
       'relativeAssetPath': relativeAssetPath,
+      if (audioKey != null) 'audioKey': audioKey,
       if (speaker != null) 'speaker': speaker,
     };
   }

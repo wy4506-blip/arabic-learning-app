@@ -137,7 +137,7 @@
     "route": "/grammar/letters/harakat",
     "type": "rule",
     "category": "grammar_letters",
-    "summary": "短音、长音、静音和重音的首发速查页。||A compact first-reference page for short vowels, long vowels, sukun, and shadda.",
+    "summary": "开口符、齐齿符、合口符、静符和叠音符的入门速查页。||A compact first-reference page for Fatḥa, Kasra, Ḍamma, Sukūn, and Shadda.",
     "sections": [
       {
         "id": "harakat_rules_main",
@@ -147,7 +147,7 @@
         "rules": [
           {
             "id": "fatha",
-            "title": "开口符||Fatha",
+            "title": "开口符||Fatḥa",
             "symbol": "ـَ",
             "summary": "让辅音带短促的 a 音。||Adds a short a sound to the consonant.",
             "example": {
@@ -155,7 +155,7 @@
               "arabicWithDiacritics": "بَ",
               "arabicPlain": "ب",
               "transliteration": "ba",
-              "translation": "短音 a||short a",
+              "translation": "发 a||sounds a",
               "audioPath": ""
             }
           },
@@ -169,13 +169,13 @@
               "arabicWithDiacritics": "بِ",
               "arabicPlain": "ب",
               "transliteration": "bi",
-              "translation": "短音 i||short i",
+              "translation": "发 i||sounds i",
               "audioPath": ""
             }
           },
           {
             "id": "damma",
-            "title": "合口符||Damma",
+            "title": "合口符||Ḍamma",
             "symbol": "ـُ",
             "summary": "让辅音带短促的 u 音。||Adds a short u sound to the consonant.",
             "example": {
@@ -183,21 +183,21 @@
               "arabicWithDiacritics": "بُ",
               "arabicPlain": "ب",
               "transliteration": "bu",
-              "translation": "短音 u||short u",
+              "translation": "发 u||sounds u",
               "audioPath": ""
             }
           },
           {
             "id": "sukun",
-            "title": "静音符||Sukun",
+            "title": "静符||Sukūn",
             "symbol": "ـْ",
-            "summary": "表示这个辅音不再带元音。||Shows that the consonant carries no following vowel.",
+            "summary": "表示这个辅音后不带元音。||Shows that the consonant carries no following vowel.",
             "example": {
               "id": "sukun_b",
               "arabicWithDiacritics": "بْ",
               "arabicPlain": "ب",
               "transliteration": "b",
-              "translation": "停住||stop the sound",
+              "translation": "无元音||no vowel",
               "audioPath": ""
             }
           },
@@ -205,13 +205,13 @@
             "id": "shadda",
             "title": "叠音符||Shadda",
             "symbol": "ـّ",
-            "summary": "表示辅音重读或双写。||Marks consonant doubling or emphasis.",
+            "summary": "表示辅音叠读或双写。||Marks consonant doubling or gemination.",
             "example": {
               "id": "shadda_bba",
               "arabicWithDiacritics": "بَّ",
               "arabicPlain": "ب",
               "transliteration": "bba",
-              "translation": "重读辅音||doubled consonant",
+              "translation": "双辅音||doubled consonant",
               "audioPath": ""
             }
           }

@@ -324,6 +324,7 @@ class _AudioOwner {
   final String ownerId;
   final String vocalized;
   final String plain;
+  final Set<String> acceptedVocalized;
   final String reviewStatus;
   final String source;
 
@@ -332,6 +333,7 @@ class _AudioOwner {
     required this.ownerId,
     required this.vocalized,
     required this.plain,
+    this.acceptedVocalized = const <String>{},
     required this.reviewStatus,
     required this.source,
   });
@@ -609,6 +611,26 @@ class _Validator {
 
     for (final group in sampleAlphabetGroups) {
       for (final letter in group.letters) {
+        final pronunciationByKey = <String, dynamic>{
+          for (final pronunciation in letter.pronunciations)
+            pronunciation.key: pronunciation,
+        };
+        final legacyPronunciationTexts = <String>[
+          pronunciationByKey['fatha']?.audioQueryText ?? '',
+          pronunciationByKey['kasra']?.audioQueryText ?? '',
+          pronunciationByKey['damma']?.audioQueryText ?? '',
+          pronunciationByKey['long_a']?.audioQueryText ?? '',
+          pronunciationByKey['long_i']?.audioQueryText ?? '',
+          pronunciationByKey['long_u']?.audioQueryText ?? '',
+          pronunciationByKey['sukun']?.audioQueryText ?? '',
+          _legacyShaddaForm(letter.arabic, 'a'),
+          _legacyShaddaForm(letter.arabic, 'i'),
+          _legacyShaddaForm(letter.arabic, 'u'),
+          pronunciationByKey['tanwin_an']?.audioQueryText ?? '',
+          pronunciationByKey['tanwin_in']?.audioQueryText ?? '',
+          pronunciationByKey['tanwin_un']?.audioQueryText ?? '',
+        ];
+
         final letterId = 'alphabet_letter_$letterIndex';
         _audioOwners[letterId] = _AudioOwner(
           ownerType: 'letter',
@@ -620,13 +642,27 @@ class _Validator {
         );
         letterIndex++;
 
-        for (final pronunciation in letter.pronunciations) {
+        for (var pronunciationOffset = 0;
+            pronunciationOffset < letter.pronunciations.length;
+            pronunciationOffset++) {
+          final pronunciation = letter.pronunciations[pronunciationOffset];
           final pronunciationId = 'alphabet_pronunciation_$pronunciationIndex';
+          final acceptedVocalized = <String>{
+            pronunciation.form,
+            pronunciation.audioQueryText,
+          };
+          if (pronunciationOffset < legacyPronunciationTexts.length) {
+            final legacyText = legacyPronunciationTexts[pronunciationOffset];
+            if (legacyText.isNotEmpty) {
+              acceptedVocalized.add(legacyText);
+            }
+          }
           _audioOwners[pronunciationId] = _AudioOwner(
             ownerType: 'pronunciation',
             ownerId: pronunciationId,
             vocalized: pronunciation.form,
             plain: _stripArabicDiacritics(pronunciation.form),
+            acceptedVocalized: acceptedVocalized,
             reviewStatus: 'published',
             source: 'alphabet/group_${group.id}/pronunciation_$pronunciationIndex',
           );
@@ -923,9 +959,16 @@ class _Validator {
       final owner = _audioOwners[sourceId];
       if (owner == null) {
         report.error('R503', target, 'sourceId=$sourceId 找不到对应内容。');
-      } else if (_normalizeArabicText(textAr) !=
-          _normalizeArabicText(owner.vocalized)) {
+      } else {
+        final normalizedText = _normalizeArabicText(textAr);
+        final acceptedForms = <String>{owner.vocalized, ...owner.acceptedVocalized}
+            .map(_normalizeArabicText)
+            .where((value) => value.isNotEmpty)
+            .toSet();
+
+        if (!acceptedForms.contains(normalizedText)) {
         report.error('R504', target, '音频文本与 owner 展示文本不一致。');
+        }
       }
 
       if (assetPath.trim().isEmpty) {
@@ -940,6 +983,24 @@ class _Validator {
         }
       }
     }
+  }
+
+  String _legacyShaddaForm(String letter, String vowel) {
+    if (letter == 'ا') {
+      return switch (vowel) {
+        'a' => 'أَّ',
+        'i' => 'إِّ',
+        'u' => 'أُّ',
+        _ => 'أَّ',
+      };
+    }
+
+    return switch (vowel) {
+      'a' => '${letter}َّ',
+      'i' => '${letter}ِّ',
+      'u' => '${letter}ُّ',
+      _ => '${letter}َّ',
+    };
   }
 
   void _validateGrammar() {

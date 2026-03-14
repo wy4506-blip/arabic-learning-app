@@ -193,11 +193,7 @@ class AudioManifestService {
       }
     }
 
-    final result = <String>[...preferred, ...fallback];
-    // Debug logging
-    // ignore: avoid_print
-    print('[AudioManifest] preference=$preference, preferredType=$preferredType, preferred=${preferred.length}, fallback=${fallback.length}, result=$result');
-    return result;
+    return <String>[...preferred, ...fallback];
   }
 
   static String _normalizeText(String? value) {

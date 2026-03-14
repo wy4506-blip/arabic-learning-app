@@ -2,6 +2,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
+import '../models/alphabet_group.dart';
 import '../models/app_settings.dart';
 import 'audio_manifest_service.dart';
 
@@ -148,8 +149,6 @@ class AudioService {
   static Future<void> speakLetter(String text) async {
     final String normalized = text.trim();
 
-    debugPrint('[Audio] speakLetter preference: $_voicePreference');
-
     final assets = await AudioManifestService.findAlphabetAssets(
       type: 'letter',
       speed: 'normal',
@@ -159,10 +158,7 @@ class AudioService {
     );
 
     if (assets.isNotEmpty) {
-      debugPrint('[Audio] manifest hit(letter): ${assets.first} (count: ${assets.length})');
-      if (assets.length > 1) {
-        debugPrint('[Audio]   all results: $assets');
-      }
+      debugPrint('[Audio] manifest hit(letter): ${assets.first}');
     } else {
       debugPrint('[Audio] manifest miss(letter): $normalized');
     }
@@ -194,6 +190,12 @@ class AudioService {
       assets: assets,
       fallbackText: normalized,
     );
+  }
+
+  static Future<void> speakPronunciationItem(
+    AlphabetPronunciationItem item,
+  ) async {
+    await speakPronunciation(item.audioQueryText);
   }
 
   static Future<void> speakExampleWord(String word) async {

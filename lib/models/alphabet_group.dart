@@ -19,24 +19,57 @@ class AlphabetExample {
 }
 
 class AlphabetPronunciationItem {
+  final String id;
+  final String key;
+  final String shortTitle;
+  final String fullTitle;
+  final String arabicSymbol;
+  final String transliteration;
+  final String ipa;
+  final String pronunciationValue;
+  final String shortSubtitle;
+  final String detailDescription;
+  final String examplePattern;
+  final String audioKey;
+  final int sortOrder;
   final String form;
-  final String latin;
-  final String label;
-  final String hint;
+  final String audioQueryText;
 
   AlphabetPronunciationItem({
+    required this.id,
+    required this.key,
+    required this.shortTitle,
+    required this.fullTitle,
+    required this.arabicSymbol,
+    required this.transliteration,
+    required this.ipa,
+    required this.pronunciationValue,
+    required this.shortSubtitle,
+    required this.detailDescription,
+    required this.examplePattern,
+    required this.audioKey,
+    required this.sortOrder,
     required this.form,
-    required this.latin,
-    required this.label,
-    required this.hint,
+    required this.audioQueryText,
   });
 
   factory AlphabetPronunciationItem.fromJson(Map<String, dynamic> json) {
     return AlphabetPronunciationItem(
+      id: json['id'] as String? ?? json['key'] as String? ?? '',
+      key: json['key'] as String? ?? '',
+      shortTitle: json['shortTitle'] as String? ?? json['label'] as String? ?? '',
+      fullTitle: json['fullTitle'] as String? ?? json['label'] as String? ?? '',
+      arabicSymbol: json['arabicSymbol'] as String? ?? '',
+      transliteration: json['transliteration'] as String? ?? json['latin'] as String? ?? '',
+      ipa: json['ipa'] as String? ?? '',
+      pronunciationValue: json['pronunciationValue'] as String? ?? json['latin'] as String? ?? '',
+      shortSubtitle: json['shortSubtitle'] as String? ?? '',
+      detailDescription: json['detailDescription'] as String? ?? json['hint'] as String? ?? '',
+      examplePattern: json['examplePattern'] as String? ?? '',
+      audioKey: json['audioKey'] as String? ?? json['key'] as String? ?? '',
+      sortOrder: json['sortOrder'] as int? ?? 0,
       form: json['form'] as String,
-      latin: json['latin'] as String,
-      label: json['label'] as String,
-      hint: json['hint'] as String,
+      audioQueryText: json['audioQueryText'] as String? ?? json['form'] as String? ?? '',
     );
   }
 }
