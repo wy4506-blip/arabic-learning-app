@@ -48,7 +48,7 @@ void main() {
       const ReviewSessionPage(session: session),
     );
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Got It'));
+    await tester.tap(find.widgetWithText(FilledButton, 'I Can Say It'));
     await tester.pump();
 
     expect(
@@ -93,12 +93,141 @@ void main() {
       const ReviewSessionPage(session: session),
     );
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Got It'));
+    await tester.tap(find.widgetWithText(FilledButton, 'I Can Say It'));
     await tester.pump();
 
-    expect(find.text('This Review Pass Is Complete'), findsOneWidget);
+    expect(find.text('This Formal Review Pass Is Complete'), findsOneWidget);
     expect(find.text('Enter Now'), findsNothing);
     expect(find.text('Back Home'), findsNothing);
-    expect(find.text('Back'), findsOneWidget);
+    expect(find.text('Return to Learning'), findsOneWidget);
+  });
+
+  testWidgets('formal lesson follow-up can continue to the next lesson', (
+    tester,
+  ) async {
+    const session = ReviewSession(
+      id: 'lesson-wrap:test',
+      kind: ReviewSessionKind.lessonWrapUp,
+      title: 'Lesson Wrap-Up',
+      subtitle: 'A short reinforcement loop.',
+      tasks: <ReviewTask>[
+        ReviewTask(
+          contentId: 'word:marhaban',
+          type: ReviewContentType.word,
+          origin: ReviewTaskOrigin.lessonBridge,
+          title: 'Hello',
+          subtitle: 'Greeting',
+          arabicText: 'مَرْحَبًا',
+          transliteration: 'marhaban',
+          helperText: 'A common greeting.',
+          lessonId: 'U1L1',
+          sourceId: 'U1L1',
+          estimatedSeconds: 30,
+          priority: 10,
+        ),
+      ],
+      countTowardActivity: true,
+      syncWithTodayPlan: false,
+      config: ReviewSessionConfig(
+        source: ReviewEntrySource.lessonFollowUp,
+        mode: ReviewSessionMode.formal,
+        nextLessonId: 'U1L2',
+        nextLessonLabel: 'Introducing Yourself',
+      ),
+    );
+
+    await pumpLocalizedTestPage(
+      tester,
+      const ReviewSessionPage(session: session),
+    );
+
+    await tester.tap(find.widgetWithText(FilledButton, 'I Can Say It'));
+    await tester.pump();
+
+    expect(find.text('Continue to Next Lesson'), findsOneWidget);
+    expect(find.text('Stay on Current Lesson'), findsOneWidget);
+    expect(find.text('Next Step'), findsOneWidget);
+    expect(find.text('Introducing Yourself'), findsOneWidget);
+  });
+
+  testWidgets('listen task shows audio guidance and play action', (
+    tester,
+  ) async {
+    const session = ReviewSession(
+      id: 'listen:test',
+      kind: ReviewSessionKind.single,
+      title: 'Pronunciation Review',
+      subtitle: 'Listen carefully.',
+      tasks: <ReviewTask>[
+        ReviewTask(
+          contentId: 'symbol_reading:alif:a',
+          type: ReviewContentType.pronunciation,
+          objectType: ReviewObjectType.symbolReading,
+          actionType: ReviewActionType.listen,
+          origin: ReviewTaskOrigin.due,
+          title: 'Fatha sound',
+          subtitle: 'Short vowel sound',
+          arabicText: 'أَ',
+          transliteration: 'a',
+          audioQueryText: 'أَ',
+          estimatedSeconds: 25,
+          priority: 10,
+        ),
+      ],
+      countTowardActivity: false,
+      syncWithTodayPlan: false,
+      config: ReviewSessionConfig.reviewTab(mode: ReviewSessionMode.formal),
+    );
+
+    await pumpLocalizedTestPage(
+      tester,
+      const ReviewSessionPage(session: session),
+    );
+
+    expect(find.text('Listen'), findsWidgets);
+    expect(find.text('Play Audio'), findsOneWidget);
+    expect(
+      find.text('Listen first, then decide whether you truly caught it.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('distinguish task shows contrast view', (
+    tester,
+  ) async {
+    const session = ReviewSession(
+      id: 'pair:test',
+      kind: ReviewSessionKind.single,
+      title: 'Contrast Review',
+      subtitle: 'Split the pair clearly.',
+      tasks: <ReviewTask>[
+        ReviewTask(
+          contentId: 'confusion_pair:ba__ta',
+          type: ReviewContentType.pair,
+          objectType: ReviewObjectType.confusionPair,
+          actionType: ReviewActionType.distinguish,
+          origin: ReviewTaskOrigin.weak,
+          title: 'Tell these two apart',
+          subtitle: 'ba vs ta',
+          arabicText: 'ب  ت',
+          sourceId: 'ب|ت',
+          estimatedSeconds: 25,
+          priority: 10,
+        ),
+      ],
+      countTowardActivity: false,
+      syncWithTodayPlan: false,
+      config: ReviewSessionConfig.reviewTab(mode: ReviewSessionMode.formal),
+    );
+
+    await pumpLocalizedTestPage(
+      tester,
+      const ReviewSessionPage(session: session),
+    );
+
+    expect(find.text('Play Contrast Audio'), findsOneWidget);
+    expect(find.text('You only need to separate these two clearly.'), findsOneWidget);
+    expect(find.text('ب'), findsWidgets);
+    expect(find.text('ت'), findsWidgets);
   });
 }

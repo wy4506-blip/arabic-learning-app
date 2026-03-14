@@ -50,6 +50,7 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
   List<GrammarPageContent> _relatedGrammarPages = const <GrammarPageContent>[];
   List<ReviewTask> _lessonPreviewTasks = const <ReviewTask>[];
   List<ReviewTask> _lessonWrapUpTasks = const <ReviewTask>[];
+  ReviewSession? _lessonWrapUpSession;
   bool _completed = false;
   late bool _unlocked;
   String _expandedSectionId = 'words';
@@ -81,8 +82,8 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
       _relatedGrammarPages = results[1] as List<GrammarPageContent>;
       _lessonPreviewTasks =
           ((results[2] as ReviewSession?)?.tasks ?? const <ReviewTask>[]);
-      _lessonWrapUpTasks =
-          ((results[3] as ReviewSession?)?.tasks ?? const <ReviewTask>[]);
+      _lessonWrapUpSession = results[3] as ReviewSession?;
+      _lessonWrapUpTasks = _lessonWrapUpSession?.tasks ?? const <ReviewTask>[];
     });
   }
 
@@ -327,10 +328,11 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
   }
 
   Future<void> _openLessonWrapUpReview() async {
-    final session = await ReviewService.createLessonWrapUpSession(
-      widget.settings,
-      widget.lesson,
-    );
+    final session = _lessonWrapUpSession ??
+        await ReviewService.createLessonWrapUpSession(
+          widget.settings,
+          widget.lesson,
+        );
     if (!mounted || session == null) return;
 
     final result = await Navigator.push<bool>(
@@ -614,6 +616,40 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
             ),
           ],
           if (!locked) ...[
+            if (_completed && _lessonWrapUpSession != null) ...[
+              const SizedBox(height: 16),
+              LessonMicroReviewCard(
+                title: localizedText(
+                  context,
+                  zh: '完成本课后，先做这一轮正式巩固',
+                  en: 'After finishing this lesson, do this formal follow-up first',
+                ),
+                subtitle: _lessonWrapUpSession!.config.nextLessonLabel == null
+                    ? localizedText(
+                        context,
+                        zh: '做完这轮巩固，再回到主线继续学习。',
+                        en: 'Finish this short reinforcement pass, then return to your main learning path.',
+                      )
+                    : localizedText(
+                        context,
+                        zh: '做完这轮巩固，就顺着进入${_lessonWrapUpSession!.config.nextLessonLabel}。',
+                        en: 'Finish this pass, then continue straight into ${_lessonWrapUpSession!.config.nextLessonLabel}.',
+                      ),
+                tasks: _lessonWrapUpTasks.take(3).toList(growable: false),
+                actionLabel: _lessonWrapUpSession!.config.nextLessonLabel == null
+                    ? localizedText(
+                        context,
+                        zh: '开始课后正式复习',
+                        en: 'Start Formal Wrap-Up Review',
+                      )
+                    : localizedText(
+                        context,
+                        zh: '先巩固，再去下一课',
+                        en: 'Reinforce First, Then Next Lesson',
+                      ),
+                onActionTap: _openLessonWrapUpReview,
+              ),
+            ],
             const SizedBox(height: 20),
             Wrap(
               spacing: 8,

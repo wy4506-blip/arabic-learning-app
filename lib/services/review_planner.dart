@@ -88,7 +88,8 @@ class ReviewPlanner {
     final tasks = _sortedCandidates(context)
         .where((task) {
           final state = context.learningStates[task.contentId];
-          return (state?.isWeak ?? false) || (state?.needsReview ?? false);
+          return (state?.stage == LearningStage.weak) ||
+              (state?.isReviewDue ?? false);
         })
         .take(6)
         .toList(growable: false);
@@ -118,6 +119,20 @@ class ReviewPlanner {
     final counts = <ReviewContentType, int>{};
     for (final task in _sortedCandidates(context)) {
       counts[task.type] = (counts[task.type] ?? 0) + 1;
+    }
+    return counts;
+  }
+
+  static Map<ReviewPracticeArea, int> buildPracticeCounts(
+    ReviewPlannerContext context,
+  ) {
+    final counts = <ReviewPracticeArea, int>{};
+    for (final task in _sortedCandidates(context)) {
+      final area = reviewPracticeAreaForObject(task.objectType);
+      if (area == null) {
+        continue;
+      }
+      counts[area] = (counts[area] ?? 0) + 1;
     }
     return counts;
   }
@@ -284,6 +299,8 @@ class ReviewPlanner {
         ReviewTask(
           contentId: contentId,
           type: ReviewContentType.word,
+          objectType: ReviewObjectType.wordReading,
+          actionType: ReviewActionType.repeat,
           origin: _originForState(
             state,
             fallback: ReviewTaskOrigin.favorite,
@@ -361,7 +378,10 @@ class ReviewPlanner {
     };
 
     for (final key in alphabetKeys) {
-      final arabic = key.replaceFirst('alphabet:', '');
+      final arabic = reviewSourceIdFromContentId(key);
+      if (arabic == null) {
+        continue;
+      }
       final letter = alphabetByKey[arabic];
       if (letter == null) {
         continue;
@@ -380,6 +400,98 @@ class ReviewPlanner {
           lessonId: state?.lessonId,
         ),
       );
+    }
+
+    for (final state in context.learningStates.values) {
+      if (state.type == ReviewContentType.pronunciation) {
+        final arabic = reviewSourceIdFromContentId(state.contentId);
+        final symbolKey = reviewVariantKeyFromContentId(state.contentId);
+        if (arabic == null || symbolKey == null) {
+          continue;
+        }
+        final letter = alphabetByKey[arabic];
+        if (letter == null) {
+          continue;
+        }
+        AlphabetPronunciationItem? pronunciation;
+        for (final item in letter.pronunciations) {
+          if (item.key == symbolKey) {
+            pronunciation = item;
+            break;
+          }
+        }
+        if (pronunciation == null) {
+          continue;
+        }
+        addTask(
+          _buildPronunciationTask(
+            context,
+            letter,
+            pronunciation,
+            origin: _originForState(state, fallback: ReviewTaskOrigin.recentLesson),
+            score: 18 + _statePriorityBonus(state),
+            lessonId: state.lessonId,
+          ),
+        );
+      }
+      if (state.type == ReviewContentType.pair) {
+        final pairKey = reviewSourceIdFromContentId(state.contentId);
+        if (pairKey == null) {
+          continue;
+        }
+        final parts = pairKey.split('__');
+        if (parts.length != 2) {
+          continue;
+        }
+        final left = alphabetByKey[parts[0]];
+        final right = alphabetByKey[parts[1]];
+        if (left == null || right == null) {
+          continue;
+        }
+        addTask(
+          _buildConfusionPairTask(
+            context,
+            left,
+            right,
+            origin: _originForState(state, fallback: ReviewTaskOrigin.recentLesson),
+            score: 16 + _statePriorityBonus(state),
+            lessonId: state.lessonId,
+          ),
+        );
+      }
+      if (state.type == ReviewContentType.alphabet &&
+          state.objectType != ReviewObjectType.letterSound) {
+        final arabic = reviewSourceIdFromContentId(state.contentId);
+        if (arabic == null) {
+          continue;
+        }
+        final letter = alphabetByKey[arabic];
+        if (letter == null) {
+          continue;
+        }
+        if (state.objectType == ReviewObjectType.letterName) {
+          addTask(
+            _buildLetterNameTask(
+              context,
+              letter,
+              origin: _originForState(state, fallback: ReviewTaskOrigin.recentLesson),
+              score: 14 + _statePriorityBonus(state),
+              lessonId: state.lessonId,
+            ),
+          );
+        }
+        if (state.objectType == ReviewObjectType.letterForm) {
+          addTask(
+            _buildLetterFormTask(
+              context,
+              letter,
+              origin: _originForState(state, fallback: ReviewTaskOrigin.recentLesson),
+              score: 14 + _statePriorityBonus(state),
+              lessonId: state.lessonId,
+            ),
+          );
+        }
+      }
     }
 
     final tasks = merged.values.toList(growable: false)
@@ -453,6 +565,8 @@ class ReviewPlanner {
     return ReviewTask(
       contentId: buildWordContentId(word.text.plain),
       type: ReviewContentType.word,
+      objectType: ReviewObjectType.wordReading,
+      actionType: ReviewActionType.repeat,
       origin: origin,
       title: LessonContentLocalizer.meaning(
         word.meaning.zh,
@@ -489,6 +603,8 @@ class ReviewPlanner {
     return ReviewTask(
       contentId: buildSentenceContentId(pattern.text.plain),
       type: ReviewContentType.sentence,
+      objectType: ReviewObjectType.sentencePattern,
+      actionType: ReviewActionType.read,
       origin: origin,
       title: LessonContentLocalizer.meaning(
         pattern.meaning.zh,
@@ -520,6 +636,8 @@ class ReviewPlanner {
     return ReviewTask(
       contentId: buildGrammarContentId(page.id),
       type: ReviewContentType.grammar,
+      objectType: ReviewObjectType.grammarReference,
+      actionType: ReviewActionType.recognize,
       origin: origin,
       title: grammarUiText(page.title, context.settings.appLanguage),
       subtitle: grammarContentText(
@@ -554,6 +672,8 @@ class ReviewPlanner {
     return ReviewTask(
       contentId: buildAlphabetContentId(letter.arabic),
       type: ReviewContentType.alphabet,
+      objectType: ReviewObjectType.letterSound,
+      actionType: ReviewActionType.listen,
       origin: origin,
       title: title,
       subtitle: LessonContentLocalizer.meaning(
@@ -573,14 +693,139 @@ class ReviewPlanner {
     );
   }
 
+  static ReviewTask _buildLetterNameTask(
+    ReviewPlannerContext context,
+    AlphabetLetter letter, {
+    required ReviewTaskOrigin origin,
+    required int score,
+    String? lessonId,
+  }) {
+    return ReviewTask(
+      contentId: buildLetterNameContentId(letter.arabic),
+      type: ReviewContentType.alphabet,
+      objectType: ReviewObjectType.letterName,
+      actionType: ReviewActionType.recognize,
+      origin: origin,
+      title: context.settings.appLanguage == AppLanguage.en
+          ? 'Name this letter'
+          : '认出这个字母的名字',
+      subtitle: context.settings.appLanguage == AppLanguage.en
+          ? '${letter.name} · ${letter.latinName}'
+          : '${letter.arabicName} · ${letter.latinName}',
+      arabicText: letter.arabic,
+      transliteration: letter.pronunciation,
+      helperText: LessonContentLocalizer.meaning(
+        letter.hint,
+        context.settings.meaningLanguage,
+      ),
+      lessonId: lessonId,
+      sourceId: letter.arabic,
+      estimatedSeconds: 25,
+      priority: score,
+    );
+  }
+
+  static ReviewTask _buildLetterFormTask(
+    ReviewPlannerContext context,
+    AlphabetLetter letter, {
+    required ReviewTaskOrigin origin,
+    required int score,
+    String? lessonId,
+  }) {
+    return ReviewTask(
+      contentId: buildLetterFormContentId(letter.arabic),
+      type: ReviewContentType.alphabet,
+      objectType: ReviewObjectType.letterForm,
+      actionType: ReviewActionType.recognize,
+      origin: origin,
+      title: context.settings.appLanguage == AppLanguage.en
+          ? 'Match the letter form'
+          : '认出这个字母形态',
+      subtitle: context.settings.appLanguage == AppLanguage.en
+          ? 'Isolated ${letter.forms.isolated} · Initial ${letter.forms.initial}'
+          : '独立 ${letter.forms.isolated} · 词首 ${letter.forms.initial}',
+      arabicText: letter.forms.medial,
+      transliteration: letter.latinName,
+      helperText: context.settings.appLanguage == AppLanguage.en
+          ? 'Also appears as ${letter.forms.finalForm} at the end of words.'
+          : '它在词尾还会写成 ${letter.forms.finalForm}。',
+      lessonId: lessonId,
+      sourceId: letter.arabic,
+      estimatedSeconds: 30,
+      priority: score,
+    );
+  }
+
+  static ReviewTask _buildPronunciationTask(
+    ReviewPlannerContext context,
+    AlphabetLetter letter,
+    AlphabetPronunciationItem pronunciation, {
+    required ReviewTaskOrigin origin,
+    required int score,
+    String? lessonId,
+  }) {
+    return ReviewTask(
+      contentId: buildSymbolReadingContentId(letter.arabic, pronunciation.key),
+      type: ReviewContentType.pronunciation,
+      objectType: ReviewObjectType.symbolReading,
+      actionType: ReviewActionType.read,
+      origin: origin,
+      title: pronunciation.fullTitle,
+      subtitle: pronunciation.shortSubtitle.isEmpty
+          ? pronunciation.detailDescription
+          : pronunciation.shortSubtitle,
+      arabicText: pronunciation.arabicSymbol,
+      transliteration: pronunciation.transliteration,
+      helperText: pronunciation.detailDescription,
+      lessonId: lessonId,
+      sourceId: letter.arabic,
+      variantKey: pronunciation.key,
+      audioQueryText: pronunciation.audioQueryText,
+      estimatedSeconds: 35,
+      priority: score,
+    );
+  }
+
+  static ReviewTask _buildConfusionPairTask(
+    ReviewPlannerContext context,
+    AlphabetLetter left,
+    AlphabetLetter right, {
+    required ReviewTaskOrigin origin,
+    required int score,
+    String? lessonId,
+  }) {
+    return ReviewTask(
+      contentId: buildConfusionPairContentId(left.arabic, right.arabic),
+      type: ReviewContentType.pair,
+      objectType: ReviewObjectType.confusionPair,
+      actionType: ReviewActionType.distinguish,
+      origin: origin,
+      title: context.settings.appLanguage == AppLanguage.en
+          ? 'Tell these two letters apart'
+          : '区分这两个易混字母',
+      subtitle: context.settings.appLanguage == AppLanguage.en
+          ? '${left.latinName} vs ${right.latinName}'
+          : '${left.arabicName} 和 ${right.arabicName}',
+      arabicText: '${left.arabic}  ${right.arabic}',
+      transliteration: '${left.pronunciation} / ${right.pronunciation}',
+      helperText: context.settings.appLanguage == AppLanguage.en
+          ? '${left.soundHint}; ${right.soundHint}'
+          : '${left.soundHint}；${right.soundHint}',
+      lessonId: lessonId,
+      sourceId: '${left.arabic}|${right.arabic}',
+      estimatedSeconds: 32,
+      priority: score,
+    );
+  }
+
   static ReviewTaskOrigin _originForState(
     LearningContentState? state, {
     required ReviewTaskOrigin fallback,
   }) {
-    if (state?.isWeak ?? false) {
+    if (state?.stage == LearningStage.weak || state?.isWeak == true) {
       return ReviewTaskOrigin.weak;
     }
-    if (state?.needsReview ?? false) {
+    if (state?.isReviewDue == true || state?.needsReview == true) {
       return ReviewTaskOrigin.due;
     }
     if (state?.isFavorited ?? false) {
@@ -594,8 +839,22 @@ class ReviewPlanner {
       return 0;
     }
     var score = state.reviewPriority * 4;
-    if (state.needsReview) {
-      score += 20;
+    switch (state.stage) {
+      case LearningStage.newItem:
+        score += 0;
+      case LearningStage.learning:
+        score += 10;
+      case LearningStage.weak:
+        score += 28;
+      case LearningStage.reviewDue:
+        score += 24;
+      case LearningStage.stable:
+        score += 8;
+      case LearningStage.mastered:
+        score += 2;
+    }
+    if (state.isReviewDue) {
+      score += 16;
     }
     if (state.isWeak) {
       score += 18;
@@ -605,6 +864,7 @@ class ReviewPlanner {
     }
     score += _recencyBonus(state.lastStudiedAt, DateTime.now());
     score += _recencyBonus(state.lastViewedAt, DateTime.now()) ~/ 2;
+    score += _recencyBonus(state.lastReviewedAt, DateTime.now());
     return score;
   }
 

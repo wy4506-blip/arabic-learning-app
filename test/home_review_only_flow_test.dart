@@ -33,7 +33,7 @@ void main() {
       },
     );
 
-    await tester.tap(find.text('Review Only').first);
+    await tester.tap(find.text('Formal Review Only').first);
     await tester.pumpAndSettle();
 
     expect(find.text('Today\'s Learning'), findsNothing);

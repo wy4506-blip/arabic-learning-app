@@ -34,10 +34,10 @@ void main() {
     );
 
     expect(find.text('Start Today\'s Learning'), findsOneWidget);
-    expect(find.text('Review Only'), findsOneWidget);
+    expect(find.text('Formal Review Only'), findsOneWidget);
     expect(find.text('Skip Review and Learn'), findsOneWidget);
 
-    await tester.tap(find.text('Start Learning').first);
+    await tester.tap(find.text('Start with Formal Review').first);
     await tester.pumpAndSettle();
 
     expect(find.text('Today\'s Learning'), findsOneWidget);

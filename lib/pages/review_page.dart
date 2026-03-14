@@ -194,8 +194,8 @@ class _ReviewPageState extends State<ReviewPage> {
                 title: localizedText(context, zh: '复习', en: 'Review'),
                 subtitle: localizedText(
                   context,
-                  zh: '回顾一下最近学过的重点，轻松接上下一步。',
-                  en: 'Revisit recent highlights and slip back into learning with less effort.',
+                  zh: '先做今天最值得的一轮正式复习，做完就顺着回到课程。',
+                  en: 'Start with the single most valuable formal review set for today, then return to lessons.',
                 ),
               ),
               const SizedBox(height: 18),
@@ -275,8 +275,8 @@ class _ReviewPageState extends State<ReviewPage> {
                 title: localizedText(context, zh: '复习', en: 'Review'),
                 subtitle: localizedText(
                   context,
-                  zh: '回顾一下最近学过的重点，轻松接上下一步。',
-                  en: 'Revisit recent highlights and slip back into learning with less effort.',
+                  zh: '正式复习优先，自由练习放后，尽量让你少做选择。',
+                  en: 'Formal review first, free practice second, with fewer choices to make.',
                 ),
               ),
               const SizedBox(height: 18),
@@ -335,13 +335,13 @@ class _ReviewPageState extends State<ReviewPage> {
                         : summary.todayPlan.hasStarted
                             ? localizedText(
                                 context,
-                                zh: '继续今天这轮回顾',
-                                en: 'Continue Today\'s Review',
+                                zh: '继续今天这轮正式复习',
+                                en: 'Continue Today\'s Formal Review',
                               )
                             : localizedText(
                                 context,
-                                zh: '先回顾一下最近最值得看的内容',
-                                en: 'Start with the most helpful recent review items',
+                                zh: '先完成今天最值得做的正式复习',
+                                en: 'Start with the most valuable formal review set',
                               ),
                 subtitle: todayPlan.tasks.isEmpty
                     ? localizedText(
@@ -352,13 +352,13 @@ class _ReviewPageState extends State<ReviewPage> {
                     : todayPlan.isCompleted
                         ? localizedText(
                             context,
-                            zh: '今天这组内容已经过完了。你可以回到课程继续推进，也可以挑一类内容再练。',
-                            en: 'Today\'s set is complete. You can return to lessons or practice one content type again.',
+                            zh: '今天这组正式复习已经完成。你可以回到课程继续推进，也可以做一轮自由练习。',
+                            en: 'Today\'s formal review is complete. You can return to lessons or do a short free-practice pass.',
                           )
                         : localizedText(
                             context,
-                            zh: '内容会优先从最近学过、待复习和需要再巩固的地方里自动整理。',
-                            en: 'The set is automatically built from recent lessons, due items, and anything that needs another pass.',
+                            zh: '内容会优先从待正式复习、薄弱项和刚学完的对象里自动整理。',
+                            en: 'The set is automatically built from due review items, weak spots, and what you just learned.',
                           ),
                 composition: _compositionLabels(typeCounts, todayPlan.tasks),
                 metaText: todayPlan.tasks.isEmpty
@@ -379,8 +379,8 @@ class _ReviewPageState extends State<ReviewPage> {
                     : todayPlan.isCompleted
                         ? localizedText(context, zh: '再来一轮快复习', en: 'Start a Quick Review')
                         : summary.todayPlan.hasStarted
-                            ? localizedText(context, zh: '继续复习', en: 'Continue Review')
-                            : localizedText(context, zh: '开始复习', en: 'Start Review'),
+                          ? localizedText(context, zh: '继续正式复习', en: 'Continue Formal Review')
+                          : localizedText(context, zh: '开始正式复习', en: 'Start Formal Review'),
                 onPrimaryTap: todayPlan.tasks.isEmpty
                     ? () => _loadDashboard()
                     : todayPlan.isCompleted
@@ -422,8 +422,8 @@ class _ReviewPageState extends State<ReviewPage> {
                     title: localizedText(context, zh: '5 分钟快复习', en: '5-Minute Review'),
                     subtitle: localizedText(
                       context,
-                      zh: '快速清几个最值得先看的点，不打断主学习节奏。',
-                      en: 'Clear a few high-value items without interrupting your lesson flow.',
+                      zh: '自由练习模式，快速清几个点，不占用正式复习配额。',
+                      en: 'Free-practice mode for clearing a few items without consuming the formal review flow.',
                     ),
                     badge: todayPlan.tasks.isEmpty ? null : '${todayPlan.pendingCount}',
                     icon: Icons.bolt_rounded,
@@ -437,8 +437,8 @@ class _ReviewPageState extends State<ReviewPage> {
                     title: localizedText(context, zh: '薄弱项再练', en: 'Weak Spots'),
                     subtitle: localizedText(
                       context,
-                      zh: '把还不稳的内容温和地再过一遍，降低遗忘感。',
-                      en: 'Give your less stable items one more calm pass.',
+                      zh: '把还不稳的内容单独拎出来补一下，适合自由练习。',
+                      en: 'Pull your unstable items into a separate free-practice pass.',
                     ),
                     badge: '${dashboard.weakTasks.length}',
                     icon: Icons.track_changes_rounded,
@@ -452,8 +452,8 @@ class _ReviewPageState extends State<ReviewPage> {
                     title: localizedText(context, zh: '按类型复习', en: 'By Type'),
                     subtitle: localizedText(
                       context,
-                      zh: '按单词、句子、语法或字母分别看，更适合补单点。',
-                      en: 'Stay inside one content type when you only need one focused pass.',
+                      zh: '按对象类型自由挑一组，适合补单点，不替代正式复习。',
+                      en: 'Choose one content type for a focused free-practice pass without replacing formal review.',
                     ),
                     icon: Icons.tune_rounded,
                     tintColor: const Color(0xFFEAF1FB),
@@ -531,6 +531,10 @@ class _ReviewPageState extends State<ReviewPage> {
     switch (type) {
       case ReviewContentType.word:
         return localizedText(context, zh: '单词', en: 'Words');
+      case ReviewContentType.pronunciation:
+        return localizedText(context, zh: '发音', en: 'Pronunciation');
+      case ReviewContentType.pair:
+        return localizedText(context, zh: '辨音', en: 'Contrast');
       case ReviewContentType.sentence:
         return localizedText(context, zh: '句子', en: 'Sentences');
       case ReviewContentType.grammar:

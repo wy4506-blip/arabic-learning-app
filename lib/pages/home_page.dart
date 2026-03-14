@@ -96,11 +96,11 @@ class HomeTodayLearningCardState {
   final String lessonMeta;
   final String totalTimeText;
   final String primaryButtonText;
-  final String secondaryButtonText;
-  final String tertiaryButtonText;
+  final String? secondaryButtonText;
+  final String? tertiaryButtonText;
   final VoidCallback onPrimaryTap;
-  final VoidCallback onSecondaryTap;
-  final VoidCallback onTertiaryTap;
+  final VoidCallback? onSecondaryTap;
+  final VoidCallback? onTertiaryTap;
 
   const HomeTodayLearningCardState({
     required this.badgeText,
@@ -111,11 +111,11 @@ class HomeTodayLearningCardState {
     required this.lessonMeta,
     required this.totalTimeText,
     required this.primaryButtonText,
-    required this.secondaryButtonText,
-    required this.tertiaryButtonText,
+    this.secondaryButtonText,
+    this.tertiaryButtonText,
     required this.onPrimaryTap,
-    required this.onSecondaryTap,
-    required this.onTertiaryTap,
+    this.onSecondaryTap,
+    this.onTertiaryTap,
   });
 }
 
@@ -385,6 +385,8 @@ class _HomePageState extends State<HomePage> {
     }
 
     final hasWarmUp = (reviewPlan?.pendingCount ?? 0) > 0;
+    final isContinuingFormalReview =
+      hasWarmUp && (reviewPlan?.hasStarted ?? false) && !(reviewPlan?.isCompleted ?? false);
     final lessonTitle = LessonLocalizer.title(
       nextLesson,
       context.appSettings.appLanguage,
@@ -398,19 +400,29 @@ class _HomePageState extends State<HomePage> {
       ),
       title: localizedText(
         context,
-        zh: '开始今天学习',
-        en: 'Start Today\'s Learning',
+        zh: hasWarmUp
+            ? (isContinuingFormalReview ? '继续今天学习' : '开始今天学习')
+            : '直接进入今天课程',
+        en: hasWarmUp
+            ? (isContinuingFormalReview
+                ? 'Continue Today\'s Learning'
+                : 'Start Today\'s Learning')
+            : 'Enter Today\'s Lesson',
       ),
       subtitle: hasWarmUp
           ? localizedText(
               context,
-              zh: '建议先复习 2 分钟，再进入下一节课',
-              en: 'A short two-minute warm-up first, then move into the next lesson.',
+              zh: isContinuingFormalReview
+                  ? '你还有一轮正式复习没完成，先接上它，再进入下一节课。'
+                  : '建议先完成一轮正式复习，再进入下一节课。',
+              en: isContinuingFormalReview
+                  ? 'Your formal review is already in progress. Finish it first, then move into the next lesson.'
+                  : 'Start with one short formal review pass, then move into the next lesson.',
             )
           : localizedText(
               context,
-              zh: '当前没有待复习内容，将直接进入下一节课',
-              en: 'No warm-up is waiting, so you will go straight into the next lesson.',
+              zh: '当前没有正式复习待办，可以直接进入下一节课。',
+              en: 'No formal review is waiting right now, so you can enter the next lesson directly.',
             ),
       lessonLabel: localizedText(
         context,
@@ -429,22 +441,37 @@ class _HomePageState extends State<HomePage> {
       ),
       primaryButtonText: localizedText(
         context,
-        zh: '开始学习',
-        en: 'Start Learning',
+        zh: hasWarmUp
+            ? (isContinuingFormalReview ? '继续正式复习' : '先做正式复习')
+            : '进入课程',
+        en: hasWarmUp
+            ? (isContinuingFormalReview
+                ? 'Continue Formal Review'
+                : 'Start with Formal Review')
+            : 'Enter Lesson',
       ),
-      secondaryButtonText: localizedText(
-        context,
-        zh: '只复习',
-        en: 'Review Only',
-      ),
-      tertiaryButtonText: localizedText(
-        context,
-        zh: '跳过复习，直接学习',
-        en: 'Skip Review and Learn',
-      ),
-      onPrimaryTap: () => _openHomeTodayReviewFlow(nextLesson),
-      onSecondaryTap: _openStandaloneReviewFlow,
-      onTertiaryTap: () => _openNextTask(nextLesson),
+      secondaryButtonText: hasWarmUp
+          ? localizedText(
+              context,
+              zh: '只做正式复习',
+              en: 'Formal Review Only',
+            )
+          : localizedText(
+              context,
+              zh: '去看复习页',
+              en: 'Open Review Page',
+            ),
+      tertiaryButtonText: hasWarmUp
+          ? localizedText(
+              context,
+              zh: '跳过复习，直接学习',
+              en: 'Skip Review and Learn',
+            )
+          : null,
+      onPrimaryTap:
+          hasWarmUp ? () => _openHomeTodayReviewFlow(nextLesson) : () => _openNextTask(nextLesson),
+      onSecondaryTap: hasWarmUp ? _openStandaloneReviewFlow : _openReviewTab,
+      onTertiaryTap: hasWarmUp ? () => _openNextTask(nextLesson) : null,
     );
   }
 
@@ -682,8 +709,8 @@ class _HomePageState extends State<HomePage> {
         title: localizedText(context, zh: '复习', en: 'Review'),
         subtitle: localizedText(
           context,
-          zh: '回顾刚学过的内容',
-          en: 'Refresh what you just learned',
+          zh: '进入正式复习或自由练习',
+          en: 'Open formal review or free practice',
         ),
         icon: Icons.refresh_rounded,
         tintColor: _homeMint,
@@ -1107,27 +1134,31 @@ class _HomeTodayLearningCard extends StatelessWidget {
               child: Text(state.primaryButtonText),
             ),
           ),
-          const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: state.onSecondaryTap,
-              child: Text(state.secondaryButtonText),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: state.onTertiaryTap,
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          if (state.secondaryButtonText != null && state.onSecondaryTap != null) ...[
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: state.onSecondaryTap,
+                child: Text(state.secondaryButtonText!),
               ),
-              child: Text(state.tertiaryButtonText),
             ),
-          ),
+          ],
+          if (state.tertiaryButtonText != null && state.onTertiaryTap != null) ...[
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: state.onTertiaryTap,
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(state.tertiaryButtonText!),
+              ),
+            ),
+          ],
         ],
       ),
     );

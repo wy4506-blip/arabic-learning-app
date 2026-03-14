@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:arabic_learning_app/models/review_models.dart';
+import 'package:arabic_learning_app/services/lesson_service.dart';
 import 'package:arabic_learning_app/services/review_service.dart';
 
 import 'test_helpers.dart';
@@ -78,5 +79,24 @@ void main() {
     expect(session.config.allowSkip, isTrue);
     expect(session.config.headerTitle, 'Quick Warm-Up');
     expect(session.tasks.length, inInclusiveRange(2, 5));
+  });
+
+  test('creates lesson wrap-up session with next lesson handoff when available',
+      () async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'completed_lessons': <String>['U1L1'],
+      'started_lessons': <String>['U1L1'],
+      'last_lesson_id': 'U1L1',
+    });
+
+    final lessons = await LessonService().loadLessons();
+    final session = await ReviewService.createLessonWrapUpSession(
+      kEnglishTestSettings,
+      lessons.first,
+    );
+
+    expect(session, isNotNull);
+    expect(session!.config.mode, ReviewSessionMode.formal);
+    expect(session.config.nextLessonId, isNotEmpty);
   });
 }

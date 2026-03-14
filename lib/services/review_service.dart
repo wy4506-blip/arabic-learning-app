@@ -2,12 +2,14 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../l10n/lesson_localizer.dart';
 import '../models/alphabet_group.dart';
 import '../models/app_settings.dart';
 import '../models/learning_state_models.dart';
 import '../models/lesson.dart';
 import '../models/review_models.dart';
 import '../models/word_item.dart';
+import 'alphabet_service.dart';
 import 'learning_state_service.dart';
 import 'progress_service.dart';
 import 'review_planner.dart';
@@ -34,6 +36,8 @@ class ReviewService {
         streakDays: _calculateStreak(logs, moment),
         weeklyReviewCount: _countWeeklyReviews(logs, moment),
         typeCounts: ReviewPlanner.buildTypeCounts(context),
+        practiceCounts: ReviewPlanner.buildPracticeCounts(context),
+        recommendedLessonId: context.progress.lastLessonId,
       ),
       weakTasks: ReviewPlanner.buildWeakCandidates(context),
       recentTasks: ReviewPlanner.buildRecentCandidates(context),
@@ -107,9 +111,12 @@ class ReviewService {
   ) async {
     final now = DateTime.now();
     final plan = await getTodayPlan(settings, now: now);
+    final context = await ReviewPlanner.loadContext(settings, now: now);
     if (plan.tasks.isEmpty) {
       return null;
     }
+
+    final nextLesson = _findNextLesson(context.lessons, context.progress.lastLessonId);
 
     final activePlan = plan.hasStarted ? plan : plan.copyWith(startedAt: now);
     if (!plan.hasStarted) {
@@ -131,7 +138,13 @@ class ReviewService {
       completedTaskIds: activePlan.completedTaskIds,
       countTowardActivity: true,
       syncWithTodayPlan: true,
-      config: const ReviewSessionConfig.reviewTab(),
+      config: ReviewSessionConfig.reviewTab(
+        mode: ReviewSessionMode.formal,
+        nextLessonId: nextLesson?.id,
+        nextLessonLabel: nextLesson == null
+            ? null
+            : LessonLocalizer.title(nextLesson, settings.appLanguage),
+      ),
     );
   }
 
@@ -174,6 +187,7 @@ class ReviewService {
       syncWithTodayPlan: true,
       config: ReviewSessionConfig(
         source: ReviewEntrySource.homeTodayPlan,
+        mode: ReviewSessionMode.formal,
         autoContinueToLesson: nextLessonId?.trim().isNotEmpty ?? false,
         nextLessonId: nextLessonId,
         allowSkip: true,
@@ -214,7 +228,9 @@ class ReviewService {
       tasks: tasks,
       countTowardActivity: true,
       syncWithTodayPlan: true,
-      config: const ReviewSessionConfig.reviewTab(),
+      config: const ReviewSessionConfig.reviewTab(
+        mode: ReviewSessionMode.freePractice,
+      ),
     );
   }
 
@@ -237,7 +253,9 @@ class ReviewService {
       tasks: tasks,
       countTowardActivity: true,
       syncWithTodayPlan: true,
-      config: const ReviewSessionConfig.reviewTab(),
+      config: const ReviewSessionConfig.reviewTab(
+        mode: ReviewSessionMode.freePractice,
+      ),
     );
   }
 
@@ -261,7 +279,9 @@ class ReviewService {
       tasks: tasks,
       countTowardActivity: true,
       syncWithTodayPlan: true,
-      config: const ReviewSessionConfig.reviewTab(),
+      config: const ReviewSessionConfig.reviewTab(
+        mode: ReviewSessionMode.freePractice,
+      ),
     );
   }
 
@@ -293,6 +313,7 @@ class ReviewService {
       syncWithTodayPlan: true,
       config: const ReviewSessionConfig(
         source: ReviewEntrySource.lessonFollowUp,
+        mode: ReviewSessionMode.formal,
       ),
     );
   }
@@ -302,6 +323,7 @@ class ReviewService {
     Lesson lesson,
   ) async {
     final context = await ReviewPlanner.loadContext(settings);
+    final nextLesson = _findNextLesson(context.lessons, lesson.id);
     final tasks = ReviewPlanner.buildLessonBridgeTasks(
       context,
       lesson,
@@ -321,8 +343,13 @@ class ReviewService {
       tasks: tasks,
       countTowardActivity: true,
       syncWithTodayPlan: true,
-      config: const ReviewSessionConfig(
+      config: ReviewSessionConfig(
         source: ReviewEntrySource.lessonFollowUp,
+        mode: ReviewSessionMode.formal,
+        nextLessonId: nextLesson?.id,
+        nextLessonLabel: nextLesson == null
+            ? null
+            : LessonLocalizer.title(nextLesson, settings.appLanguage),
       ),
     );
   }
@@ -341,7 +368,9 @@ class ReviewService {
       tasks: <ReviewTask>[task],
       countTowardActivity: false,
       syncWithTodayPlan: true,
-      config: const ReviewSessionConfig.reviewTab(),
+      config: const ReviewSessionConfig.reviewTab(
+        mode: ReviewSessionMode.freePractice,
+      ),
     );
   }
 
@@ -353,6 +382,7 @@ class ReviewService {
     await LearningStateService.markReviewResult(
       contentId: task.contentId,
       type: task.type,
+      objectType: task.objectType,
       lessonId: task.lessonId,
       remembered: remembered,
     );
@@ -411,107 +441,157 @@ class ReviewService {
   }
 
   static Future<void> recordLessonStarted(Lesson lesson) async {
-    final states = await LearningStateService.getAllStates();
     final now = DateTime.now();
 
     for (final word in lesson.vocabulary) {
-      final contentId = buildWordContentId(word.text.plain);
-      final existing = states[contentId];
-      states[contentId] = LearningContentState(
-        contentId: contentId,
+      await LearningStateService.upsertLearningState(
+        contentId: buildWordContentId(word.text.plain),
         type: ReviewContentType.word,
+        objectType: ReviewObjectType.wordReading,
         lessonId: lesson.id,
-        isStarted: true,
-        isCompleted: existing?.isCompleted ?? false,
-        lastStudiedAt: existing?.lastStudiedAt,
         lastViewedAt: now,
-        needsReview: existing?.needsReview ?? false,
-        isWeak: existing?.isWeak ?? false,
-        isFavorited: existing?.isFavorited ?? false,
-        reviewPriority: existing?.reviewPriority ?? 0,
+        isStarted: true,
+        stage: LearningStage.learning,
       );
     }
 
     for (final pattern in lesson.patterns) {
-      final contentId = buildSentenceContentId(pattern.text.plain);
-      final existing = states[contentId];
-      states[contentId] = LearningContentState(
-        contentId: contentId,
+      await LearningStateService.upsertLearningState(
+        contentId: buildSentenceContentId(pattern.text.plain),
         type: ReviewContentType.sentence,
+        objectType: ReviewObjectType.sentencePattern,
         lessonId: lesson.id,
-        isStarted: true,
-        isCompleted: existing?.isCompleted ?? false,
-        lastStudiedAt: existing?.lastStudiedAt,
         lastViewedAt: now,
-        needsReview: existing?.needsReview ?? false,
-        isWeak: existing?.isWeak ?? false,
-        isFavorited: existing?.isFavorited ?? false,
-        reviewPriority: existing?.reviewPriority ?? 0,
+        isStarted: true,
+        stage: LearningStage.learning,
       );
     }
-
-    await LearningStateService.saveAllStates(states.values);
   }
 
   static Future<void> recordLessonCompleted(Lesson lesson) async {
-    final states = await LearningStateService.getAllStates();
     final now = DateTime.now();
+    final tomorrow = DateTime(now.year, now.month, now.day + 1, 7);
 
     for (final word in lesson.vocabulary) {
-      final contentId = buildWordContentId(word.text.plain);
-      final existing = states[contentId];
-      states[contentId] = LearningContentState(
-        contentId: contentId,
+      await LearningStateService.upsertLearningState(
+        contentId: buildWordContentId(word.text.plain),
         type: ReviewContentType.word,
+        objectType: ReviewObjectType.wordReading,
         lessonId: lesson.id,
-        isStarted: true,
-        isCompleted: true,
         lastStudiedAt: now,
         lastViewedAt: now,
+        isStarted: true,
+        isCompleted: true,
+        stage: LearningStage.reviewDue,
         needsReview: true,
-        isWeak: existing?.isWeak ?? false,
-        isFavorited: existing?.isFavorited ?? false,
-        reviewPriority: (existing?.reviewPriority ?? 0) + 1,
+        reviewPriority: 1,
+        nextReviewAt: tomorrow,
       );
     }
 
     for (final pattern in lesson.patterns) {
-      final contentId = buildSentenceContentId(pattern.text.plain);
-      final existing = states[contentId];
-      states[contentId] = LearningContentState(
-        contentId: contentId,
+      await LearningStateService.upsertLearningState(
+        contentId: buildSentenceContentId(pattern.text.plain),
         type: ReviewContentType.sentence,
+        objectType: ReviewObjectType.sentencePattern,
         lessonId: lesson.id,
-        isStarted: true,
-        isCompleted: true,
         lastStudiedAt: now,
         lastViewedAt: now,
+        isStarted: true,
+        isCompleted: true,
+        stage: LearningStage.reviewDue,
         needsReview: true,
-        isWeak: existing?.isWeak ?? false,
-        isFavorited: existing?.isFavorited ?? false,
-        reviewPriority: (existing?.reviewPriority ?? 0) + 1,
+        reviewPriority: 1,
+        nextReviewAt: tomorrow,
       );
     }
 
-    for (final letter in lesson.letters) {
-      final contentId = buildAlphabetContentId(removeArabicDiacritics(letter));
-      final existing = states[contentId];
-      states[contentId] = LearningContentState(
-        contentId: contentId,
+    final groups = await AlphabetService.loadAlphabetGroups();
+    final alphabetByArabic = <String, AlphabetLetter>{
+      for (final group in groups)
+        for (final letter in group.letters) removeArabicDiacritics(letter.arabic): letter,
+    };
+    final lessonLetters = lesson.letters
+        .map((item) => alphabetByArabic[removeArabicDiacritics(item)])
+        .whereType<AlphabetLetter>()
+        .toList(growable: false);
+
+    for (final letter in lessonLetters) {
+      await LearningStateService.upsertLearningState(
+        contentId: buildLetterNameContentId(letter.arabic),
         type: ReviewContentType.alphabet,
+        objectType: ReviewObjectType.letterName,
         lessonId: lesson.id,
-        isStarted: true,
-        isCompleted: true,
         lastStudiedAt: now,
         lastViewedAt: now,
-        needsReview: true,
-        isWeak: existing?.isWeak ?? false,
-        isFavorited: existing?.isFavorited ?? false,
-        reviewPriority: (existing?.reviewPriority ?? 0) + 1,
+        isStarted: true,
+        isCompleted: true,
+        stage: LearningStage.learning,
+        reviewPriority: 1,
+        nextReviewAt: now.add(const Duration(hours: 6)),
       );
+      await LearningStateService.upsertLearningState(
+        contentId: buildLetterSoundContentId(letter.arabic),
+        type: ReviewContentType.alphabet,
+        objectType: ReviewObjectType.letterSound,
+        lessonId: lesson.id,
+        lastStudiedAt: now,
+        lastViewedAt: now,
+        isStarted: true,
+        isCompleted: true,
+        stage: LearningStage.reviewDue,
+        needsReview: true,
+        reviewPriority: 2,
+        nextReviewAt: tomorrow,
+      );
+      await LearningStateService.upsertLearningState(
+        contentId: buildLetterFormContentId(letter.arabic),
+        type: ReviewContentType.alphabet,
+        objectType: ReviewObjectType.letterForm,
+        lessonId: lesson.id,
+        lastStudiedAt: now,
+        lastViewedAt: now,
+        isStarted: true,
+        isCompleted: true,
+        stage: LearningStage.learning,
+        reviewPriority: 1,
+        nextReviewAt: now.add(const Duration(hours: 12)),
+      );
+      for (final pronunciation in letter.pronunciations.take(2)) {
+        await LearningStateService.upsertLearningState(
+          contentId: buildSymbolReadingContentId(letter.arabic, pronunciation.key),
+          type: ReviewContentType.pronunciation,
+          objectType: ReviewObjectType.symbolReading,
+          lessonId: lesson.id,
+          lastStudiedAt: now,
+          lastViewedAt: now,
+          isStarted: true,
+          isCompleted: true,
+          stage: LearningStage.reviewDue,
+          needsReview: true,
+          reviewPriority: 1,
+          nextReviewAt: tomorrow,
+        );
+      }
     }
 
-    await LearningStateService.saveAllStates(states.values);
+    for (var index = 0; index + 1 < lessonLetters.length; index += 2) {
+      final left = lessonLetters[index];
+      final right = lessonLetters[index + 1];
+      await LearningStateService.upsertLearningState(
+        contentId: buildConfusionPairContentId(left.arabic, right.arabic),
+        type: ReviewContentType.pair,
+        objectType: ReviewObjectType.confusionPair,
+        lessonId: lesson.id,
+        lastStudiedAt: now,
+        lastViewedAt: now,
+        isStarted: true,
+        isCompleted: true,
+        stage: LearningStage.learning,
+        reviewPriority: 1,
+        nextReviewAt: now.add(const Duration(hours: 18)),
+      );
+    }
   }
 
   static Future<void> markWordFavorited(
@@ -522,6 +602,7 @@ class ReviewService {
     await LearningStateService.setFavorited(
       contentId: buildWordContentId(word.text.plain),
       type: ReviewContentType.word,
+      objectType: ReviewObjectType.wordReading,
       lessonId: lessonId,
       isFavorited: isFavorited,
     );
@@ -534,6 +615,7 @@ class ReviewService {
     await LearningStateService.markViewed(
       contentId: buildGrammarContentId(pageId),
       type: ReviewContentType.grammar,
+      objectType: ReviewObjectType.grammarReference,
       lessonId: lessonId,
     );
   }
@@ -546,6 +628,7 @@ class ReviewService {
     await LearningStateService.setFavorited(
       contentId: buildGrammarContentId(pageId),
       type: ReviewContentType.grammar,
+      objectType: ReviewObjectType.grammarReference,
       lessonId: lessonId,
       isFavorited: isFavorited,
     );
@@ -558,6 +641,7 @@ class ReviewService {
     await LearningStateService.markViewed(
       contentId: buildAlphabetContentId(letter.arabic),
       type: ReviewContentType.alphabet,
+      objectType: ReviewObjectType.letterSound,
       lessonId: lessonId,
     );
   }
@@ -569,6 +653,7 @@ class ReviewService {
     await LearningStateService.setWeak(
       contentId: task.contentId,
       type: task.type,
+      objectType: task.objectType,
       lessonId: task.lessonId,
       isWeak: isWeak,
     );
@@ -663,6 +748,10 @@ class ReviewService {
     switch (type) {
       case ReviewContentType.word:
         return english ? 'Word Review' : '按单词复习';
+      case ReviewContentType.pronunciation:
+        return english ? 'Pronunciation Review' : '按发音复习';
+      case ReviewContentType.pair:
+        return english ? 'Distinction Review' : '按易混对复习';
       case ReviewContentType.sentence:
         return english ? 'Sentence Review' : '按句子复习';
       case ReviewContentType.grammar:
@@ -670,5 +759,35 @@ class ReviewService {
       case ReviewContentType.alphabet:
         return english ? 'Alphabet Review' : '按字母复习';
     }
+  }
+
+  static Lesson? _findNextLesson(
+    List<Lesson> lessons,
+    String? currentLessonId,
+  ) {
+    if (lessons.isEmpty) {
+      return null;
+    }
+    final sorted = List<Lesson>.from(lessons)
+      ..sort((a, b) => a.sequence.compareTo(b.sequence));
+    if (currentLessonId == null || currentLessonId.isEmpty) {
+      return sorted.isEmpty ? null : sorted.first;
+    }
+    Lesson? current;
+    for (final lesson in sorted) {
+      if (lesson.id == currentLessonId) {
+        current = lesson;
+        break;
+      }
+    }
+    if (current == null) {
+      return sorted.isEmpty ? null : sorted.first;
+    }
+    for (final lesson in sorted) {
+      if (lesson.sequence > current.sequence) {
+        return lesson;
+      }
+    }
+    return null;
   }
 }
