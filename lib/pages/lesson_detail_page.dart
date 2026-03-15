@@ -16,8 +16,11 @@ import '../l10n/localized_text.dart';
 import '../services/audio_service.dart';
 import '../services/arabic_learning_display_service.dart';
 import '../services/grammar_service.dart';
+import '../services/learning_routing_models.dart';
+import '../services/learning_routing_policy.dart';
 import '../services/lesson_progress_service.dart';
 import '../services/lesson_practice_service.dart';
+import '../services/lesson_service.dart';
 import '../services/progress_service.dart';
 import '../services/review_service.dart';
 import '../services/vocab_service.dart';
@@ -54,6 +57,7 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
   List<ReviewTask> _lessonPreviewTasks = const <ReviewTask>[];
   List<ReviewTask> _lessonWrapUpTasks = const <ReviewTask>[];
   ReviewSession? _lessonWrapUpSession;
+  PostLessonRoute? _postLessonRoute;
   V2LessonStatus _lessonStatus = V2LessonStatus.available;
   late bool _unlocked;
   String _expandedSectionId = 'words';
@@ -74,25 +78,109 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
   Future<void> _load() async {
     final results = await Future.wait<dynamic>([
       ProgressService.getSnapshot(),
+      LessonService().loadLessons(),
       GrammarService.getPagesForLesson(widget.lesson.id),
       ReviewService.createLessonPreviewSession(widget.settings, widget.lesson),
       ReviewService.createLessonWrapUpSession(widget.settings, widget.lesson),
     ]);
     final snapshot = results[0] as ProgressSnapshot;
+    final lessons = results[1] as List<Lesson>;
     final lessonStatus = ProgressService.resolveLessonStatus(
       lesson: widget.lesson,
       snapshot: snapshot,
       unlocked: _unlocked,
     );
+    final overview = ProgressService.buildOverview(
+      lessons: lessons,
+      snapshot: snapshot,
+      unlocked: _unlocked,
+    );
+    final postLessonRoute = _resolvePostLessonRoute(
+      resultStatus: lessonStatus,
+      nextLessonId: overview.recommendedLessonId,
+    );
     if (!mounted) return;
     setState(() {
       _lessonStatus = lessonStatus;
-      _relatedGrammarPages = results[1] as List<GrammarPageContent>;
+      _postLessonRoute = postLessonRoute;
+      _relatedGrammarPages = results[2] as List<GrammarPageContent>;
       _lessonPreviewTasks =
-          ((results[2] as ReviewSession?)?.tasks ?? const <ReviewTask>[]);
-      _lessonWrapUpSession = results[3] as ReviewSession?;
+          ((results[3] as ReviewSession?)?.tasks ?? const <ReviewTask>[]);
+      _lessonWrapUpSession = results[4] as ReviewSession?;
       _lessonWrapUpTasks = _lessonWrapUpSession?.tasks ?? const <ReviewTask>[];
     });
+  }
+
+  PostLessonRoute? _resolvePostLessonRoute({
+    required V2LessonStatus resultStatus,
+    required String? nextLessonId,
+  }) {
+    final isPostLessonState =
+        resultStatus == V2LessonStatus.coreCompleted ||
+        resultStatus.isCompletedLike;
+    if (!isPostLessonState) {
+      return null;
+    }
+
+    final targetReached =
+        resultStatus != V2LessonStatus.coreCompleted &&
+        resultStatus != V2LessonStatus.dueForReview;
+
+    return LearningRoutingPolicy.decidePostLessonRoute(
+      resultStatus: resultStatus,
+      targetReached: targetReached,
+      nextLessonId: nextLessonId,
+      fromHomeTodayPlan: false,
+    );
+  }
+
+  bool get _shouldShowPostLessonReviewCard {
+    final route = _postLessonRoute;
+    return _lessonWrapUpSession != null &&
+        route != null &&
+        route.action != PostLessonActionType.returnToLessonDetail;
+  }
+
+  String _postLessonSubtitle(BuildContext context) {
+    final route = _postLessonRoute;
+    final nextLessonLabel = _lessonWrapUpSession?.config.nextLessonLabel;
+
+    if (route?.action == PostLessonActionType.continueNextLesson) {
+      if (nextLessonLabel != null && nextLessonLabel.trim().isNotEmpty) {
+        return localizedText(
+          context,
+          zh: '做完这轮巩固，就顺着进入$nextLessonLabel。',
+          en: 'Finish this pass, then continue straight into $nextLessonLabel.',
+        );
+      }
+      return localizedText(
+        context,
+        zh: '做完这轮巩固，就继续下一课。',
+        en: 'Finish this pass, then continue to the next lesson.',
+      );
+    }
+
+    return localizedText(
+      context,
+      zh: '做完这轮巩固，再回到主线继续学习。',
+      en: 'Finish this short reinforcement pass, then return to your main learning path.',
+    );
+  }
+
+  String _postLessonActionLabel(BuildContext context) {
+    if (_postLessonRoute?.action == PostLessonActionType.continueNextLesson) {
+      return localizedText(
+        context,
+        zh: '先巩固，再去下一课',
+        en: 'Reinforce First, Then Next Lesson',
+      );
+    }
+
+    return localizedText(
+      context,
+      zh: '开始课后正式复习',
+      en: 'Start Formal Wrap-Up Review',
+    );
   }
 
   String _displayArabic(String text) {
@@ -677,8 +765,7 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
             ),
           ],
           if (!locked) ...[
-            if (_lessonStatus.isCompletedLike &&
-                _lessonWrapUpSession != null) ...[
+            if (_shouldShowPostLessonReviewCard) ...[
               const SizedBox(height: 16),
               LessonMicroReviewCard(
                 title: localizedText(
@@ -686,30 +773,9 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
                   zh: '完成本课后，先做这一轮正式巩固',
                   en: 'After finishing this lesson, do this formal follow-up first',
                 ),
-                subtitle: _lessonWrapUpSession!.config.nextLessonLabel == null
-                    ? localizedText(
-                        context,
-                        zh: '做完这轮巩固，再回到主线继续学习。',
-                        en: 'Finish this short reinforcement pass, then return to your main learning path.',
-                      )
-                    : localizedText(
-                        context,
-                        zh: '做完这轮巩固，就顺着进入${_lessonWrapUpSession!.config.nextLessonLabel}。',
-                        en: 'Finish this pass, then continue straight into ${_lessonWrapUpSession!.config.nextLessonLabel}.',
-                      ),
+                subtitle: _postLessonSubtitle(context),
                 tasks: _lessonWrapUpTasks.take(3).toList(growable: false),
-                actionLabel:
-                    _lessonWrapUpSession!.config.nextLessonLabel == null
-                        ? localizedText(
-                            context,
-                            zh: '开始课后正式复习',
-                            en: 'Start Formal Wrap-Up Review',
-                          )
-                        : localizedText(
-                            context,
-                            zh: '先巩固，再去下一课',
-                            en: 'Reinforce First, Then Next Lesson',
-                          ),
+                actionLabel: _postLessonActionLabel(context),
                 onActionTap: _openLessonWrapUpReview,
               ),
             ],
@@ -1143,7 +1209,7 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
                 lesson: lesson,
                 practiceCount: practiceCount,
               ),
-              if (_lessonStatus.isCompletedLike &&
+              if (_shouldShowPostLessonReviewCard &&
                   _lessonWrapUpTasks.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 LessonMicroReviewCard(
@@ -1152,17 +1218,9 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
                     zh: '课后巩固',
                     en: 'After-Lesson Reinforcement',
                   ),
-                  subtitle: localizedText(
-                    context,
-                    zh: '刚学完这节，顺手再过一遍重点，更容易留下来。',
-                    en: 'This lesson is still fresh, so a short follow-up pass will stick better.',
-                  ),
+                  subtitle: _postLessonSubtitle(context),
                   tasks: _lessonWrapUpTasks.take(3).toList(growable: false),
-                  actionLabel: localizedText(
-                    context,
-                    zh: '顺手巩固一下',
-                    en: 'Reinforce It Now',
-                  ),
+                  actionLabel: _postLessonActionLabel(context),
                   onActionTap: _openLessonWrapUpReview,
                 ),
               ],
