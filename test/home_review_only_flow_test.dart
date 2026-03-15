@@ -16,7 +16,9 @@ void main() {
     hasEnteredHomeAfterFirstExperience: true,
   );
 
-  testWidgets('review only opens the regular review flow without lesson handoff', (
+  testWidgets(
+      'alphabet stage stays as the only home primary recommendation before completion',
+      (
     tester,
   ) async {
     await pumpLocalizedTestPage(
@@ -26,18 +28,11 @@ void main() {
         onboardingState: completedOnboarding,
         onOpenTab: (_) {},
       ),
-      sharedPreferences: <String, Object>{
-        'completed_lessons': <String>['U1L1'],
-        'started_lessons': <String>['U1L1'],
-        'last_lesson_id': 'U1L1',
-      },
     );
 
-    await tester.tap(find.text('Formal Review Only').first);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Today\'s Learning'), findsNothing);
-    expect(find.text('Today\'s Review'), findsWidgets);
-    expect(find.text('Skip Review'), findsNothing);
+    expect(find.text('Start Alphabet Learning'), findsOneWidget);
+    expect(find.text('Open Alphabet Groups'), findsOneWidget);
+    expect(find.text('Start Lesson 1'), findsNothing);
+    expect(find.text('Start Formal Review'), findsNothing);
   });
 }

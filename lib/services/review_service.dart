@@ -16,6 +16,30 @@ import 'review_planner.dart';
 import 'review_sync_service.dart';
 import '../widgets/app_widgets.dart';
 
+class ReviewEntrySnapshot {
+  final List<ReviewTask> formalTasks;
+  final List<ReviewTask> lightTasks;
+  final List<ReviewTask> overdueTasks;
+  final List<ReviewTask> stageReinforcementTasks;
+
+  const ReviewEntrySnapshot({
+    required this.formalTasks,
+    required this.lightTasks,
+    required this.overdueTasks,
+    required this.stageReinforcementTasks,
+  });
+
+  bool get hasFormalReview => formalTasks.isNotEmpty;
+  bool get hasLightReview => lightTasks.isNotEmpty;
+  bool get hasOverdueReview => overdueTasks.isNotEmpty;
+  bool get hasStageReinforcement => stageReinforcementTasks.isNotEmpty;
+  int get formalReviewCount => formalTasks.length;
+  int get lightReviewCount => lightTasks.length;
+  int get overdueReviewCount => overdueTasks.length;
+  int get stageReinforcementCount => stageReinforcementTasks.length;
+  int get primaryReviewCount => hasFormalReview ? formalReviewCount : lightReviewCount;
+}
+
 class ReviewService {
   ReviewService._();
 
@@ -52,7 +76,10 @@ class ReviewService {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_todayPlanKey);
     final context = await ReviewPlanner.loadContext(settings, now: moment);
-    final freshTasks = ReviewPlanner.buildTodayCandidates(context);
+    final reviewSignals = ReviewPlanner.buildSignals(context);
+    final freshTasks = reviewSignals.hasFormalReview
+      ? reviewSignals.formalReviewTasks
+      : ReviewPlanner.buildTodayCandidates(context);
     final todayKey = reviewDateKey(moment);
 
     if (raw == null || raw.isEmpty) {
@@ -106,6 +133,28 @@ class ReviewService {
     return plan;
   }
 
+  static Future<ReviewEntrySnapshot> getEntrySnapshot(
+    AppSettings settings, {
+    DateTime? now,
+  }) async {
+    final moment = now ?? DateTime.now();
+    final context = await ReviewPlanner.loadContext(settings, now: moment);
+    final signals = ReviewPlanner.buildSignals(context);
+    final todayPlan = await getTodayPlan(settings, now: moment);
+    final formalTasks = todayPlan.tasks
+        .where((task) => !todayPlan.completedTaskIds.contains(task.contentId))
+        .toList(growable: false);
+
+    return ReviewEntrySnapshot(
+      formalTasks: formalTasks.isNotEmpty
+          ? formalTasks
+          : signals.formalReviewTasks,
+      lightTasks: signals.lightReviewTasks,
+      overdueTasks: signals.overdueReviewTasks,
+      stageReinforcementTasks: signals.stageReinforcementTasks,
+    );
+  }
+
   static Future<ReviewSession?> createTodaySession(
     AppSettings settings,
   ) async {
@@ -116,7 +165,8 @@ class ReviewService {
       return null;
     }
 
-    final nextLesson = _findNextLesson(context.lessons, context.progress.lastLessonId);
+    final nextLesson =
+        _findNextLesson(context.lessons, context.progress.lastLessonId);
 
     final activePlan = plan.hasStarted ? plan : plan.copyWith(startedAt: now);
     if (!plan.hasStarted) {
@@ -204,14 +254,17 @@ class ReviewService {
     AppSettings settings,
   ) async {
     final context = await ReviewPlanner.loadContext(settings);
+    final signals = ReviewPlanner.buildSignals(context);
     final todayPlan = await getTodayPlan(settings);
     final pool = todayPlan.tasks
         .where((task) => !todayPlan.completedTaskIds.contains(task.contentId))
         .toList(growable: false);
-    final tasks =
-        (pool.isNotEmpty ? pool : ReviewPlanner.buildRecentCandidates(context))
-            .take(4)
-            .toList(growable: false);
+    final candidatePool = pool.isNotEmpty
+        ? pool
+        : (signals.lightReviewTasks.isNotEmpty
+            ? signals.lightReviewTasks
+            : ReviewPlanner.buildRecentCandidates(context));
+    final tasks = candidatePool.take(4).toList(growable: false);
     if (tasks.isEmpty) {
       return null;
     }
@@ -227,7 +280,7 @@ class ReviewService {
           : '不打断节奏，顺手过几个高价值内容就够了。',
       tasks: tasks,
       countTowardActivity: true,
-      syncWithTodayPlan: true,
+      syncWithTodayPlan: false,
       config: const ReviewSessionConfig.reviewTab(
         mode: ReviewSessionMode.freePractice,
       ),
@@ -238,7 +291,11 @@ class ReviewService {
     AppSettings settings,
   ) async {
     final context = await ReviewPlanner.loadContext(settings);
-    final tasks = ReviewPlanner.buildWeakCandidates(context);
+    final signals = ReviewPlanner.buildSignals(context);
+    final tasks = signals.formalReviewTasks.where((task) {
+      final state = context.learningStates[task.contentId];
+      return state?.stage == LearningStage.weak || state?.isWeak == true;
+    }).take(6).toList(growable: false);
     if (tasks.isEmpty) {
       return null;
     }
@@ -252,7 +309,7 @@ class ReviewService {
           : '把还不稳的点温和地再过一遍，更容易留下来。',
       tasks: tasks,
       countTowardActivity: true,
-      syncWithTodayPlan: true,
+      syncWithTodayPlan: false,
       config: const ReviewSessionConfig.reviewTab(
         mode: ReviewSessionMode.freePractice,
       ),
@@ -278,7 +335,7 @@ class ReviewService {
           : '只看一种内容类型，少切换，脑子更轻松。',
       tasks: tasks,
       countTowardActivity: true,
-      syncWithTodayPlan: true,
+      syncWithTodayPlan: false,
       config: const ReviewSessionConfig.reviewTab(
         mode: ReviewSessionMode.freePractice,
       ),
@@ -509,7 +566,8 @@ class ReviewService {
     final groups = await AlphabetService.loadAlphabetGroups();
     final alphabetByArabic = <String, AlphabetLetter>{
       for (final group in groups)
-        for (final letter in group.letters) removeArabicDiacritics(letter.arabic): letter,
+        for (final letter in group.letters)
+          removeArabicDiacritics(letter.arabic): letter,
     };
     final lessonLetters = lesson.letters
         .map((item) => alphabetByArabic[removeArabicDiacritics(item)])
@@ -559,7 +617,8 @@ class ReviewService {
       );
       for (final pronunciation in letter.pronunciations.take(2)) {
         await LearningStateService.upsertLearningState(
-          contentId: buildSymbolReadingContentId(letter.arabic, pronunciation.key),
+          contentId:
+              buildSymbolReadingContentId(letter.arabic, pronunciation.key),
           type: ReviewContentType.pronunciation,
           objectType: ReviewObjectType.symbolReading,
           lessonId: lesson.id,
@@ -646,6 +705,65 @@ class ReviewService {
     );
   }
 
+  static Future<void> markAlphabetListenReadCompleted(
+    AlphabetLetter letter, {
+    String? lessonId,
+  }) async {
+    final now = DateTime.now();
+
+    await LearningStateService.upsertLearningState(
+      contentId: buildLetterSoundContentId(letter.arabic),
+      type: ReviewContentType.alphabet,
+      objectType: ReviewObjectType.letterSound,
+      lessonId: lessonId,
+      lastStudiedAt: now,
+      lastViewedAt: now,
+      isStarted: true,
+      isCompleted: true,
+      stage: LearningStage.reviewDue,
+      needsReview: true,
+      reviewPriority: 2,
+      nextReviewAt: now,
+    );
+
+    await LearningStateService.upsertLearningState(
+      contentId: buildLetterNameContentId(letter.arabic),
+      type: ReviewContentType.alphabet,
+      objectType: ReviewObjectType.letterName,
+      lessonId: lessonId,
+      lastStudiedAt: now,
+      lastViewedAt: now,
+      isStarted: true,
+      isCompleted: true,
+      stage: LearningStage.reviewDue,
+      needsReview: true,
+      reviewPriority: 1,
+      nextReviewAt: now,
+    );
+  }
+
+  static Future<void> markAlphabetWriteCompleted(
+    AlphabetLetter letter, {
+    String? lessonId,
+  }) async {
+    final now = DateTime.now();
+
+    await LearningStateService.upsertLearningState(
+      contentId: buildLetterFormContentId(letter.arabic),
+      type: ReviewContentType.alphabet,
+      objectType: ReviewObjectType.letterForm,
+      lessonId: lessonId,
+      lastStudiedAt: now,
+      lastViewedAt: now,
+      isStarted: true,
+      isCompleted: true,
+      stage: LearningStage.reviewDue,
+      needsReview: true,
+      reviewPriority: 1,
+      nextReviewAt: now,
+    );
+  }
+
   static Future<void> setTaskWeak(
     ReviewTask task, {
     required bool isWeak,
@@ -707,7 +825,7 @@ class ReviewService {
     final marker = '$sessionId|${DateTime.now().toIso8601String()}';
     final updated = <String>[marker, ...logs].take(60).toList(growable: false);
     await prefs.setStringList(_sessionLogsKey, updated);
-    ReviewSyncService.bump();
+    ReviewSyncService.markSessionLogged();
   }
 
   static int _calculateStreak(List<DateTime> logs, DateTime now) {
@@ -736,7 +854,7 @@ class ReviewService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_todayPlanKey, jsonEncode(plan.toJson()));
     if (notify) {
-      ReviewSyncService.bump();
+      ReviewSyncService.markPlanChanged();
     }
   }
 

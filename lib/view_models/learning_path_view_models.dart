@@ -2,7 +2,10 @@ import '../l10n/app_strings.dart';
 import '../l10n/lesson_localizer.dart';
 import '../models/app_settings.dart';
 import '../models/lesson.dart';
+import '../models/v2_lesson_progress_models.dart';
+import '../services/learning_state_service.dart';
 import '../services/progress_service.dart';
+import '../services/review_service.dart';
 
 enum HomePrimaryActionType {
   continueAlphabet,
@@ -43,8 +46,21 @@ class LearningPathSnapshot {
   final bool hasCompletedAllLessons;
   final bool isTrialComplete;
   final int remainingLessonCount;
+  final String? recommendedLessonId;
   final Lesson? recommendedLesson;
-  final String? currentUnitId;
+  final String? currentGroupId;
+  final String? currentPhaseId;
+  final String? currentLessonId;
+  final List<ProgressStageSummary> stageSummaries;
+  final Map<String, V2LessonStatus> lessonStatuses;
+  final int coreCompletedLessonCount;
+  final int reviewDueLessonCount;
+  final int formalReviewCount;
+  final int lightReviewCount;
+  final int overdueReviewCount;
+  final int stageReinforcementCount;
+  final int trackedObjectCount;
+  final int weakObjectCount;
 
   const LearningPathSnapshot({
     required this.lessons,
@@ -64,9 +80,24 @@ class LearningPathSnapshot {
     required this.hasCompletedAllLessons,
     required this.isTrialComplete,
     required this.remainingLessonCount,
+    required this.recommendedLessonId,
     required this.recommendedLesson,
-    required this.currentUnitId,
+    required this.currentGroupId,
+    required this.currentPhaseId,
+    required this.currentLessonId,
+    required this.stageSummaries,
+    required this.lessonStatuses,
+    required this.coreCompletedLessonCount,
+    required this.reviewDueLessonCount,
+    required this.formalReviewCount,
+    required this.lightReviewCount,
+    required this.overdueReviewCount,
+    required this.stageReinforcementCount,
+    required this.trackedObjectCount,
+    required this.weakObjectCount,
   });
+
+  String? get currentUnitId => currentGroupId;
 
   double get completionRate {
     return totalLessonCount == 0 ? 0 : completedLessonCount / totalLessonCount;
@@ -75,6 +106,16 @@ class LearningPathSnapshot {
   bool get nextLessonLocked {
     return recommendedLesson?.isLocked == true && !unlocked;
   }
+
+  V2LessonStatus lessonStatusFor(String lessonId) {
+    return lessonStatuses[lessonId] ?? V2LessonStatus.available;
+  }
+
+  bool get shouldPrioritizeReview =>
+      formalReviewCount > 0 || overdueReviewCount > 0;
+
+  int get actionableReviewCount =>
+      formalReviewCount > 0 ? formalReviewCount : pendingReviewCount;
 }
 
 class HomeMainLearningViewModel {
@@ -128,6 +169,58 @@ class CourseCurrentLearningViewModel {
     this.reviewText,
     this.stageText,
     this.lesson,
+  });
+}
+
+enum CoursePhaseStatus {
+  current,
+  available,
+  locked,
+  planned,
+  completed,
+}
+
+class CoursePhaseViewModel {
+  final String phaseId;
+  final String title;
+  final String description;
+  final CoursePhaseStatus status;
+  final String statusText;
+  final String recommendedActionText;
+  final String accessText;
+  final bool canEnter;
+  final bool isPlaceholder;
+  final bool isPrimaryEntryTarget;
+  final Lesson? lesson;
+  final double? progressValue;
+  final String? progressText;
+  final String? footnote;
+
+  const CoursePhaseViewModel({
+    required this.phaseId,
+    required this.title,
+    required this.description,
+    required this.status,
+    required this.statusText,
+    required this.recommendedActionText,
+    required this.accessText,
+    required this.canEnter,
+    required this.isPlaceholder,
+    required this.isPrimaryEntryTarget,
+    this.lesson,
+    this.progressValue,
+    this.progressText,
+    this.footnote,
+  });
+}
+
+class CourseLearningMapViewModel {
+  final List<CoursePhaseViewModel> phases;
+  final bool hasPrimaryEntryTarget;
+
+  const CourseLearningMapViewModel({
+    required this.phases,
+    required this.hasPrimaryEntryTarget,
   });
 }
 
@@ -202,40 +295,50 @@ class LearningPathViewModels {
     required List<Lesson> lessons,
     required ProgressSnapshot progress,
     required bool unlocked,
+    ProgressOverview? progressOverview,
+    ReviewEntrySnapshot? reviewEntry,
+    LearningStateSummary? learningStateSummary,
   }) {
-    final lessonIds = lessons.map((lesson) => lesson.id).toSet();
-    final completedLessonIds = progress.completedLessons.intersection(lessonIds);
-    final startedLessonIds = progress.startedLessons.intersection(lessonIds);
+    final resolvedProgressOverview = progressOverview ??
+        ProgressService.buildOverview(
+            lessons: lessons, snapshot: progress, unlocked: unlocked);
+    final lessonStatuses = resolvedProgressOverview.lessonStatuses;
+    final completedLessonIds = lessonStatuses.entries
+        .where((entry) => entry.value.isCompletedLike)
+        .map((entry) => entry.key)
+        .toSet();
+    final startedLessonIds = lessonStatuses.entries
+        .where((entry) => entry.value.isStartedLike)
+        .map((entry) => entry.key)
+        .toSet();
     final freeLessons = lessons.where((lesson) => !lesson.isLocked).toList();
     final freeCompletedLessonCount = freeLessons
         .where((lesson) => completedLessonIds.contains(lesson.id))
         .length;
 
-    final recommendedLesson = _resolveRecommendedLesson(
-          lessons: lessons,
-          progress: progress,
-          unlocked: unlocked,
-        ) ??
-        (lessons.isNotEmpty ? lessons.last : null);
-    final currentUnitId = _resolveCurrentUnitId(
-      lessons: lessons,
-      progress: progress,
-      unlocked: unlocked,
-    );
+    final recommendedLessonId = resolvedProgressOverview.recommendedLessonId;
+    final recommendedLesson = recommendedLessonId == null
+        ? null
+        : _firstWhereOrNull(
+            lessons,
+            (lesson) => lesson.id == recommendedLessonId,
+          );
 
-    final completedLessonCount = completedLessonIds.length;
-    final startedLessonCount = startedLessonIds.length;
-    final totalLessonCount = lessons.length;
-    final pendingReviewCount =
+    final completedLessonCount = resolvedProgressOverview.completedLessonCount;
+    final startedLessonCount = resolvedProgressOverview.startedLessonCount;
+    final totalLessonCount = resolvedProgressOverview.totalLessonCount;
+    final fallbackReviewCount =
         (startedLessonCount - completedLessonCount).clamp(0, totalLessonCount);
+    final pendingReviewCount =
+        reviewEntry?.primaryReviewCount ?? fallbackReviewCount;
 
     return LearningPathSnapshot(
       lessons: lessons,
       unlocked: unlocked,
       completedLessonIds: completedLessonIds,
       startedLessonIds: startedLessonIds,
-      reviewHistoryCount: progress.reviewCount,
-      streakDays: progress.streakDays,
+      reviewHistoryCount: resolvedProgressOverview.reviewCount,
+      streakDays: resolvedProgressOverview.streakDays,
       totalLessonCount: totalLessonCount,
       completedLessonCount: completedLessonCount,
       startedLessonCount: startedLessonCount,
@@ -243,15 +346,28 @@ class LearningPathViewModels {
       freeLessonCount: freeLessons.length,
       freeCompletedLessonCount: freeCompletedLessonCount,
       hasLockedLessons: lessons.any((lesson) => lesson.isLocked),
-      hasStartedAny: startedLessonCount > 0,
+      hasStartedAny: resolvedProgressOverview.startedLessonCount > 0,
       hasCompletedAllLessons:
           totalLessonCount > 0 && completedLessonCount >= totalLessonCount,
-      isTrialComplete:
-          freeLessons.isNotEmpty && freeCompletedLessonCount >= freeLessons.length,
-      remainingLessonCount:
-          (totalLessonCount - completedLessonCount).clamp(0, totalLessonCount),
+      isTrialComplete: freeLessons.isNotEmpty &&
+          freeCompletedLessonCount >= freeLessons.length,
+      remainingLessonCount: resolvedProgressOverview.remainingLessonCount,
+      recommendedLessonId: recommendedLessonId,
       recommendedLesson: recommendedLesson,
-      currentUnitId: currentUnitId,
+      currentGroupId: resolvedProgressOverview.currentGroupId,
+      currentPhaseId: resolvedProgressOverview.currentPhaseId,
+      currentLessonId: resolvedProgressOverview.currentLessonId,
+      stageSummaries: resolvedProgressOverview.stageSummaries,
+      lessonStatuses: lessonStatuses,
+      coreCompletedLessonCount:
+          resolvedProgressOverview.coreCompletedLessonCount,
+      reviewDueLessonCount: resolvedProgressOverview.reviewDueLessonCount,
+      formalReviewCount: reviewEntry?.formalReviewCount ?? fallbackReviewCount,
+      lightReviewCount: reviewEntry?.lightReviewCount ?? 0,
+      overdueReviewCount: reviewEntry?.overdueReviewCount ?? 0,
+      stageReinforcementCount: reviewEntry?.stageReinforcementCount ?? 0,
+      trackedObjectCount: learningStateSummary?.trackedObjectCount ?? 0,
+      weakObjectCount: learningStateSummary?.weakCount ?? 0,
     );
   }
 
@@ -260,10 +376,11 @@ class LearningPathViewModels {
     required LearningPathSnapshot snapshot,
     required bool onboardingCompleted,
   }) {
-    if (snapshot.pendingReviewCount > 0 && snapshot.completedLessonCount > 0) {
+    if (snapshot.shouldPrioritizeReview && snapshot.completedLessonCount > 0) {
       return HomeMainLearningViewModel(
         badgeText: _copy(language, zh: '今日建议', en: 'Today\'s Tip'),
-        title: _copy(language, zh: '先完成今天的复习', en: 'Finish Today\'s Review First'),
+        title:
+            _copy(language, zh: '先完成今天的复习', en: 'Finish Today\'s Review First'),
         arabicPreview: 'راجع الآن',
         description: _copy(
           language,
@@ -274,8 +391,8 @@ class LearningPathViewModels {
             'Completed ${snapshot.completedLessonCount}/${snapshot.totalLessonCount} lessons',
         reviewText: _copy(
           language,
-          zh: '待回顾 ${snapshot.pendingReviewCount} 项',
-          en: '${snapshot.pendingReviewCount} items to review',
+          zh: '待回顾 ${snapshot.actionableReviewCount} 项',
+          en: '${snapshot.actionableReviewCount} items to review',
         ),
         primaryButtonText: _copy(language, zh: '开始复习', en: 'Start Review'),
         actionType: HomePrimaryActionType.startReview,
@@ -285,7 +402,8 @@ class LearningPathViewModels {
     if (onboardingCompleted && !snapshot.hasStartedAny) {
       return HomeMainLearningViewModel(
         badgeText: _copy(language, zh: '今日主线', en: 'Today\'s Focus'),
-        title: _copy(language, zh: '开始你的阿语学习', en: 'Start Your Arabic Learning'),
+        title:
+            _copy(language, zh: '开始你的阿语学习', en: 'Start Your Arabic Learning'),
         arabicPreview: 'تابع الحروف',
         description: _copy(
           language,
@@ -294,7 +412,8 @@ class LearningPathViewModels {
         ),
         progressText:
             _copy(language, zh: '已完成首学体验', en: 'First experience completed'),
-        reviewText: _copy(language, zh: '下一步：分组字母', en: 'Next: grouped letters'),
+        reviewText:
+            _copy(language, zh: '下一步：分组字母', en: 'Next: grouped letters'),
         primaryButtonText: _copy(language, zh: '继续', en: 'Continue'),
         secondaryText: _copy(language, zh: '查看字母表', en: 'Browse Alphabet'),
         actionType: HomePrimaryActionType.continueAlphabet,
@@ -313,12 +432,13 @@ class LearningPathViewModels {
           zh: '解锁后可继续学习后面的课程内容。',
           en: 'Unlock to continue the remaining course content.',
         ),
-        progressText: _copy(language, zh: '已完成前 3 课', en: 'First 3 lessons completed'),
-        reviewText: snapshot.pendingReviewCount > 0
+        progressText:
+            _copy(language, zh: '已完成前 3 课', en: 'First 3 lessons completed'),
+        reviewText: snapshot.actionableReviewCount > 0
             ? _copy(
                 language,
-                zh: '待回顾 ${snapshot.pendingReviewCount} 项',
-                en: '${snapshot.pendingReviewCount} items to review',
+                zh: '待回顾 ${snapshot.actionableReviewCount} 项',
+                en: '${snapshot.actionableReviewCount} items to review',
               )
             : null,
         primaryButtonText:
@@ -347,19 +467,17 @@ class LearningPathViewModels {
         progressText: _copy(
           language,
           zh: '进度 ${snapshot.completedLessonCount}/${snapshot.totalLessonCount}',
-          en:
-              'Progress ${snapshot.completedLessonCount}/${snapshot.totalLessonCount}',
+          en: 'Progress ${snapshot.completedLessonCount}/${snapshot.totalLessonCount}',
         ),
-        reviewText: snapshot.pendingReviewCount > 0
+        reviewText: snapshot.actionableReviewCount > 0
             ? _copy(
                 language,
-                zh: '待复习 ${snapshot.pendingReviewCount} 项',
-                en: '${snapshot.pendingReviewCount} items to review',
+                zh: '待复习 ${snapshot.actionableReviewCount} 项',
+                en: '${snapshot.actionableReviewCount} items to review',
               )
             : null,
         progressValue: snapshot.completionRate,
-        primaryButtonText:
-            _copy(language, zh: '继续学习', en: 'Continue Learning'),
+        primaryButtonText: _copy(language, zh: '继续学习', en: 'Continue Learning'),
         secondaryText: _copy(language, zh: '查看课程', en: 'View Lessons'),
         actionType: HomePrimaryActionType.continueLesson,
         lesson: lesson,
@@ -386,11 +504,11 @@ class LearningPathViewModels {
     required AppStrings strings,
     required LearningPathSnapshot snapshot,
   }) {
-    final reviewText = snapshot.pendingReviewCount > 0
+    final reviewText = snapshot.actionableReviewCount > 0
         ? _copy(
             language,
-            zh: '待复习 ${snapshot.pendingReviewCount} 项',
-            en: '${snapshot.pendingReviewCount} items to review',
+            zh: '待复习 ${snapshot.actionableReviewCount} 项',
+            en: '${snapshot.actionableReviewCount} items to review',
           )
         : null;
     final progressText = strings.t(
@@ -431,8 +549,8 @@ class LearningPathViewModels {
         ),
         progressText: progressText,
         reviewText: reviewText,
-        stageText:
-            _copy(language, zh: '前三节免费体验已完成', en: 'First 3 free lessons completed'),
+        stageText: _copy(language,
+            zh: '前三节免费体验已完成', en: 'First 3 free lessons completed'),
         primaryButtonText:
             _copy(language, zh: '解锁全部课程', en: 'Unlock All Lessons'),
         actionType: CoursePrimaryActionType.unlockAll,
@@ -449,8 +567,7 @@ class LearningPathViewModels {
           en: 'Start with lesson 1 and finish today\'s first lesson.',
         ),
         progressText: progressText,
-        primaryButtonText:
-            _copy(language, zh: '开始学习', en: 'Start Learning'),
+        primaryButtonText: _copy(language, zh: '开始学习', en: 'Start Learning'),
         actionType: CoursePrimaryActionType.startLesson,
       );
     }
@@ -466,18 +583,17 @@ class LearningPathViewModels {
       arabicPreview: lesson.titleAr,
       description: _copy(
         language,
-        zh: snapshot.hasStartedAny
-          ? '保持节奏，把这一课继续学完。'
-          : '从这一课开始，先完成第一节内容。',
+        zh: snapshot.hasStartedAny ? '保持节奏，把这一课继续学完。' : '从这一课开始，先完成第一节内容。',
         en: snapshot.hasStartedAny
-          ? 'Keep your rhythm and finish this lesson next.'
-          : 'Start here and finish the first lesson.',
+            ? 'Keep your rhythm and finish this lesson next.'
+            : 'Start here and finish the first lesson.',
       ),
       progressText: progressText,
       reviewText: reviewText,
       stageText: snapshot.unlocked
           ? _copy(language, zh: '完整课程已开启', en: 'Full course unlocked')
-          : _copy(language, zh: '当前处于免费体验阶段', en: 'You are in the free trial stage'),
+          : _copy(language,
+              zh: '当前处于免费体验阶段', en: 'You are in the free trial stage'),
       primaryButtonText: _copy(
         language,
         zh: snapshot.hasStartedAny ? '继续学习' : '开始学习',
@@ -490,6 +606,81 @@ class LearningPathViewModels {
     );
   }
 
+  static CourseLearningMapViewModel buildCourseLearningMap({
+    required AppLanguage language,
+    required LearningPathSnapshot snapshot,
+  }) {
+    final phases = snapshot.stageSummaries.map((summary) {
+      final phaseLessons = snapshot.lessons
+          .where(
+              (lesson) => _phaseIdForUnitId(lesson.unitId) == summary.stageId)
+          .toList(growable: false);
+      final stageLesson = _resolveStageLesson(
+        lessons: phaseLessons,
+        snapshot: snapshot,
+      );
+      final allLocked = phaseLessons.isNotEmpty &&
+          phaseLessons.every((lesson) => lesson.isLocked && !snapshot.unlocked);
+      final status = _mapCoursePhaseStatus(
+        phaseStatus: summary.status,
+        allLocked: allLocked,
+      );
+      final unitLabel = phaseLessons.isNotEmpty
+          ? phaseLessons.first.unitId
+          : summary.stageId.toUpperCase();
+
+      return CoursePhaseViewModel(
+        phaseId: summary.stageId,
+        title: _copy(
+          language,
+          zh: '学习单元 $unitLabel',
+          en: 'Unit $unitLabel',
+        ),
+        description: _phaseDescription(
+          language,
+          status: summary.status,
+          lessonCount: summary.totalLessonCount,
+        ),
+        status: status,
+        statusText: _phaseStatusText(language, status),
+        recommendedActionText: _phaseActionText(
+          language,
+          status: status,
+          canEnter: stageLesson != null,
+        ),
+        accessText: _phaseAccessText(
+          language,
+          status: status,
+          canEnter: stageLesson != null,
+        ),
+        canEnter: stageLesson != null,
+        isPlaceholder: false,
+        isPrimaryEntryTarget: summary.stageId == snapshot.currentPhaseId,
+        lesson: stageLesson,
+        progressValue: summary.totalLessonCount == 0
+            ? null
+            : summary.completedLessonCount / summary.totalLessonCount,
+        progressText: _copy(
+          language,
+          zh: '已完成 ${summary.completedLessonCount}/${summary.totalLessonCount} 节',
+          en: '${summary.completedLessonCount}/${summary.totalLessonCount} lessons completed',
+        ),
+        footnote: summary.reviewDueCount > 0
+            ? _copy(
+                language,
+                zh: '待回顾 ${summary.reviewDueCount} 节',
+                en: '${summary.reviewDueCount} lessons need review',
+              )
+            : null,
+      );
+    }).toList(growable: false);
+
+    return CourseLearningMapViewModel(
+      phases: phases,
+      hasPrimaryEntryTarget: phases.any((phase) => phase.isPrimaryEntryTarget),
+    );
+  }
+
   static LearningOverviewViewModel buildProfileOverview({
     required AppLanguage language,
     required AppStrings strings,
@@ -497,14 +688,16 @@ class LearningPathViewModels {
   }) {
     final lesson = snapshot.recommendedLesson;
 
-    if (snapshot.pendingReviewCount > 0) {
+    if (snapshot.shouldPrioritizeReview) {
       return LearningOverviewViewModel(
         title: strings.t('profile.overview_title_review_first'),
         suggestion: strings.t('profile.overview_suggestion_review_first'),
         stats: <String>[
           strings.t(
             'profile.overview_review',
-            params: <String, String>{'count': '${snapshot.pendingReviewCount}'},
+            params: <String, String>{
+              'count': '${snapshot.actionableReviewCount}'
+            },
           ),
           strings.t('profile.overview_lesson_not_finished'),
         ],
@@ -515,7 +708,8 @@ class LearningPathViewModels {
     }
 
     if (!snapshot.hasStartedAny ||
-        (snapshot.completedLessonCount == 0 && snapshot.startedLessonCount == 0)) {
+        (snapshot.completedLessonCount == 0 &&
+            snapshot.startedLessonCount == 0)) {
       return LearningOverviewViewModel(
         title: strings.t('profile.overview_title_start_learning'),
         suggestion: strings.t('profile.overview_suggestion_start_learning'),
@@ -694,58 +888,169 @@ class LearningPathViewModels {
         return strings.t('profile.unit_default');
     }
   }
+}
 
-  static Lesson? _resolveRecommendedLesson({
-    required List<Lesson> lessons,
-    required ProgressSnapshot progress,
-    required bool unlocked,
-  }) {
-    if (lessons.isEmpty) return null;
-
-    Lesson? byLastLesson;
-    if (progress.lastLessonId != null) {
-      byLastLesson = _firstWhereOrNull(
-        lessons,
-        (lesson) =>
-            lesson.id == progress.lastLessonId &&
-            progress.startedLessons.contains(lesson.id) &&
-            !progress.completedLessons.contains(lesson.id),
-      );
-    }
-
-    final startedInProgress = _firstWhereOrNull(
-      lessons,
-      (lesson) =>
-          progress.startedLessons.contains(lesson.id) &&
-          !progress.completedLessons.contains(lesson.id),
-    );
-
-    final nextAccessibleUnfinished = _firstWhereOrNull(
-      lessons,
-      (lesson) =>
-          !progress.completedLessons.contains(lesson.id) &&
-          (!lesson.isLocked || unlocked),
-    );
-
-    return byLastLesson ?? startedInProgress ?? nextAccessibleUnfinished;
+Lesson? _resolveStageLesson({
+  required List<Lesson> lessons,
+  required LearningPathSnapshot snapshot,
+}) {
+  if (lessons.isEmpty) {
+    return null;
   }
 
-  static String? _resolveCurrentUnitId({
-    required List<Lesson> lessons,
-    required ProgressSnapshot progress,
-    required bool unlocked,
-  }) {
-    final referenceLesson = _resolveRecommendedLesson(
-          lessons: lessons,
-          progress: progress,
-          unlocked: unlocked,
-        ) ??
-        _firstWhereOrNull(
-          lessons,
-          (lesson) => !progress.completedLessons.contains(lesson.id),
-        ) ??
-        (lessons.isNotEmpty ? lessons.first : null);
-    return referenceLesson?.unitId;
+  final current = _firstWhereOrNull(
+    lessons,
+    (lesson) => snapshot.lessonStatusFor(lesson.id).isCurrentLike,
+  );
+  if (current != null) {
+    return current;
+  }
+
+  final next = _firstWhereOrNull(
+    lessons,
+    (lesson) {
+      final status = snapshot.lessonStatusFor(lesson.id);
+      return status == V2LessonStatus.available ||
+          status == V2LessonStatus.coreCompleted;
+    },
+  );
+  if (next != null) {
+    return next;
+  }
+
+  return _firstWhereOrNull(
+        lessons,
+        (lesson) => snapshot.lessonStatusFor(lesson.id).isCompletedLike,
+      ) ??
+      lessons.first;
+}
+
+String _phaseIdForUnitId(String? unitId) {
+  if (unitId == null || unitId.isEmpty) {
+    return 'phase_unknown';
+  }
+  return 'phase_${unitId.toLowerCase()}';
+}
+
+CoursePhaseStatus _mapCoursePhaseStatus({
+  required V2PhaseStatus phaseStatus,
+  required bool allLocked,
+}) {
+  if (allLocked) {
+    return CoursePhaseStatus.locked;
+  }
+  switch (phaseStatus) {
+    case V2PhaseStatus.notStarted:
+      return CoursePhaseStatus.available;
+    case V2PhaseStatus.active:
+    case V2PhaseStatus.consolidation:
+      return CoursePhaseStatus.current;
+    case V2PhaseStatus.completed:
+      return CoursePhaseStatus.completed;
+  }
+}
+
+String _phaseDescription(
+  AppLanguage language, {
+  required V2PhaseStatus status,
+  required int lessonCount,
+}) {
+  switch (status) {
+    case V2PhaseStatus.notStarted:
+      return _copy(
+        language,
+        zh: '这一单元还没开始，共 $lessonCount 节课。',
+        en: 'This unit has not started yet and contains $lessonCount lessons.',
+      );
+    case V2PhaseStatus.active:
+      return _copy(
+        language,
+        zh: '这一单元正在进行中，继续沿当前主线推进。',
+        en: 'This unit is active. Continue along the current learning path.',
+      );
+    case V2PhaseStatus.consolidation:
+      return _copy(
+        language,
+        zh: '这一单元已学完主线，但还有回顾巩固信号。',
+        en: 'The main path is finished here, but some review signals remain.',
+      );
+    case V2PhaseStatus.completed:
+      return _copy(
+        language,
+        zh: '这一单元已稳定完成，可按需回看。',
+        en: 'This unit is completed and can be revisited as needed.',
+      );
+  }
+}
+
+String _phaseActionText(
+  AppLanguage language, {
+  required CoursePhaseStatus status,
+  required bool canEnter,
+}) {
+  if (!canEnter) {
+    return _copy(language, zh: '当前不可进入', en: 'Not available to enter');
+  }
+  switch (status) {
+    case CoursePhaseStatus.current:
+      return _copy(language, zh: '继续这个单元', en: 'Continue This Unit');
+    case CoursePhaseStatus.available:
+      return _copy(language, zh: '开始这个单元', en: 'Start This Unit');
+    case CoursePhaseStatus.locked:
+      return _copy(language, zh: '当前未开放', en: 'Currently Locked');
+    case CoursePhaseStatus.planned:
+      return _copy(language, zh: '等待内容接入', en: 'Waiting for Content');
+    case CoursePhaseStatus.completed:
+      return _copy(language, zh: '回看这个单元', en: 'Review This Unit');
+  }
+}
+
+String _phaseAccessText(
+  AppLanguage language, {
+  required CoursePhaseStatus status,
+  required bool canEnter,
+}) {
+  if (!canEnter) {
+    return _copy(language,
+        zh: '当前没有可进入的课程入口。',
+        en: 'There is no available lesson entry in this unit right now.');
+  }
+  switch (status) {
+    case CoursePhaseStatus.current:
+      return _copy(language,
+          zh: '这是当前课程主线所在单元。',
+          en: 'This is the unit currently driving the main learning path.');
+    case CoursePhaseStatus.available:
+      return _copy(language,
+          zh: '这一单元可以直接进入。', en: 'This unit is ready to enter.');
+    case CoursePhaseStatus.locked:
+      return _copy(language,
+          zh: '这一单元当前锁定。', en: 'This unit is currently locked.');
+    case CoursePhaseStatus.planned:
+      return _copy(language,
+          zh: '这一单元仍在规划中。', en: 'This unit is still planned only.');
+    case CoursePhaseStatus.completed:
+      return _copy(language,
+          zh: '这一单元已经完成，可回看复盘。',
+          en: 'This unit is finished and available for review.');
+  }
+}
+
+String _phaseStatusText(
+  AppLanguage language,
+  CoursePhaseStatus status,
+) {
+  switch (status) {
+    case CoursePhaseStatus.current:
+      return _copy(language, zh: '当前阶段', en: 'Current');
+    case CoursePhaseStatus.available:
+      return _copy(language, zh: '可开始', en: 'Available');
+    case CoursePhaseStatus.locked:
+      return _copy(language, zh: '未开放', en: 'Locked');
+    case CoursePhaseStatus.planned:
+      return _copy(language, zh: '规划中', en: 'Planned');
+    case CoursePhaseStatus.completed:
+      return _copy(language, zh: '已完成', en: 'Completed');
   }
 }
 

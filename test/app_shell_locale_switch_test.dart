@@ -49,7 +49,7 @@ void main() {
 
     await tester.tap(find.text('课程'));
     await pumpUntilLoaded(tester);
-    expect(find.text('当前推荐单元'), findsOneWidget);
+    expect(find.text('学习地图'), findsOneWidget);
 
     await tester.tap(find.text('复习'));
     await pumpUntilLoaded(tester);

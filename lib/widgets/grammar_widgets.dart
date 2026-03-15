@@ -4,9 +4,11 @@ import '../app_scope.dart';
 import '../l10n/grammar_text.dart';
 import '../l10n/localized_text.dart';
 import '../models/grammar_models.dart';
+import '../services/audio_service.dart';
 import '../theme/app_arabic_typography.dart';
 import '../theme/app_theme.dart';
 import 'app_widgets.dart';
+import 'arabic_text_with_audio.dart';
 
 IconData grammarIconFromName(String name) {
   switch (name) {
@@ -267,22 +269,37 @@ class _GrammarTableRow extends StatelessWidget {
                   vertical: 12,
                 ),
                 child: AppArabicTypography.isArabic(value)
-                    ? ArabicText.label(
-                        value,
-                        style: TextStyle(
-                          fontSize: isHeader ? 18 : 20,
-                          fontWeight: isHeader
-                              ? FontWeight.w600
-                              : FontWeight.w500,
-                          color: AppTheme.textPrimary,
-                        ),
-                        textAlign: TextAlign.center,
-                      )
+                    ? (isHeader
+                        ? ArabicText.label(
+                            value,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.textPrimary,
+                            ),
+                            textAlign: TextAlign.center,
+                          )
+                        : ArabicTextWithAudio(
+                            textAr: value,
+                            request: LearningAudioRequest.general(
+                              scope: 'grammar',
+                              type: 'phrase',
+                              textAr: value,
+                              textPlain: value,
+                              debugLabel: 'grammar_table_cell',
+                            ),
+                            variant: ArabicAudioTextVariant.label,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                              color: AppTheme.textPrimary,
+                            ),
+                            textAlign: TextAlign.center,
+                            spacing: 6,
+                          ))
                     : Text(
                         grammarContentText(value, meaningLanguage),
-                        style: (isHeader
-                                ? text.labelLarge
-                                : text.bodyMedium)
+                        style: (isHeader ? text.labelLarge : text.bodyMedium)
                             ?.copyWith(color: AppTheme.textPrimary),
                         textAlign: TextAlign.center,
                       ),
@@ -348,7 +365,7 @@ class GrammarRuleCard extends StatelessWidget {
           ),
           if (rule.example != null) ...[
             const SizedBox(height: 12),
-            GrammarExampleCard(example: rule.example!, onPlay: onPlay),
+            GrammarExampleCard(example: rule.example!),
           ],
         ],
       ),
@@ -425,8 +442,16 @@ class _CompareValue extends StatelessWidget {
           Text(label, style: Theme.of(context).textTheme.labelMedium),
           const SizedBox(height: 8),
           if (AppArabicTypography.isArabic(value))
-            ArabicText.word(
-              value,
+            ArabicTextWithAudio(
+              textAr: value,
+              request: LearningAudioRequest.general(
+                scope: 'grammar',
+                type: 'phrase',
+                textAr: value,
+                textPlain: value,
+                debugLabel: 'grammar_compare_value',
+              ),
+              variant: ArabicAudioTextVariant.word,
               style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
             )
           else
@@ -442,12 +467,10 @@ class _CompareValue extends StatelessWidget {
 
 class GrammarExampleCard extends StatelessWidget {
   final GrammarExampleData example;
-  final Future<void> Function()? onPlay;
 
   const GrammarExampleCard({
     super.key,
     required this.example,
-    this.onPlay,
   });
 
   @override
@@ -464,28 +487,23 @@ class GrammarExampleCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: ArabicText.sentence(
-                  example.arabicWithDiacritics,
-                  style: const TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.w600,
-                    height: 1.5,
-                  ),
-                  textAlign: TextAlign.right,
-                ),
-              ),
-              if (onPlay != null)
-                IconButton(
-                  onPressed: () async => onPlay!.call(),
-                  icon: const Icon(
-                    Icons.volume_up_rounded,
-                    color: AppTheme.accentMintDark,
-                  ),
-                ),
-            ],
+          ArabicTextWithAudio(
+            textAr: example.arabicWithDiacritics,
+            request: LearningAudioRequest.general(
+              scope: 'grammar',
+              type: 'sentence',
+              asset: example.audioPath,
+              textAr: example.arabicWithDiacritics,
+              textPlain: example.arabicPlain,
+              debugLabel: 'grammar_example_card',
+            ),
+            variant: ArabicAudioTextVariant.sentence,
+            style: const TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.w600,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.right,
           ),
           if (example.arabicPlain.isNotEmpty &&
               example.arabicPlain != example.arabicWithDiacritics) ...[

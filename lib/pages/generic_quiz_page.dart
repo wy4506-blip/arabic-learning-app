@@ -12,6 +12,8 @@ class GenericQuizPage extends StatefulWidget {
   final String emptyText;
   final List<QuizQuestion> questions;
   final Future<List<QuizQuestion>>? Function()? questionsLoader;
+  final Future<void> Function(List<QuizQuestion> questions, int score)?
+      onCompleted;
 
   const GenericQuizPage({
     super.key,
@@ -21,6 +23,7 @@ class GenericQuizPage extends StatefulWidget {
     required this.emptyText,
     required this.questions,
     this.questionsLoader,
+    this.onCompleted,
   });
 
   @override
@@ -35,6 +38,7 @@ class _GenericQuizPageState extends State<GenericQuizPage> {
   int _score = 0;
   String? _selectedAnswer;
   bool _answered = false;
+  bool _completionHandled = false;
 
   @override
   void initState() {
@@ -80,7 +84,7 @@ class _GenericQuizPageState extends State<GenericQuizPage> {
     });
   }
 
-  void _nextQuestion() {
+  Future<void> _nextQuestion() async {
     if (_questions.isEmpty) return;
 
     AudioService.stop();
@@ -93,8 +97,22 @@ class _GenericQuizPageState extends State<GenericQuizPage> {
       });
       _autoplayCurrentPromptIfNeeded();
     } else {
-      _showResultDialog();
+      await _finishQuiz();
     }
+  }
+
+  Future<void> _finishQuiz() async {
+    if (_completionHandled) {
+      _showResultDialog();
+      return;
+    }
+
+    _completionHandled = true;
+    if (widget.onCompleted != null) {
+      await widget.onCompleted!(_questions, _score);
+    }
+    if (!mounted) return;
+    _showResultDialog();
   }
 
   void _restartQuiz() {
@@ -103,6 +121,7 @@ class _GenericQuizPageState extends State<GenericQuizPage> {
       _score = 0;
       _selectedAnswer = null;
       _answered = false;
+      _completionHandled = false;
     });
     _autoplayCurrentPromptIfNeeded();
   }
@@ -120,10 +139,24 @@ class _GenericQuizPageState extends State<GenericQuizPage> {
     final question = _currentQuestion;
     switch (question.promptType) {
       case 'letter_audio':
-        await AudioService.speakLetter(question.prompt);
+        await AudioService.playLearningText(
+          LearningAudioRequest.alphabet(
+            type: 'letter',
+            textAr: question.prompt,
+            textPlain: question.prompt,
+            debugLabel: 'generic_quiz_letter_prompt',
+          ),
+        );
         return;
       case 'pronunciation_audio':
-        await AudioService.speakPronunciation(question.prompt);
+        await AudioService.playLearningText(
+          LearningAudioRequest.alphabet(
+            type: 'pronunciation',
+            textAr: question.prompt,
+            textPlain: question.prompt,
+            debugLabel: 'generic_quiz_pronunciation_prompt',
+          ),
+        );
         return;
       default:
         return;

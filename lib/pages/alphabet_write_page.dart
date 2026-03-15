@@ -4,6 +4,8 @@ import '../app_scope.dart';
 import '../l10n/alphabet_content_localizer.dart';
 import '../l10n/localized_text.dart';
 import '../models/alphabet_group.dart';
+import '../services/alphabet_progress_service.dart';
+import '../services/review_service.dart';
 import '../theme/app_arabic_typography.dart';
 import '../theme/app_theme.dart';
 
@@ -22,6 +24,13 @@ class AlphabetWritePage extends StatefulWidget {
 class _AlphabetWritePageState extends State<AlphabetWritePage> {
   bool _showObservation = false;
   int _practiceStep = -1;
+
+  Future<void> _completeWriting() async {
+    await AlphabetProgressService.markWriteCompleted(widget.letter);
+    await ReviewService.markAlphabetWriteCompleted(widget.letter);
+    if (!mounted) return;
+    Navigator.pop(context, true);
+  }
 
   List<_PracticeStep> get _practiceSteps => <_PracticeStep>[
         _PracticeStep(
@@ -69,22 +78,19 @@ class _AlphabetWritePageState extends State<AlphabetWritePage> {
         return localizedText(
           context,
           zh: step.detail,
-          en:
-              'Write ${widget.letter.forms.isolated} on its own three times and memorize the main outline.',
+          en: 'Write ${widget.letter.forms.isolated} on its own three times and memorize the main outline.',
         );
       case '再看连接形':
         return localizedText(
           context,
           zh: step.detail,
-          en:
-              'Write ${widget.letter.forms.initial}, ${widget.letter.forms.medial}, and ${widget.letter.forms.finalForm} in order and compare how the connection changes.',
+          en: 'Write ${widget.letter.forms.initial}, ${widget.letter.forms.medial}, and ${widget.letter.forms.finalForm} in order and compare how the connection changes.',
         );
       case '最后写示例词':
         return localizedText(
           context,
           zh: step.detail,
-          en:
-              'Trace ${widget.letter.example.arabic} and say ${widget.letter.example.latin} aloud at the same time.',
+          en: 'Trace ${widget.letter.example.arabic} and say ${widget.letter.example.latin} aloud at the same time.',
         );
       case '完成自检':
         return localizedText(
@@ -132,7 +138,11 @@ class _AlphabetWritePageState extends State<AlphabetWritePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        localizedText(context, zh: '书写', en: 'Write'),
+                        localizedText(
+                          context,
+                          zh: '书写巩固',
+                          en: 'Writing Practice',
+                        ),
                         style: text.titleMedium,
                       ),
                       const SizedBox(height: 1),
@@ -210,46 +220,6 @@ class _AlphabetWritePageState extends State<AlphabetWritePage> {
               ),
             ),
             SizedBox(height: sectionGap),
-            Text(
-              localizedText(
-                context,
-                zh: '书写形态',
-                en: 'Writing Forms',
-              ),
-              style: text.titleMedium,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              localizedText(
-                context,
-                zh: '阿拉伯字母在不同位置会变化。先认形，再动笔，书写会稳得多。',
-                en: 'Arabic letters change by position. Learn the shapes first, then start writing.',
-              ),
-              style: text.bodyMedium,
-            ),
-            const SizedBox(height: 12),
-            _buildFormsGrid(
-              context,
-              isSmallScreen: isSmallScreen,
-              isLargeScreen: isLargeScreen,
-            ),
-            if (_showObservation) ...[
-              SizedBox(height: sectionGap),
-              _ObservationCard(
-                letter: widget.letter,
-                currentStep: _practiceStep,
-              ),
-            ],
-            SizedBox(height: sectionGap),
-            Text(
-              localizedText(
-                context,
-                zh: '连写规则',
-                en: 'Connection Rule',
-              ),
-              style: text.titleMedium,
-            ),
-            const SizedBox(height: 8),
             Container(
               padding: EdgeInsets.all(isSmallScreen ? 14 : 16),
               decoration: BoxDecoration(
@@ -277,39 +247,120 @@ class _AlphabetWritePageState extends State<AlphabetWritePage> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      widget.letter.connectsAfter
-                          ? localizedText(
-                              context,
-                              zh: '这个字母通常可以继续向后连接。写在词中时，重点观察它和后一个字母之间的过渡。',
-                              en: 'This letter usually connects forward. When it appears inside a word, focus on the transition into the next letter.',
-                            )
-                          : localizedText(
-                              context,
-                              zh: '这个字母通常不向后连接。它后面的字母需要重新起笔，这是阅读和书写都要特别注意的断点。',
-                              en: 'This letter usually does not connect forward. The next letter starts fresh, which matters in both reading and writing.',
-                            ),
-                      style: text.bodyMedium,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          localizedText(
+                            context,
+                            zh: '这一步放到后面巩固即可',
+                            en: 'This Step Can Wait',
+                          ),
+                          style: text.titleSmall,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          localizedText(
+                            context,
+                            zh: '首轮先看独立形和断连提醒就够了。完整四形、临摹和自检都保留在后面。',
+                            en: 'For the first pass, just look at the isolated form and the connection rule. The full set of forms, tracing, and self-check stay below.',
+                          ),
+                          style: text.bodyMedium,
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
             SizedBox(height: sectionGap),
-            Text(
-              localizedText(
-                context,
-                zh: '分步临摹',
-                en: 'Step-by-Step Tracing',
-              ),
-              style: text.titleMedium,
-            ),
-            const SizedBox(height: 8),
             Container(
               padding: EdgeInsets.all(isSmallScreen ? 14 : 16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: const Color(0xFFF7FCFA),
                 borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: const Color(0xFFD8ECE4)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    localizedText(
+                      context,
+                      zh: '首轮先看独立形',
+                      en: 'Start with the Isolated Form',
+                    ),
+                    style: text.titleSmall,
+                  ),
+                  const SizedBox(height: 10),
+                  Center(
+                    child: ArabicText.word(
+                      widget.letter.forms.isolated,
+                      style: text.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.deepAccent,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    widget.letter.connectsAfter
+                        ? localizedText(
+                            context,
+                            zh: '这个字母通常可以继续向后连接。首轮先知道“它通常不断开”就够了。',
+                            en: 'This letter usually connects forward. For the first pass, it is enough to know that it usually keeps flowing.',
+                          )
+                        : localizedText(
+                            context,
+                            zh: '这个字母通常不向后连接。首轮先知道“它后面会重新起笔”就够了。',
+                            en: 'This letter usually does not connect forward. For the first pass, it is enough to know that the next letter starts fresh.',
+                          ),
+                    style: text.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: sectionGap),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(
+                    vertical: isSmallScreen ? 12 : 13,
+                  ),
+                  side: const BorderSide(color: Color(0xFFD0D5DD)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.schedule_rounded),
+                label: Text(
+                  localizedText(
+                    context,
+                    zh: '稍后再练，先回去继续认字母',
+                    en: 'Practice This Later',
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: sectionGap),
+            Text(
+              localizedText(
+                context,
+                zh: '书写形态',
+                en: 'Writing Forms',
+              ),
+              style: text.labelLarge?.copyWith(
+                color: AppTheme.textSecondary,
+              ),
+            ),
+            SizedBox(height: sectionGap),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
                 boxShadow: const [
                   BoxShadow(
                     color: Color(0x10000000),
@@ -318,162 +369,276 @@ class _AlphabetWritePageState extends State<AlphabetWritePage> {
                   ),
                 ],
               ),
-              child: Column(
-                children: [
-                  for (var index = 0; index < _practiceSteps.length; index++)
-                    _PracticeStepTile(
-                      step: _practiceSteps[index],
-                      active: _practiceStep == index,
-                      completed: _practiceStep > index,
-                    ),
-                ],
-              ),
-            ),
-            if (_practiceStep >= 0) ...[
-              SizedBox(height: sectionGap),
-              Container(
-                padding: EdgeInsets.all(isSmallScreen ? 14 : 16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF7FCFA),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: const Color(0xFFD8ECE4),
+              child: Theme(
+                data: Theme.of(context)
+                    .copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  tilePadding: EdgeInsets.symmetric(
+                    horizontal: isSmallScreen ? 14 : 16,
+                    vertical: 4,
                   ),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(
-                      Icons.edit_note_rounded,
-                      color: AppTheme.deepAccent,
+                  childrenPadding: EdgeInsets.fromLTRB(
+                    isSmallScreen ? 14 : 16,
+                    0,
+                    isSmallScreen ? 14 : 16,
+                    16,
+                  ),
+                  title: Text(
+                    localizedText(
+                      context,
+                      zh: '完整书写巩固（可稍后）',
+                      en: 'Full Writing Practice Later',
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
+                    style: text.titleMedium,
+                  ),
+                  subtitle: Text(
+                    localizedText(
+                      context,
+                      zh: '四种字形、连写规则、临摹步骤和自检都保留在这里。',
+                      en: 'The full forms, connection rule, tracing steps, and self-check stay here.',
+                    ),
+                    style: text.bodySmall,
+                  ),
+                  children: [
+                    Text(
+                      localizedText(
+                        context,
+                        zh: '书写形态',
+                        en: 'Writing Forms',
+                      ),
+                      style: text.titleMedium,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      localizedText(
+                        context,
+                        zh: '阿拉伯字母在不同位置会变化。先认形，再动笔，书写会稳得多。',
+                        en: 'Arabic letters change by position. Learn the shapes first, then start writing.',
+                      ),
+                      style: text.bodyMedium,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildFormsGrid(
+                      context,
+                      isSmallScreen: isSmallScreen,
+                      isLargeScreen: isLargeScreen,
+                    ),
+                    if (_showObservation) ...[
+                      SizedBox(height: sectionGap),
+                      _ObservationCard(
+                        letter: widget.letter,
+                        currentStep: _practiceStep,
+                      ),
+                    ],
+                    SizedBox(height: sectionGap),
+                    Text(
+                      localizedText(
+                        context,
+                        zh: '连写规则',
+                        en: 'Connection Rule',
+                      ),
+                      style: text.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: EdgeInsets.all(isSmallScreen ? 14 : 16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF7FAF9),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
                       child: Text(
-                        _practiceDetail(
-                          context,
-                          _practiceSteps[_practiceStep],
+                        widget.letter.connectsAfter
+                            ? localizedText(
+                                context,
+                                zh: '这个字母通常可以继续向后连接。写在词中时，重点观察它和后一个字母之间的过渡。',
+                                en: 'This letter usually connects forward. When it appears inside a word, focus on the transition into the next letter.',
+                              )
+                            : localizedText(
+                                context,
+                                zh: '这个字母通常不向后连接。它后面的字母需要重新起笔，这是阅读和书写都要特别注意的断点。',
+                                en: 'This letter usually does not connect forward. The next letter starts fresh, which matters in both reading and writing.',
+                              ),
+                        style: text.bodyMedium,
+                      ),
+                    ),
+                    SizedBox(height: sectionGap),
+                    Text(
+                      localizedText(
+                        context,
+                        zh: '分步临摹',
+                        en: 'Step-by-Step Tracing',
+                      ),
+                      style: text.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: EdgeInsets.all(isSmallScreen ? 14 : 16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF7FAF9),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        children: [
+                          for (var index = 0;
+                              index < _practiceSteps.length;
+                              index++)
+                            _PracticeStepTile(
+                              step: _practiceSteps[index],
+                              active: _practiceStep == index,
+                              completed: _practiceStep > index,
+                            ),
+                        ],
+                      ),
+                    ),
+                    if (_practiceStep >= 0) ...[
+                      SizedBox(height: sectionGap),
+                      Container(
+                        padding: EdgeInsets.all(isSmallScreen ? 14 : 16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF7FCFA),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: const Color(0xFFD8ECE4),
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.edit_note_rounded,
+                              color: AppTheme.deepAccent,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                _practiceDetail(
+                                  context,
+                                  _practiceSteps[_practiceStep],
+                                ),
+                                style: text.bodyMedium,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    SizedBox(height: sectionGap),
+                    Text(
+                      localizedText(
+                        context,
+                        zh: '学习提示',
+                        en: 'Learning Note',
+                      ),
+                      style: text.titleMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: EdgeInsets.all(isSmallScreen ? 14 : 16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF7FAF9),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        AlphabetContentLocalizer.tip(
+                          widget.letter,
+                          context.appSettings.meaningLanguage,
                         ),
                         style: text.bodyMedium,
+                      ),
+                    ),
+                    SizedBox(height: sectionGap),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(
+                                vertical: isSmallScreen ? 12 : 13,
+                              ),
+                              side: const BorderSide(color: Color(0xFFD0D5DD)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            onPressed: _toggleObservation,
+                            child: Text(
+                              _showObservation
+                                  ? localizedText(
+                                      context,
+                                      zh: '收起观察',
+                                      en: 'Hide Notes',
+                                    )
+                                  : localizedText(
+                                      context,
+                                      zh: '观察结构',
+                                      en: 'Observe Shape',
+                                    ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: AppTheme.deepAccent,
+                              padding: EdgeInsets.symmetric(
+                                vertical: isSmallScreen ? 12 : 13,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            onPressed: _advancePractice,
+                            child: Text(
+                              _practiceStep + 1 < _practiceSteps.length
+                                  ? (_practiceStep < 0
+                                      ? localizedText(
+                                          context,
+                                          zh: '开始临摹',
+                                          en: 'Start Tracing',
+                                        )
+                                      : localizedText(
+                                          context,
+                                          zh: '下一步',
+                                          en: 'Next',
+                                        ))
+                                  : localizedText(
+                                      context,
+                                      zh: '重新开始',
+                                      en: 'Restart',
+                                    ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: sectionGap),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppTheme.deepAccent,
+                          padding: EdgeInsets.symmetric(
+                            vertical: isSmallScreen ? 12 : 13,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        onPressed: _completeWriting,
+                        icon: const Icon(Icons.check_circle_rounded),
+                        label: Text(
+                          localizedText(
+                            context,
+                            zh: '完成书写巩固',
+                            en: 'Finish Writing Practice',
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
-            SizedBox(height: sectionGap),
-            Text(
-              localizedText(
-                context,
-                zh: '学习提示',
-                en: 'Learning Note',
-              ),
-              style: text.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: EdgeInsets.all(isSmallScreen ? 14 : 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x10000000),
-                    blurRadius: 12,
-                    offset: Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    radius: isSmallScreen ? 18 : 20,
-                    backgroundColor: const Color(0xFFE8F5F0),
-                    child: Icon(
-                      Icons.lightbulb_rounded,
-                      color: AppTheme.deepAccent,
-                      size: isSmallScreen ? 18 : 20,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      AlphabetContentLocalizer.tip(
-                        widget.letter,
-                        context.appSettings.meaningLanguage,
-                      ),
-                      style: text.bodyMedium,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: sectionGap),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(
-                        vertical: isSmallScreen ? 12 : 13,
-                      ),
-                      side: const BorderSide(color: Color(0xFFD0D5DD)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    onPressed: _toggleObservation,
-                    child: Text(
-                      _showObservation
-                          ? localizedText(
-                              context,
-                              zh: '收起观察',
-                              en: 'Hide Notes',
-                            )
-                          : localizedText(
-                              context,
-                              zh: '观察结构',
-                              en: 'Observe Shape',
-                            ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppTheme.deepAccent,
-                      padding: EdgeInsets.symmetric(
-                        vertical: isSmallScreen ? 12 : 13,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    onPressed: _advancePractice,
-                    child: Text(
-                      _practiceStep + 1 < _practiceSteps.length
-                          ? (_practiceStep < 0
-                              ? localizedText(
-                                  context,
-                                  zh: '开始临摹',
-                                  en: 'Start Tracing',
-                                )
-                              : localizedText(
-                                  context,
-                                  zh: '下一步',
-                                  en: 'Next',
-                                ))
-                          : localizedText(
-                              context,
-                              zh: '重新开始',
-                              en: 'Restart',
-                            ),
-                    ),
-                  ),
-                ),
-              ],
             ),
           ],
         ),
@@ -629,8 +794,7 @@ class _ObservationCard extends StatelessWidget {
       localizedText(
         context,
         zh: '再看连接形：${letter.forms.initial} / ${letter.forms.medial} / ${letter.forms.finalForm}',
-        en:
-            'Then compare the connecting forms: ${letter.forms.initial} / ${letter.forms.medial} / ${letter.forms.finalForm}',
+        en: 'Then compare the connecting forms: ${letter.forms.initial} / ${letter.forms.medial} / ${letter.forms.finalForm}',
       ),
       localizedText(
         context,
@@ -719,10 +883,14 @@ class _PracticeStepTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final localizedTitle = switch (step.title) {
-      '先写独立形' => localizedText(context, zh: '先写独立形', en: 'Write the Isolated Form'),
-      '再看连接形' => localizedText(context, zh: '再看连接形', en: 'Study the Connecting Forms'),
-      '最后写示例词' => localizedText(context, zh: '最后写示例词', en: 'Write the Example Word'),
-      '完成自检' => localizedText(context, zh: '完成自检', en: 'Finish with a Self-check'),
+      '先写独立形' =>
+        localizedText(context, zh: '先写独立形', en: 'Write the Isolated Form'),
+      '再看连接形' =>
+        localizedText(context, zh: '再看连接形', en: 'Study the Connecting Forms'),
+      '最后写示例词' =>
+        localizedText(context, zh: '最后写示例词', en: 'Write the Example Word'),
+      '完成自检' =>
+        localizedText(context, zh: '完成自检', en: 'Finish with a Self-check'),
       _ => step.title,
     };
 

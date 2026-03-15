@@ -15,6 +15,7 @@ import '../services/unlock_service.dart';
 import '../theme/app_arabic_typography.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_widgets.dart';
+import '../widgets/arabic_text_with_audio.dart';
 import 'alphabet_letter_home_page.dart';
 import 'grammar_detail_page.dart';
 import 'lesson_detail_page.dart';
@@ -116,8 +117,9 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
   Future<void> _completeSession({
     required bool completedTodayPlan,
   }) async {
-    final shouldRecordStandaloneCompletion = widget.session.countTowardActivity &&
-        (!widget.session.syncWithTodayPlan || !completedTodayPlan);
+    final shouldRecordStandaloneCompletion =
+        widget.session.countTowardActivity &&
+            (!widget.session.syncWithTodayPlan || !completedTodayPlan);
     if (shouldRecordStandaloneCompletion) {
       await ReviewService.finishSession(widget.session);
     }
@@ -240,50 +242,117 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
   Future<void> _playListenPrompt(ReviewTask task) async {
     switch (task.type) {
       case ReviewContentType.alphabet:
-        await AudioService.speakLetter(task.sourceId ?? task.arabicText ?? task.title);
+        await AudioService.playLearningText(
+          LearningAudioRequest.alphabet(
+            type: 'letter',
+            textAr: task.sourceId ?? task.arabicText ?? task.title,
+            textPlain: task.arabicText ?? task.title,
+            debugLabel: 'review_listen_alphabet',
+          ),
+        );
         return;
       case ReviewContentType.pronunciation:
-        await AudioService.speakPronunciation(
-          task.audioQueryText ?? task.arabicText ?? task.transliteration ?? task.title,
+        await AudioService.playLearningText(
+          LearningAudioRequest.alphabet(
+            type: 'pronunciation',
+            textAr: task.audioQueryText ??
+                task.arabicText ??
+                task.transliteration ??
+                task.title,
+            textPlain: task.arabicText ?? task.title,
+            debugLabel: 'review_listen_pronunciation',
+          ),
         );
         return;
       case ReviewContentType.word:
       case ReviewContentType.sentence:
       case ReviewContentType.pair:
       case ReviewContentType.grammar:
-        await AudioService.speakText(
-          task.arabicText ?? task.audioQueryText ?? task.transliteration ?? task.title,
+        await AudioService.playLearningText(
+          LearningAudioRequest.general(
+            scope: 'review',
+            type: task.type == ReviewContentType.word ? 'word' : 'sentence',
+            textAr: task.arabicText ??
+                task.audioQueryText ??
+                task.transliteration ??
+                task.title,
+            textPlain: task.audioQueryText ?? task.title,
+            debugLabel: 'review_listen_text',
+          ),
         );
         return;
     }
   }
 
   Future<void> _playRepeatPrompt(ReviewTask task) async {
-    await AudioService.speakText(
-      task.arabicText ?? task.audioQueryText ?? task.transliteration ?? task.title,
+    await AudioService.playLearningText(
+      LearningAudioRequest.general(
+        scope: 'review',
+        type: task.type == ReviewContentType.word ? 'word' : 'sentence',
+        textAr: task.arabicText ??
+            task.audioQueryText ??
+            task.transliteration ??
+            task.title,
+        textPlain: task.audioQueryText ?? task.title,
+        debugLabel: 'review_repeat_text',
+      ),
     );
   }
 
   Future<void> _playReadPrompt(ReviewTask task) async {
     if (task.type == ReviewContentType.pronunciation) {
-      await AudioService.speakPronunciation(
-        task.audioQueryText ?? task.arabicText ?? task.transliteration ?? task.title,
+      await AudioService.playLearningText(
+        LearningAudioRequest.alphabet(
+          type: 'pronunciation',
+          textAr: task.audioQueryText ??
+              task.arabicText ??
+              task.transliteration ??
+              task.title,
+          textPlain: task.arabicText ?? task.title,
+          debugLabel: 'review_read_pronunciation',
+        ),
       );
       return;
     }
-    await AudioService.speakText(
-      task.arabicText ?? task.audioQueryText ?? task.transliteration ?? task.title,
+    await AudioService.playLearningText(
+      LearningAudioRequest.general(
+        scope: 'review',
+        type: task.type == ReviewContentType.word ? 'word' : 'sentence',
+        textAr: task.arabicText ??
+            task.audioQueryText ??
+            task.transliteration ??
+            task.title,
+        textPlain: task.audioQueryText ?? task.title,
+        debugLabel: 'review_read_text',
+      ),
     );
   }
 
   Future<void> _playComparePrompt(ReviewTask task) async {
     if (task.type == ReviewContentType.pair) {
       final pairItems = _pairItems(task);
-      await AudioService.speakText(pairItems.join(' '));
+      await AudioService.playLearningText(
+        LearningAudioRequest.general(
+          scope: 'review',
+          type: 'sentence',
+          textAr: pairItems.join(' '),
+          textPlain: pairItems.join(' '),
+          debugLabel: 'review_compare_pair',
+        ),
+      );
       return;
     }
-    await AudioService.speakText(
-      task.arabicText ?? task.audioQueryText ?? task.transliteration ?? task.title,
+    await AudioService.playLearningText(
+      LearningAudioRequest.general(
+        scope: 'review',
+        type: task.type == ReviewContentType.word ? 'word' : 'sentence',
+        textAr: task.arabicText ??
+            task.audioQueryText ??
+            task.transliteration ??
+            task.title,
+        textPlain: task.audioQueryText ?? task.title,
+        debugLabel: 'review_compare_text',
+      ),
     );
   }
 
@@ -472,39 +541,34 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
       return localizedText(
         context,
         zh: '页面会短暂停留后自动跳转，你也可以现在直接进入。',
-        en:
-            'You will move into the next lesson in a moment, or you can jump in right away.',
+        en: 'You will move into the next lesson in a moment, or you can jump in right away.',
       );
     }
     if (_completedTodayPlan) {
       return localizedText(
         context,
         zh: '今天建议先看的内容已经完成，可以回到课程继续学习。',
-        en:
-            'The suggested review for today is done. You can head back into learning with a clearer head.',
+        en: 'The suggested review for today is done. You can head back into learning with a clearer head.',
       );
     }
     if (_canContinueToNextLesson) {
       return localizedText(
         context,
         zh: '这轮正式复习已经完成，现在可以顺着进入下一课。',
-        en:
-            'This formal review pass is done. You can continue straight into the next lesson now.',
+        en: 'This formal review pass is done. You can continue straight into the next lesson now.',
       );
     }
     if (!_isFormalReview) {
       return localizedText(
         context,
         zh: '这轮自由练习已经完成，可以继续课程，也可以再挑一组内容顺手练一遍。',
-        en:
-            'This free-practice pass is done. You can return to lessons or pick another small set.',
+        en: 'This free-practice pass is done. You can return to lessons or pick another small set.',
       );
     }
     return localizedText(
       context,
       zh: '这组内容已经回顾完成，可以先回到原本的学习路径。',
-      en:
-          'This set has been reviewed once more. You can return to your normal learning path now.',
+      en: 'This set has been reviewed once more. You can return to your normal learning path now.',
     );
   }
 
@@ -564,7 +628,9 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
         ),
         const SizedBox(height: 14),
         Text(
-          _showCompletionState ? _completionTitle(context) : _headerTitle(context),
+          _showCompletionState
+              ? _completionTitle(context)
+              : _headerTitle(context),
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 8),
@@ -624,10 +690,21 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (task.arabicText != null && task.arabicText!.trim().isNotEmpty) ...[
+              if (task.arabicText != null &&
+                  task.arabicText!.trim().isNotEmpty) ...[
                 Center(
-                  child: ArabicText.sentence(
-                    task.arabicText!,
+                  child: ArabicTextWithAudio(
+                    textAr: task.arabicText!,
+                    request: LearningAudioRequest.general(
+                      scope: 'review',
+                      type: task.type == ReviewContentType.word
+                          ? 'word'
+                          : 'sentence',
+                      textAr: task.arabicText!,
+                      textPlain: task.audioQueryText ?? task.arabicText!,
+                      debugLabel: 'review_task_prompt',
+                    ),
+                    variant: ArabicAudioTextVariant.sentence,
                     style: const TextStyle(
                       fontSize: 38,
                       height: 1.55,
@@ -657,7 +734,8 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
-              if (task.helperText != null && task.helperText!.trim().isNotEmpty) ...[
+              if (task.helperText != null &&
+                  task.helperText!.trim().isNotEmpty) ...[
                 const SizedBox(height: 14),
                 Container(
                   width: double.infinity,
@@ -699,7 +777,8 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
             ),
           ],
         ),
-        if ((task.sourceId?.isNotEmpty ?? false) || (task.lessonId?.isNotEmpty ?? false)) ...[
+        if ((task.sourceId?.isNotEmpty ?? false) ||
+            (task.lessonId?.isNotEmpty ?? false)) ...[
           const SizedBox(height: 10),
           Align(
             alignment: Alignment.centerLeft,
@@ -749,7 +828,8 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
             zh: '如果你能自然跟出来，就点“会读了”；如果还会卡住，就点“还不稳”。',
             en: 'If you can repeat it naturally, confirm it. If it still feels sticky, mark it for another pass.',
           ),
-          buttonLabel: localizedText(context, zh: '播放示范', en: 'Play Model Audio'),
+          buttonLabel:
+              localizedText(context, zh: '播放示范', en: 'Play Model Audio'),
           onPressed: () => _playPromptAudio(task),
           busy: _playingPromptAudio,
         );
@@ -765,7 +845,8 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
             zh: '重点不是速度，而是读得顺。需要时可以先听一遍参考音。',
             en: 'Speed is not the goal. Smooth reading is. Play the reference audio first if you need it.',
           ),
-          buttonLabel: localizedText(context, zh: '播放参考音', en: 'Play Reference Audio'),
+          buttonLabel:
+              localizedText(context, zh: '播放参考音', en: 'Play Reference Audio'),
           onPressed: () => _playPromptAudio(task),
           busy: _playingPromptAudio,
         );
@@ -785,7 +866,8 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
                 zh: '先看差异，再读一遍或听一遍。确认自己不会再把它们混在一起。',
                 en: 'Look at the contrast first, then read or listen once. Confirm that you no longer mix them up.',
               ),
-              buttonLabel: localizedText(context, zh: '播放对比音', en: 'Play Contrast Audio'),
+              buttonLabel: localizedText(context,
+                  zh: '播放对比音', en: 'Play Contrast Audio'),
               onPressed: () => _playPromptAudio(task),
               busy: _playingPromptAudio,
             ),
@@ -816,7 +898,8 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
                         ),
                       ),
                     ),
-                    if (item != pairItems.take(2).last) const SizedBox(width: 10),
+                    if (item != pairItems.take(2).last)
+                      const SizedBox(width: 10),
                   ],
                 ],
               ),
@@ -908,7 +991,9 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
                   child: Text(
                     localizedText(
                       context,
-                      zh: _navigatingToLesson ? '正在打开下一课…' : '如果不想等待，可以现在直接进入下一课。',
+                      zh: _navigatingToLesson
+                          ? '正在打开下一课…'
+                          : '如果不想等待，可以现在直接进入下一课。',
                       en: _navigatingToLesson
                           ? 'Opening the next lesson now...'
                           : 'If you do not want to wait, you can enter the lesson right away.',
@@ -919,7 +1004,8 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
                 const SizedBox(height: 18),
               ],
               if (_canContinueToNextLesson &&
-                  (widget.session.config.nextLessonLabel?.trim().isNotEmpty ?? false)) ...[
+                  (widget.session.config.nextLessonLabel?.trim().isNotEmpty ??
+                      false)) ...[
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
@@ -987,8 +1073,9 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
   @override
   Widget build(BuildContext context) {
     final task = _currentTask;
-    final showSkipAction =
-        widget.session.config.allowSkip && !_showCompletionState && _hasNextLesson;
+    final showSkipAction = widget.session.config.allowSkip &&
+        !_showCompletionState &&
+        _hasNextLesson;
 
     return Scaffold(
       appBar: AppBar(

@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import '../app_scope.dart';
 import '../l10n/lesson_content_localizer.dart';
 import '../models/word_item.dart';
+import '../services/audio_service.dart';
 import '../services/review_service.dart';
 import '../services/vocab_service.dart';
 import '../theme/app_arabic_typography.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_widgets.dart';
+import '../widgets/arabic_text_with_audio.dart';
 
 class VocabBookPage extends StatefulWidget {
   const VocabBookPage({super.key});
@@ -165,8 +167,16 @@ class _VocabBookPageState extends State<VocabBookPage> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      ArabicText.word(
-                                        word.arabic,
+                                      ArabicTextWithAudio(
+                                        textAr: word.arabic,
+                                        request: LearningAudioRequest.general(
+                                          scope: 'vocab_book',
+                                          type: 'word',
+                                          textAr: word.arabic,
+                                          textPlain: word.plainArabic,
+                                          debugLabel: 'vocab_book_word',
+                                        ),
+                                        variant: ArabicAudioTextVariant.word,
                                         style: const TextStyle(
                                           fontSize: 26,
                                           height: 1.35,
@@ -229,7 +239,8 @@ class _VocabBookPageState extends State<VocabBookPage> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             _WordMetaLine(
-                                              label: strings.t('wordbook.plain'),
+                                              label:
+                                                  strings.t('wordbook.plain'),
                                               value: word.plainArabic,
                                               isArabic: true,
                                             ),
@@ -283,7 +294,8 @@ class _VocabBookPageState extends State<VocabBookPage> {
                                             ],
                                             const SizedBox(height: 6),
                                             _WordMetaLine(
-                                              label: strings.t('wordbook.pattern'),
+                                              label:
+                                                  strings.t('wordbook.pattern'),
                                               value: word.morphology == null
                                                   ? strings.t('wordbook.unset')
                                                   : _uiText(
@@ -296,7 +308,8 @@ class _VocabBookPageState extends State<VocabBookPage> {
                                                     .isNotEmpty) ...[
                                               const SizedBox(height: 6),
                                               _WordMetaLine(
-                                                label: strings.t('wordbook.note'),
+                                                label:
+                                                    strings.t('wordbook.note'),
                                                 value: _meaningText(
                                                   context,
                                                   word.patternNote!,
@@ -335,8 +348,23 @@ class _VocabBookPageState extends State<VocabBookPage> {
                                                     ),
                                               ),
                                               const SizedBox(height: 6),
-                                              ArabicText.sentence(
-                                                word.exampleSentenceVocalized!,
+                                              ArabicTextWithAudio(
+                                                textAr: word
+                                                    .exampleSentenceVocalized!,
+                                                request: LearningAudioRequest
+                                                    .general(
+                                                  scope: 'vocab_book',
+                                                  type: 'sentence',
+                                                  textAr: word
+                                                      .exampleSentenceVocalized!,
+                                                  textPlain: word
+                                                          .exampleSentencePlain ??
+                                                      word.exampleSentenceVocalized!,
+                                                  debugLabel:
+                                                      'vocab_book_example_sentence',
+                                                ),
+                                                variant: ArabicAudioTextVariant
+                                                    .sentence,
                                                 style: const TextStyle(
                                                   fontSize: 22,
                                                   height: 1.55,

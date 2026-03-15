@@ -4,11 +4,15 @@ import '../app_scope.dart';
 import '../l10n/alphabet_content_localizer.dart';
 import '../l10n/localized_text.dart';
 import '../models/alphabet_group.dart';
-import '../theme/app_arabic_typography.dart';
+import '../services/alphabet_progress_service.dart';
+import '../services/alphabet_service.dart';
+import '../services/audio_service.dart';
 import '../theme/app_theme.dart';
+import '../widgets/arabic_text_with_audio.dart';
 import 'alphabet_letter_home_page.dart';
+import 'alphabet_quiz_hub_page.dart';
 
-class AlphabetGroupDetailPage extends StatelessWidget {
+class AlphabetGroupDetailPage extends StatefulWidget {
   final AlphabetGroup group;
 
   const AlphabetGroupDetailPage({
@@ -17,13 +21,152 @@ class AlphabetGroupDetailPage extends StatelessWidget {
   });
 
   @override
+  State<AlphabetGroupDetailPage> createState() =>
+      _AlphabetGroupDetailPageState();
+}
+
+class _AlphabetGroupDetailPageState extends State<AlphabetGroupDetailPage> {
+  final ScrollController _scrollController = ScrollController();
+  int _reloadVersion = 0;
+  AlphabetLearningSnapshot _snapshot = AlphabetLearningSnapshot.empty;
+  AlphabetGroupProgress _groupProgress = const AlphabetGroupProgress(
+    completedLetterCount: 0,
+    totalLetterCount: 0,
+    isCompleted: false,
+  );
+  AlphabetGroup? _nextGroup;
+  bool _isRefreshing = true;
+
+  AlphabetGroup get group => widget.group;
+
+  @override
+  void initState() {
+    super.initState();
+    _reloadGroupProgress();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _reloadGroupProgress(
+      {bool showCompletionFeedback = false}) async {
+    final reloadVersion = ++_reloadVersion;
+    final previousCompleted = _groupProgress.isCompleted;
+    final snapshot = await AlphabetProgressService.getSnapshot();
+    final groupProgress = await AlphabetProgressService.getGroupProgress(group);
+    final allGroups = await AlphabetService.loadAlphabetGroups();
+    final currentIndex = allGroups.indexWhere((item) => item.id == group.id);
+    final nextGroup = currentIndex >= 0 && currentIndex + 1 < allGroups.length
+        ? allGroups[currentIndex + 1]
+        : null;
+
+    if (!mounted || reloadVersion != _reloadVersion) return;
+
+    setState(() {
+      _snapshot = snapshot;
+      _groupProgress = groupProgress;
+      _nextGroup = nextGroup;
+      _isRefreshing = false;
+    });
+
+    if (showCompletionFeedback &&
+        !previousCompleted &&
+        groupProgress.isCompleted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            localizedText(
+              context,
+              zh: '这一组已完成，可以继续下一步了。',
+              en: 'This group is complete. You can continue now.',
+            ),
+          ),
+        ),
+      );
+    }
+  }
+
+  bool _isLetterCompleted(AlphabetLetter letter) {
+    final letterKey = letter.arabic.trim();
+    return _snapshot.viewedLetters.contains(letterKey) &&
+        _snapshot.listenCompletedLetters.contains(letterKey);
+  }
+
+  Future<void> _openLetter(AlphabetLetter letter) async {
+    final wasCompleted = _isLetterCompleted(letter);
+    final completed = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AlphabetLetterHomePage(letter: letter),
+      ),
+    );
+    if (completed == true && !wasCompleted && mounted) {
+      final letterKey = letter.arabic.trim();
+      final totalLetterCount = _groupProgress.totalLetterCount == 0
+          ? group.letters.length
+          : _groupProgress.totalLetterCount;
+      final completedLetterCount = (_groupProgress.completedLetterCount + 1)
+          .clamp(0, group.letters.length);
+      setState(() {
+        _snapshot = AlphabetLearningSnapshot(
+          viewedLetters: <String>{..._snapshot.viewedLetters, letterKey},
+          listenCompletedLetters: <String>{
+            ..._snapshot.listenCompletedLetters,
+            letterKey,
+          },
+          writeCompletedLetters: _snapshot.writeCompletedLetters,
+          totalLetterCount: _snapshot.totalLetterCount,
+          totalGroupCount: _snapshot.totalGroupCount,
+          completedGroupCount: _snapshot.completedGroupCount,
+        );
+        _groupProgress = AlphabetGroupProgress(
+          completedLetterCount: completedLetterCount,
+          totalLetterCount: totalLetterCount,
+          isCompleted: completedLetterCount >= totalLetterCount,
+        );
+      });
+    }
+    if (_scrollController.hasClients) {
+      _scrollController.jumpTo(0);
+    }
+    await _reloadGroupProgress(showCompletionFeedback: true);
+  }
+
+  Future<void> _continueToNextGroup() async {
+    if (_nextGroup == null) {
+      if (!mounted) return;
+      Navigator.pop(context);
+      return;
+    }
+
+    await Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AlphabetGroupDetailPage(group: _nextGroup!),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
+    final totalLetterCount = _groupProgress.totalLetterCount == 0
+        ? group.letters.length
+        : _groupProgress.totalLetterCount;
+    final progressLabel = localizedText(
+      context,
+      zh: '当前组进度 ${_groupProgress.completedLetterCount} / $totalLetterCount',
+      en: 'Group progress ${_groupProgress.completedLetterCount} / $totalLetterCount',
+    );
 
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: SafeArea(
         child: ListView(
+          controller: _scrollController,
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
           children: [
             Row(
@@ -107,14 +250,58 @@ class AlphabetGroupDetailPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          localizedText(
-                            context,
-                            zh: '先点进单个字母主页，再选择听读或书写。',
-                            en: 'Open a single letter first, then choose listening or writing.',
-                          ),
+                          _isRefreshing
+                              ? localizedText(
+                                  context,
+                                  zh: '正在刷新本组学习进度…',
+                                  en: 'Refreshing this group progress...',
+                                )
+                              : progressLabel,
                           style: text.bodySmall,
                         ),
                       ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 14),
+            Text(
+              progressLabel,
+              style: text.labelLarge?.copyWith(
+                color: AppTheme.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      progressLabel,
+                      style: text.titleSmall,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  SizedBox(
+                    width: 82,
+                    child: LinearProgressIndicator(
+                      value: totalLetterCount == 0
+                          ? 0
+                          : _groupProgress.completedLetterCount /
+                              totalLetterCount,
+                      minHeight: 8,
+                      borderRadius: BorderRadius.circular(999),
+                      backgroundColor: const Color(0xFFE5E7EB),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        AppTheme.deepAccent,
+                      ),
                     ),
                   ),
                 ],
@@ -172,13 +359,21 @@ class AlphabetGroupDetailPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(18),
                         ),
                         child: Center(
-                          child: ArabicText.word(
-                            letter.arabic,
+                          child: ArabicTextWithAudio(
+                            textAr: letter.arabic,
+                            request: LearningAudioRequest.alphabet(
+                              type: 'letter',
+                              textAr: letter.arabic,
+                              textPlain: letter.arabic,
+                              debugLabel: 'alphabet_group_chip',
+                            ),
+                            variant: ArabicAudioTextVariant.word,
                             style: text.titleLarge?.copyWith(
                               fontSize: 24,
                               fontWeight: FontWeight.w700,
                             ),
                             textAlign: TextAlign.center,
+                            spacing: 4,
                           ),
                         ),
                       ),
@@ -208,6 +403,96 @@ class AlphabetGroupDetailPage extends StatelessWidget {
             ...group.letters.map(
               (letter) => _buildLetterCard(context, letter),
             ),
+            if (_groupProgress.isCompleted) ...[
+              const SizedBox(height: 18),
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x10000000),
+                      blurRadius: 16,
+                      offset: Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      localizedText(
+                        context,
+                        zh: '本组已完成',
+                        en: 'This Group Is Complete',
+                      ),
+                      style: text.titleLarge,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      localizedText(
+                        context,
+                        zh: '你已经完成了这一组的首轮字母学习，可以继续下一组或转入练习。',
+                        en: 'You finished the first pass for this group. Continue to the next group or switch to practice.',
+                      ),
+                      style: text.bodyMedium,
+                    ),
+                    const SizedBox(height: 14),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: [
+                        FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppTheme.deepAccent,
+                          ),
+                          onPressed: _continueToNextGroup,
+                          icon: const Icon(Icons.arrow_forward_rounded),
+                          label: Text(
+                            localizedText(
+                              context,
+                              zh: '继续下一组',
+                              en: 'Continue Next Group',
+                            ),
+                          ),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const AlphabetQuizHubPage(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.quiz_rounded),
+                          label: Text(
+                            localizedText(
+                              context,
+                              zh: '做本组小测',
+                              en: 'Practice This Group',
+                            ),
+                          ),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.grid_view_rounded),
+                          label: Text(
+                            localizedText(
+                              context,
+                              zh: '返回字母总览',
+                              en: 'Back to Alphabet Overview',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -278,6 +563,7 @@ class AlphabetGroupDetailPage extends StatelessWidget {
 
   Widget _buildLetterCard(BuildContext context, AlphabetLetter letter) {
     final text = Theme.of(context).textTheme;
+    final isCompleted = _isLetterCompleted(letter);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -286,14 +572,7 @@ class AlphabetGroupDetailPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         child: InkWell(
           borderRadius: BorderRadius.circular(24),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => AlphabetLetterHomePage(letter: letter),
-              ),
-            );
-          },
+          onTap: () => _openLetter(letter),
           child: Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
@@ -316,13 +595,21 @@ class AlphabetGroupDetailPage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Center(
-                    child: ArabicText.word(
-                      letter.arabic,
+                    child: ArabicTextWithAudio(
+                      textAr: letter.arabic,
+                      request: LearningAudioRequest.alphabet(
+                        type: 'letter',
+                        textAr: letter.arabic,
+                        textPlain: letter.arabic,
+                        debugLabel: 'alphabet_group_card_letter',
+                      ),
+                      variant: ArabicAudioTextVariant.word,
                       style: text.titleLarge?.copyWith(
                         fontSize: 28,
                         fontWeight: FontWeight.w700,
                       ),
                       textAlign: TextAlign.center,
+                      spacing: 4,
                     ),
                   ),
                 ),
@@ -331,11 +618,19 @@ class AlphabetGroupDetailPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ArabicText.word(
-                        letter.arabicName,
+                      ArabicTextWithAudio(
+                        textAr: letter.arabicName,
+                        request: LearningAudioRequest.alphabet(
+                          type: 'letter',
+                          textAr: letter.arabicName,
+                          textPlain: letter.arabicName,
+                          debugLabel: 'alphabet_group_card_name',
+                        ),
+                        variant: ArabicAudioTextVariant.word,
                         style: text.titleMedium,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                        spacing: 6,
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -357,6 +652,26 @@ class AlphabetGroupDetailPage extends StatelessWidget {
                         spacing: 8,
                         runSpacing: 8,
                         children: [
+                          _buildMetaTag(
+                            context,
+                            isCompleted
+                                ? localizedText(
+                                    context,
+                                    zh: '已完成',
+                                    en: 'Completed',
+                                  )
+                                : localizedText(
+                                    context,
+                                    zh: '未完成',
+                                    en: 'Not completed',
+                                  ),
+                            color: isCompleted
+                                ? const Color(0xFFE8F5F0)
+                                : const Color(0xFFF4F6F8),
+                            textColor: isCompleted
+                                ? AppTheme.deepAccent
+                                : AppTheme.textSecondary,
+                          ),
                           _buildMetaTag(
                             context,
                             localizedText(
@@ -391,19 +706,24 @@ class AlphabetGroupDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMetaTag(BuildContext context, String label) {
+  Widget _buildMetaTag(
+    BuildContext context,
+    String label, {
+    Color color = const Color(0xFFF4F6F8),
+    Color textColor = AppTheme.textSecondary,
+  }) {
     final text = Theme.of(context).textTheme;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFF4F6F8),
+        color: color,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         label,
         style: text.labelMedium?.copyWith(
-          color: AppTheme.textSecondary,
+          color: textColor,
         ),
       ),
     );

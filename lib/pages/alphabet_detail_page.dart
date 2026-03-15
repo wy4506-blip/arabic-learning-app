@@ -20,11 +20,25 @@ class AlphabetDetailPage extends StatelessWidget {
   });
 
   Future<void> _playLetter() async {
-    await AudioService.speakLetter(letter.arabic);
+    await AudioService.playLearningText(
+      LearningAudioRequest.alphabet(
+        type: 'letter',
+        textAr: letter.arabic,
+        textPlain: letter.arabic,
+        debugLabel: 'alphabet_detail_letter',
+      ),
+    );
   }
 
   Future<void> _playExampleWord() async {
-    await AudioService.speakExampleWord(letter.example.arabic);
+    await AudioService.playLearningText(
+      LearningAudioRequest.alphabet(
+        type: 'word',
+        textAr: letter.example.arabic,
+        textPlain: letter.example.arabic,
+        debugLabel: 'alphabet_detail_example_word',
+      ),
+    );
   }
 
   void _showPronunciationSheet(
@@ -37,7 +51,14 @@ class AlphabetDetailPage extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (_) => _PronunciationDetailSheet(
         item: item,
-        onPlay: () => AudioService.speakPronunciationItem(item),
+        onPlay: () => AudioService.playLearningText(
+          LearningAudioRequest.alphabet(
+            type: 'pronunciation',
+            textAr: item.audioQueryText,
+            textPlain: item.form,
+            debugLabel: 'alphabet_detail_pronunciation',
+          ),
+        ),
       ),
     );
   }
@@ -112,13 +133,15 @@ class AlphabetDetailPage extends StatelessWidget {
                   const SizedBox(height: 12),
                   ArabicText.word(
                     letter.arabicName,
-                    style: text.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                    style:
+                        text.titleLarge?.copyWith(fontWeight: FontWeight.w700),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     letter.latinName,
-                    style: text.titleSmall?.copyWith(color: AppTheme.deepAccent),
+                    style:
+                        text.titleSmall?.copyWith(color: AppTheme.deepAccent),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 6),
@@ -128,7 +151,8 @@ class AlphabetDetailPage extends StatelessWidget {
                       zh: '基础发音：${letter.pronunciation}',
                       en: 'Core sound: ${letter.pronunciation}',
                     ),
-                    style: text.bodyMedium?.copyWith(color: AppTheme.deepAccent),
+                    style:
+                        text.bodyMedium?.copyWith(color: AppTheme.deepAccent),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
@@ -141,7 +165,8 @@ class AlphabetDetailPage extends StatelessWidget {
                   FilledButton.icon(
                     style: FilledButton.styleFrom(
                       backgroundColor: AppTheme.deepAccent,
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 18, vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18),
                       ),
@@ -149,7 +174,8 @@ class AlphabetDetailPage extends StatelessWidget {
                     onPressed: _playLetter,
                     icon: const Icon(Icons.volume_up_rounded),
                     label: Text(
-                      localizedText(context, zh: '播放字母发音', en: 'Play Letter Audio'),
+                      localizedText(context,
+                          zh: '播放字母发音', en: 'Play Letter Audio'),
                     ),
                   ),
                 ],
@@ -173,7 +199,8 @@ class AlphabetDetailPage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => AlphabetListenReadPage(letter: letter),
+                          builder: (_) =>
+                              AlphabetListenReadPage(letter: letter),
                         ),
                       );
                     },
@@ -205,7 +232,8 @@ class AlphabetDetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              localizedText(context, zh: '13 项标准发音', en: '13 Standard Sound Forms'),
+              localizedText(context,
+                  zh: '13 项标准发音', en: '13 Standard Sound Forms'),
               style: text.titleLarge,
             ),
             const SizedBox(height: 6),
@@ -232,8 +260,10 @@ class AlphabetDetailPage extends StatelessWidget {
                 final item = letter.pronunciations[index];
                 return AlphabetPronunciationCard(
                   arabic: item.form,
-                  title: AlphabetContentLocalizer.pronunciationShortTitle(item, appLanguage),
-                  value: AlphabetContentLocalizer.pronunciationValue(item, appLanguage),
+                  title: AlphabetContentLocalizer.pronunciationShortTitle(
+                      item, appLanguage),
+                  value: AlphabetContentLocalizer.pronunciationValue(
+                      item, appLanguage),
                   subtitle: AlphabetContentLocalizer.pronunciationShortSubtitle(
                     item,
                     meaningLanguage,
@@ -260,12 +290,14 @@ class AlphabetDetailPage extends StatelessWidget {
                       children: [
                         ArabicText.word(
                           letter.example.arabic,
-                          style: text.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+                          style: text.headlineSmall
+                              ?.copyWith(fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: 6),
                         Text(
                           letter.example.latin,
-                          style: text.bodySmall?.copyWith(color: AppTheme.deepAccent),
+                          style: text.bodySmall
+                              ?.copyWith(color: AppTheme.deepAccent),
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -338,7 +370,8 @@ class AlphabetDetailPage extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.lightbulb_rounded, color: AppTheme.deepAccent),
+                      const Icon(Icons.lightbulb_rounded,
+                          color: AppTheme.deepAccent),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -352,7 +385,8 @@ class AlphabetDetailPage extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.link_rounded, color: AppTheme.deepAccent),
+                      const Icon(Icons.link_rounded,
+                          color: AppTheme.deepAccent),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -471,7 +505,9 @@ class _ActionCard extends StatelessWidget {
                 child: Icon(icon, color: color),
               ),
               const SizedBox(height: 12),
-              Text(title, style: text.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
+              Text(title,
+                  style:
+                      text.titleSmall?.copyWith(fontWeight: FontWeight.w700)),
               const SizedBox(height: 4),
               Text(
                 subtitle,
@@ -502,13 +538,15 @@ class _FormTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: text.bodySmall?.copyWith(color: const Color(0xFF667085))),
+          Text(title,
+              style: text.bodySmall?.copyWith(color: const Color(0xFF667085))),
           const SizedBox(height: 8),
           Expanded(
             child: Center(
               child: ArabicText.word(
                 value,
-                style: text.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
+                style:
+                    text.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -564,7 +602,8 @@ class _PronunciationDetailSheet extends StatelessWidget {
             const SizedBox(height: 12),
             _DetailRow(
               label: localizedText(context, zh: '中文名称', en: 'Name'),
-              value: AlphabetContentLocalizer.pronunciationFullTitle(item, appLanguage),
+              value: AlphabetContentLocalizer.pronunciationFullTitle(
+                  item, appLanguage),
             ),
             _DetailRow(label: 'Arabic', value: item.form),
             _DetailRow(label: 'Transliteration', value: item.transliteration),
@@ -589,7 +628,8 @@ class _PronunciationDetailSheet extends StatelessWidget {
                 ),
                 onPressed: onPlay,
                 icon: const Icon(Icons.volume_up_rounded),
-                label: Text(localizedText(context, zh: '播放示例', en: 'Play Sample')),
+                label:
+                    Text(localizedText(context, zh: '播放示例', en: 'Play Sample')),
               ),
             ),
           ],

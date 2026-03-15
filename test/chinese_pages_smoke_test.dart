@@ -224,7 +224,9 @@ void main() {
       expect(find.text('字母学习'), findsOneWidget);
       expect(find.text('Letter Study'), findsNothing);
       expect(find.textContaining('基础发音'), findsWidgets);
-      expect(find.text('四种常见字形'), findsOneWidget);
+      expect(find.text('首轮先记住这 2 点'), findsOneWidget);
+      expect(find.text('开始轻量听读'), findsOneWidget);
+      expect(find.text('继续深入（可稍后）'), findsOneWidget);
       expect(find.text('书写'), findsOneWidget);
       expectNoVisibleMojibake(tester);
     });

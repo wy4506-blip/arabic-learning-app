@@ -80,12 +80,13 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Send',
   },
   'home.today_start': <String, String>{
-    'zh': '今天从这里开始',
-    'en': 'Start Here Today',
+    'zh': '继续今天的学习',
+    'en': 'Continue Today\'s Learning',
   },
   'home.today_subtitle': <String, String>{
-    'zh': '少入口、低干扰、强反馈的阿语入门首页',
-    'en': 'A focused Arabic learning home with fewer distractions.',
+    'zh': '先完成当前最重要的一步，再沿学习路径进入下一步。',
+    'en':
+        'Finish the most important next step first, then keep moving along the learning path.',
   },
   'home.quick_actions': <String, String>{
     'zh': '常用入口',
@@ -93,7 +94,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   },
   'home.quick_actions_subtitle': <String, String>{
     'zh': '只保留最核心的 4 个动作，首页聚焦分发与反馈',
-    'en': 'Four high-value entry points to keep the home page tight and useful.',
+    'en':
+        'Four high-value entry points to keep the home page tight and useful.',
   },
   'home.lessons': <String, String>{
     'zh': '课程',
@@ -161,15 +163,17 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   },
   'home.default_lesson_note': <String, String>{
     'zh': '先建立字母识读与基础发音，再进入完整 16 节课程。',
-    'en': 'Build letter recognition and pronunciation first, then move into the 16-lesson course.',
+    'en':
+        'Build letter recognition and pronunciation first, then move into the 16-lesson course.',
   },
   'home.next_open_note': <String, String>{
     'zh': '{minutes} 分钟 · 下一步建议优先完成这一课。',
     'en': '{minutes} min · This is the best next lesson to take.',
   },
   'home.next_locked_note': <String, String>{
-    'zh': '{minutes} 分钟 · 前 3 节体验完成后，可继续解锁这节。',
-    'en': '{minutes} min · Unlock this after finishing the first 3 free lessons.',
+    'zh': '{minutes} 分钟 · 当前阶段完成后，可查看会员说明并继续后续路径。',
+    'en':
+        '{minutes} min · After this stage, view membership info and continue into the next path.',
   },
   'home.start_alphabet': <String, String>{
     'zh': '开始字母学习',
@@ -188,8 +192,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'View Lessons',
   },
   'home.free_lessons': <String, String>{
-    'zh': '前 3 节免费',
-    'en': 'First 3 Lessons Free',
+    'zh': '当前开放起步阶段',
+    'en': 'Starter Stage Open',
   },
   'home.streak_today_start': <String, String>{
     'zh': '今日开始',
@@ -200,8 +204,9 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': '{days} days',
   },
   'home.unlock_note': <String, String>{
-    'zh': '解锁后后续课程会直接展开，不再单独打断。',
-    'en': 'After unlocking, later lessons open naturally with no extra friction.',
+    'zh': '会员用于提升学习效率与后续阶段衔接，不再单独打断主线。',
+    'en':
+        'Membership improves continuity and efficiency instead of interrupting the main path.',
   },
   'course.title': <String, String>{
     'zh': '课程',
@@ -209,7 +214,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   },
   'course.subtitle': <String, String>{
     'zh': '按当前进度继续，也可以随时回看已学内容。',
-    'en': 'Continue from your current progress, or revisit what you already learned.',
+    'en':
+        'Continue from your current progress, or revisit what you already learned.',
   },
   'course.completed_summary': <String, String>{
     'zh': '已完成 {completed} / {total} 课时',
@@ -289,7 +295,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   },
   'wordbook.subtitle': <String, String>{
     'zh': '重点是检索、复习与掌握状态，而不是堆列表',
-    'en': 'Built for search, review, and retention instead of a long dump list.',
+    'en':
+        'Built for search, review, and retention instead of a long dump list.',
   },
   'wordbook.search_hint': <String, String>{
     'zh': '搜索阿语 / 中文 / 英文 / 音译',
@@ -428,8 +435,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Current Pack',
   },
   'profile.restore_purchase': <String, String>{
-    'zh': '恢复购买',
-    'en': 'Restore Purchase',
+    'zh': '恢复会员权益',
+    'en': 'Restore Membership',
   },
   'profile.restore_purchase_value': <String, String>{
     'zh': '保留入口',
@@ -460,8 +467,9 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'First 3 lessons free',
   },
   'profile.page_intro': <String, String>{
-    'zh': '管理学习体验、课程权益，以及反馈与帮助入口。',
-    'en': 'Manage learning preferences, course access, and support in one place.',
+    'zh': '管理会员状态、学习偏好、帮助反馈，以及产品说明入口。',
+    'en':
+        'Manage membership, learning preferences, help, feedback, and product information in one place.',
   },
   'profile.section_learning_state': <String, String>{
     'zh': '学习状态',
@@ -480,24 +488,24 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Appearance & Reminder',
   },
   'profile.section_course_access': <String, String>{
-    'zh': '课程权益',
-    'en': 'Course Access',
+    'zh': '会员状态',
+    'en': 'Membership',
   },
   'profile.section_content_purchase': <String, String>{
     'zh': '内容与购买',
     'en': 'Content & Purchase',
   },
   'profile.section_developer_support': <String, String>{
-    'zh': '开发者与支持',
-    'en': 'Developer & Support',
+    'zh': '帮助与反馈',
+    'en': 'Help & Feedback',
   },
   'profile.section_help_feedback': <String, String>{
     'zh': '帮助与反馈',
     'en': 'Help & Feedback',
   },
   'profile.section_about_info': <String, String>{
-    'zh': '关于与说明',
-    'en': 'About & Info',
+    'zh': '关于产品与说明',
+    'en': 'About Product & Info',
   },
   'profile.section_about': <String, String>{
     'zh': '关于',
@@ -545,7 +553,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   },
   'profile.overview_suggestion_completed': <String, String>{
     'zh': '主线课程已经完成，现在更适合按需回看和复习。',
-    'en': 'The main course is done. Now it makes more sense to revisit and review as needed.',
+    'en':
+        'The main course is done. Now it makes more sense to revisit and review as needed.',
   },
   'profile.overview_suggestion_continue': <String, String>{
     'zh': '继续上一节内容：{lesson}',
@@ -556,8 +565,9 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Review {count} key items first, then keep learning.',
   },
   'profile.overview_suggestion_unlock': <String, String>{
-    'zh': '免费体验已经完成，解锁后可以自然继续后续课程。',
-    'en': 'The free trial is complete. Unlock to continue the full course naturally.',
+    'zh': '当前阶段已经走通，先巩固已学内容，再决定是否开启会员。',
+    'en':
+        'The current stage is complete. Reinforce what you learned first, then decide whether to enable membership.',
   },
   'profile.overview_suggestion_keep_going': <String, String>{
     'zh': '继续保持当前节奏，回看已学内容也很有价值。',
@@ -632,40 +642,42 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Current Status',
   },
   'profile.plan_trial_badge': <String, String>{
-    'zh': '体验版',
-    'en': 'Trial',
+    'zh': '基础版',
+    'en': 'Core',
   },
   'profile.plan_trial_title': <String, String>{
-    'zh': '当前版本：体验版',
-    'en': 'Current Plan: Trial',
+    'zh': '当前为基础学习路径',
+    'en': 'You Are on the Core Learning Path',
   },
   'profile.plan_trial_description': <String, String>{
-    'zh': '前 {free} 节可直接体验，先完成完整学习流程再决定是否继续。',
-    'en': 'The first {free} lessons are open so you can experience the full learning loop first.',
+    'zh': '当前主线可以继续使用。会员用于提升学习效率，并在后续阶段接入时提供更顺滑的衔接。',
+    'en':
+        'Your current main path remains available. Membership is positioned as an efficiency upgrade and smoother continuation into later stages.',
   },
   'profile.plan_trial_footnote': <String, String>{
-    'zh': '已完成 {completed}/{total} 节体验课',
-    'en': '{completed}/{total} trial lessons completed',
+    'zh': '当前已完成 {completed}/{total} 个起步阶段课时',
+    'en': '{completed}/{total} starter-stage lessons completed',
   },
   'profile.plan_unlock_action': <String, String>{
-    'zh': '解锁完整课程',
-    'en': 'Unlock Full Course',
+    'zh': '查看会员说明',
+    'en': 'View Membership Info',
   },
   'profile.plan_full_badge': <String, String>{
-    'zh': '完整版',
-    'en': 'Full',
+    'zh': '会员',
+    'en': 'Member',
   },
   'profile.plan_full_title': <String, String>{
-    'zh': '当前版本：完整版',
-    'en': 'Current Plan: Full',
+    'zh': '当前已启用会员',
+    'en': 'Membership Is Active',
   },
   'profile.plan_full_description': <String, String>{
-    'zh': '已解锁全部课程内容。',
-    'en': 'All course content is unlocked.',
+    'zh': '会员已启用，可在后续阶段开放时获得更顺滑的学习衔接。',
+    'en':
+        'Membership is active and will provide smoother continuity as later stages become available.',
   },
   'profile.plan_full_footnote': <String, String>{
-    'zh': '剩余 {remaining} 节可继续推进',
-    'en': '{remaining} lessons left to continue',
+    'zh': '当前仍有 {remaining} 节可继续推进的课程内容',
+    'en': '{remaining} lessons are currently available to continue',
   },
   'profile.text_mode_subtitle': <String, String>{
     'zh': '选择更适合当前阶段的阿文显示方式。',
@@ -712,36 +724,39 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Off',
   },
   'profile.content_pack_title': <String, String>{
-    'zh': '当前内容包',
-    'en': 'Current Content Pack',
+    'zh': '会员状态',
+    'en': 'Membership Status',
   },
   'profile.content_pack_trial_value': <String, String>{
-    'zh': '体验版',
-    'en': 'Trial',
+    'zh': '基础学习路径',
+    'en': 'Core Learning Path',
   },
   'profile.content_pack_full_value': <String, String>{
     'zh': '完整版',
     'en': 'Full',
   },
   'profile.content_pack_trial_subtitle': <String, String>{
-    'zh': '当前可体验入门内容。',
-    'en': 'The beginner content is currently available to try.',
+    'zh': '当前主线仍可继续，会员不再作为拦截页出现。',
+    'en':
+        'Your current path remains available, and membership no longer acts as a blocking screen.',
   },
   'profile.content_pack_full_subtitle': <String, String>{
-    'zh': '已解锁全部 {count} 节课程内容。',
-    'en': 'All {count} lessons are unlocked.',
+    'zh': '会员已启用，后续阶段开放时会更顺滑接续。',
+    'en':
+        'Membership is active and will support smoother continuation as later stages open.',
   },
   'profile.unlock_full_title': <String, String>{
-    'zh': '解锁完整课程',
-    'en': 'Unlock Full Course',
+    'zh': '会员说明',
+    'en': 'Membership Info',
   },
   'profile.unlock_full_value': <String, String>{
-    'zh': '去解锁',
-    'en': 'Unlock',
+    'zh': '查看',
+    'en': 'View',
   },
   'profile.unlock_full_subtitle': <String, String>{
-    'zh': '解锁后可继续学习全部课程内容。',
-    'en': 'Unlock to continue learning all course content.',
+    'zh': '了解会员如何提升学习效率，而不是阻断当前主线。',
+    'en':
+        'See how membership improves learning efficiency instead of blocking the current path.',
   },
   'profile.unlocked_value': <String, String>{
     'zh': '已解锁',
@@ -752,12 +767,12 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Full lesson access is already available.',
   },
   'profile.restore_purchase_subtitle': <String, String>{
-    'zh': '在新设备上恢复已购权益。',
-    'en': 'Restore your purchased access on a new device.',
+    'zh': '在新设备上恢复已经开通的会员状态。',
+    'en': 'Restore your existing membership state on a new device.',
   },
   'profile.restore_purchase_current': <String, String>{
-    'zh': '当前已经是完整版，无需恢复购买。',
-    'en': 'Full access is already active. No restore is needed.',
+    'zh': '当前会员已启用，无需重复恢复。',
+    'en': 'Membership is already active. No restore is needed.',
   },
   'profile.submit_suggestion': <String, String>{
     'zh': '提建议',
@@ -793,15 +808,18 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   },
   'profile.developer_note_body_1': <String, String>{
     'zh': '这款 App 的起点很简单：希望把阿拉伯语入门做得更轻一些，让第一次接触这门语言的人也能顺着学下去。',
-    'en': 'This app started from a simple goal: make beginner Arabic feel lighter, so first-time learners can keep going without being pushed out early.',
+    'en':
+        'This app started from a simple goal: make beginner Arabic feel lighter, so first-time learners can keep going without being pushed out early.',
   },
   'profile.developer_note_body_2': <String, String>{
     'zh': '如果你愿意持续用它学习、也愿意告诉我们哪些地方还不够顺，这款产品就会继续一点点变得更好。',
-    'en': 'If you keep learning with it and tell us where the experience still feels rough, the product can keep getting better step by step.',
+    'en':
+        'If you keep learning with it and tell us where the experience still feels rough, the product can keep getting better step by step.',
   },
   'profile.contact_support_body': <String, String>{
     'zh': '请描述你遇到的问题、出现页面以及复现步骤，我们会据此继续排查。',
-    'en': 'Describe the issue, where it happened, and how to reproduce it so we can investigate further.',
+    'en':
+        'Describe the issue, where it happened, and how to reproduce it so we can investigate further.',
   },
   'profile.contact_support_opened': <String, String>{
     'zh': '已打开邮件应用。',
@@ -809,7 +827,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   },
   'profile.contact_support_copied': <String, String>{
     'zh': '当前无法直接发信，已复制支持内容到剪贴板。',
-    'en': 'Could not open mail directly. The support content was copied instead.',
+    'en':
+        'Could not open mail directly. The support content was copied instead.',
   },
   'profile.about_version': <String, String>{
     'zh': '当前版本',
@@ -841,27 +860,33 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   },
   'profile.privacy_body_1': <String, String>{
     'zh': '本应用首发版本主要在本地保存学习进度、设置项和解锁状态，用于改善学习体验与恢复使用状态。',
-    'en': 'In the first release, this app mainly stores learning progress, settings, and unlock status locally to improve the learning experience and restore your state.',
+    'en':
+        'In the first release, this app mainly stores learning progress, settings, and unlock status locally to improve the learning experience and restore your state.',
   },
   'profile.privacy_body_2': <String, String>{
     'zh': '当你通过反馈入口发送建议或问题时，相关内容会通过系统邮件应用发送给开发者，以便处理产品改进和问题排查。',
-    'en': 'When you send suggestions or issue reports, that content is passed to your system mail app so the developer can review improvements and investigate problems.',
+    'en':
+        'When you send suggestions or issue reports, that content is passed to your system mail app so the developer can review improvements and investigate problems.',
   },
   'profile.privacy_body_3': <String, String>{
     'zh': '后续如果增加在线账号、支付或云同步能力，隐私说明会同步更新并在应用内明确展示。',
-    'en': 'If future versions add online accounts, payments, or cloud sync, this privacy notice will be updated and shown clearly in the app.',
+    'en':
+        'If future versions add online accounts, payments, or cloud sync, this privacy notice will be updated and shown clearly in the app.',
   },
   'profile.terms_body_1': <String, String>{
     'zh': '本应用用于阿拉伯语入门学习与复习，内容以帮助建立基础识读、词汇和句型能力为目标。',
-    'en': 'This app is designed for beginner Arabic learning and review, helping you build basic reading, vocabulary, and pattern recognition skills.',
+    'en':
+        'This app is designed for beginner Arabic learning and review, helping you build basic reading, vocabulary, and pattern recognition skills.',
   },
   'profile.terms_body_2': <String, String>{
     'zh': '首发版本中的购买、恢复购买和部分反馈流程仍为轻量实现，后续可能根据正式支付与支持系统继续完善。',
-    'en': 'Some purchase, restore, and support flows in the first release are still lightweight implementations and may evolve with future production systems.',
+    'en':
+        'Some purchase, restore, and support flows in the first release are still lightweight implementations and may evolve with future production systems.',
   },
   'profile.terms_body_3': <String, String>{
     'zh': '使用过程中如发现内容错误、音频问题或界面异常，欢迎通过应用内反馈入口联系开发者。',
-    'en': 'If you encounter content errors, audio problems, or interface issues, please contact the developer through the in-app feedback entry.',
+    'en':
+        'If you encounter content errors, audio problems, or interface issues, please contact the developer through the in-app feedback entry.',
   },
   'profile.unit_1': <String, String>{
     'zh': 'Unit 1 · 入门表达',
@@ -1001,7 +1026,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   },
   'feedback.hint': <String, String>{
     'zh': '例如：第 4 课标题和阿语不够对齐；复习页返回后状态丢失；希望补一个慢速播放按钮。',
-    'en': 'Example: Lesson 4 title alignment feels off; review state resets after returning; please add a slow-play button.',
+    'en':
+        'Example: Lesson 4 title alignment feels off; review state resets after returning; please add a slow-play button.',
   },
   'feedback.submit': <String, String>{
     'zh': '发送给开发者',
@@ -1036,68 +1062,74 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Experience Issue',
   },
   'unlock.title': <String, String>{
-    'zh': '解锁全部课程',
-    'en': 'Unlock Full Course',
+    'zh': '会员说明',
+    'en': 'Membership Info',
   },
   'unlock.subtitle': <String, String>{
-    'zh': '一次性解锁后续 13 节课程内容。',
-    'en': 'Unlock the remaining 13 lessons in one step.',
+    'zh': '会员用于提升学习效率与后续阶段衔接，不再阻断当前主线。',
+    'en':
+        'Membership improves learning efficiency and future stage continuity without blocking your current path.',
   },
   'unlock.plan': <String, String>{
-    'zh': '前 3 节免费，后 13 节一次性解锁 ¥10',
-    'en': 'First 3 lessons free, unlock the remaining 13 for CNY 10',
+    'zh': '当前仍可继续基础学习路径；会员作为效率提升与后续衔接说明保留。',
+    'en':
+        'The core learning path remains available. Membership stays as an efficiency upgrade and future-stage continuity option.',
   },
   'unlock.benefits': <String, String>{
-    'zh': '解锁后可获得',
-    'en': 'What You Get',
+    'zh': '会员可带来',
+    'en': 'Membership Can Help With',
   },
   'unlock.benefit_lessons': <String, String>{
     'zh': '16 节完整课程开放',
     'en': 'Access to all 16 lessons',
   },
   'unlock.benefit_no_lock': <String, String>{
-    'zh': '锁定提示自动消失',
-    'en': 'Locked-state prompts disappear',
+    'zh': '减少主路径切换与额外判断',
+    'en': 'Reduce extra switching and decision overhead',
   },
   'unlock.benefit_home': <String, String>{
-    'zh': '首页不再显示解锁入口',
-    'en': 'Home stops showing unlock prompts',
+    'zh': '首页与学习路径提示更聚焦',
+    'en': 'Keep home and path guidance more focused',
   },
   'unlock.benefit_path': <String, String>{
-    'zh': '学习路径恢复为完整版本',
-    'en': 'Learning flow becomes seamless again',
+    'zh': '后续阶段开放时更顺滑接入学习路径',
+    'en': 'Connect into later stages more smoothly as they open',
   },
   'unlock.action': <String, String>{
     'zh': '立即解锁（模拟）',
     'en': 'Unlock Now (Mock)',
   },
   'unlock.footer': <String, String>{
-    'zh': '当前为本地模拟解锁，后续可接正式支付。',
-    'en': 'This is a local mock unlock flow and can later be replaced with real payment.',
+    'zh': '当前仍是本地模拟开通流程；这页现在是说明页，不再承担主链路拦截。',
+    'en':
+        'This is still a local mock activation flow. The page now serves as an information page rather than a main-path blocker.',
   },
   'unlock.hero_title': <String, String>{
-    'zh': '一次解锁完整课程',
-    'en': 'Unlock the Full Course in One Step',
+    'zh': '会员让学习路径更顺滑',
+    'en': 'Membership Makes the Learning Path Smoother',
   },
   'unlock.hero_subtitle_trial': <String, String>{
-    'zh': '前 {free} 节可免费体验，解锁后继续学习剩余 {remaining} 节内容。',
-    'en': 'The first {free} lessons are free. Unlock to continue the remaining {remaining} lessons.',
+    'zh': '当前主线仍可继续。会员会在后续阶段接入时，帮助你更顺滑地承接剩余 {remaining} 节内容。',
+    'en':
+        'Your current main path remains available. Membership helps you continue more smoothly into the remaining {remaining} lessons as later stages connect in.',
   },
   'unlock.hero_subtitle_completed': <String, String>{
-    'zh': '你已学完前 {free} 节免费内容，解锁后可继续后续 {remaining} 节完整学习路径。',
-    'en': 'You finished the first {free} free lessons. Unlock to continue the remaining {remaining} lessons.',
+    'zh': '你已完成当前起步阶段。会员可在后续学习路径接入时，帮助你更顺滑地继续剩余 {remaining} 节内容。',
+    'en':
+        'You finished the current starter stage. Membership can help you continue more smoothly into the remaining {remaining} lessons as the later path connects in.',
   },
   'unlock.hero_subtitle_unlocked': <String, String>{
-    'zh': '当前已解锁完整课程，可直接继续学习。',
-    'en': 'The full course is already unlocked and ready to continue.',
+    'zh': '当前会员已启用，后续阶段开放时会自动衔接到学习路径中。',
+    'en':
+        'Membership is already active and will connect automatically as later stages open.',
   },
   'unlock.price': <String, String>{
     'zh': '¥10',
     'en': 'CNY 10',
   },
   'unlock.price_tag': <String, String>{
-    'zh': '一次性买断',
-    'en': 'One-Time Purchase',
+    'zh': '本地模拟开通',
+    'en': 'Local Mock Activation',
   },
   'unlock.trust_subscription': <String, String>{
     'zh': '无订阅',
@@ -1112,64 +1144,71 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Permanent Access to This Release',
   },
   'unlock.benefit_all_lessons': <String, String>{
-    'zh': '解锁全部 {count} 节系统课程',
-    'en': 'Unlock all {count} structured lessons',
+    'zh': '后续 {count} 节系统课程接入后可更顺滑继续',
+    'en':
+        'Continue more smoothly as the remaining {count} structured lessons connect in',
   },
   'unlock.benefit_learning_flow': <String, String>{
-    'zh': '学习路径完整开放，可连续学下去',
-    'en': 'Open the full learning path and continue without interruption',
+    'zh': '学习路径提示更集中，减少被购买页打断',
+    'en':
+        'Keep the learning path more focused with less interruption from purchase screens',
   },
   'unlock.benefit_content_full': <String, String>{
-    'zh': '单词、句子、练习内容全部可用',
-    'en': 'Full access to words, sentences, and practice content',
+    'zh': '后续扩展内容开放时自动纳入同一路径',
+    'en':
+        'Bring later expansion content into the same path as it becomes available',
   },
   'unlock.benefit_review_full': <String, String>{
-    'zh': '复习与巩固体验恢复完整版',
-    'en': 'Restore the full review and reinforcement experience',
+    'zh': '复习与巩固信号在后续阶段更完整',
+    'en': 'Support fuller review and reinforcement signals in later stages',
   },
   'unlock.notes_title': <String, String>{
-    'zh': '购买说明',
-    'en': 'Purchase Notes',
+    'zh': '当前说明',
+    'en': 'Current Notes',
   },
   'unlock.note_one_time': <String, String>{
-    'zh': '本次为一次性付费，不是订阅',
-    'en': 'This is a one-time payment, not a subscription.',
+    'zh': '当前仍是一次性本地模拟开通，不是订阅流程',
+    'en':
+        'This is still a one-time local mock activation rather than a subscription flow.',
   },
   'unlock.note_restore': <String, String>{
-    'zh': '购买后可恢复已解锁内容',
-    'en': 'Unlocked access can be restored after purchase.',
+    'zh': '保留恢复入口，便于后续接正式购买逻辑',
+    'en':
+        'A restore entry remains in place for future real purchase integration.',
   },
   'unlock.note_current_release': <String, String>{
-    'zh': '当前版本后续 {remaining} 节课程将全部开放',
-    'en': 'The remaining {remaining} lessons in the current release will be fully unlocked.',
+    'zh': '当前版本后续 {remaining} 节课程接入时，会优先沿当前学习路径衔接',
+    'en':
+        'As the remaining {remaining} lessons connect into the current release, they will follow the same learning path first.',
   },
   'unlock.note_future': <String, String>{
-    'zh': '未来如新增独立专题课程，会单独说明',
-    'en': 'Future standalone topic packs, if added later, will be described separately.',
+    'zh': '未来如新增独立专题阶段，会单独说明，不混入当前骨架收尾范围',
+    'en':
+        'If standalone future stages are added later, they will be described separately rather than mixed into the current skeleton scope.',
   },
   'unlock.secondary_action': <String, String>{
-    'zh': '先继续体验免费内容',
-    'en': 'Continue with Free Content First',
+    'zh': '先继续当前学习',
+    'en': 'Continue Current Learning First',
   },
   'unlock.primary_action': <String, String>{
-    'zh': '10 元解锁全部课程',
-    'en': 'Unlock All Lessons for CNY 10',
+    'zh': '开通会员（模拟）',
+    'en': 'Enable Membership (Mock)',
   },
   'unlock.action_processing': <String, String>{
     'zh': '正在解锁...',
     'en': 'Unlocking...',
   },
   'unlock.action_unlocked': <String, String>{
-    'zh': '已解锁完整课程',
-    'en': 'Full Course Unlocked',
+    'zh': '会员已启用',
+    'en': 'Membership Active',
   },
   'unlock.success': <String, String>{
-    'zh': '已解锁全部课程',
-    'en': 'All lessons unlocked',
+    'zh': '会员已启用',
+    'en': 'Membership enabled',
   },
   'unlock.failure': <String, String>{
-    'zh': '解锁失败，请稍后再试',
-    'en': 'Unlock failed. Please try again shortly.',
+    'zh': '会员开通失败，请稍后再试',
+    'en': 'Membership activation failed. Please try again shortly.',
   },
   'grammar.home_title': <String, String>{
     'zh': '语法速查',
@@ -1217,7 +1256,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   },
   'lesson.locked_subtitle': <String, String>{
     'zh': '当前课时属于后续内容，解锁后自动展开完整词汇、对话与练习。',
-    'en': 'This lesson belongs to later content. Unlocking will open words, dialogue, and practice seamlessly.',
+    'en':
+        'This lesson belongs to later content. Unlocking will open words, dialogue, and practice seamlessly.',
   },
   'lesson.go_unlock': <String, String>{
     'zh': '去解锁',
@@ -1313,7 +1353,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   },
   'lesson.practice_card_ready': <String, String>{
     'zh': '包含理解、听辨与听写，做完会直接记录课程完成状态。',
-    'en': 'Includes comprehension, listening, and dictation. Completion updates lesson progress directly.',
+    'en':
+        'Includes comprehension, listening, and dictation. Completion updates lesson progress directly.',
   },
   'lesson.practice_count_empty': <String, String>{
     'zh': '暂无题目',
@@ -1337,7 +1378,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   },
   'lesson.summary_subtitle': <String, String>{
     'zh': '把这课最值得带走的内容再压一遍，形成完成感',
-    'en': 'Compress the most important takeaways one more time before leaving the lesson.',
+    'en':
+        'Compress the most important takeaways one more time before leaving the lesson.',
   },
   'onboarding.welcome_title': <String, String>{
     'zh': '从第一个字母开始，轻松进入阿拉伯语',
@@ -1349,7 +1391,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   },
   'onboarding.welcome_note': <String, String>{
     'zh': '不用先做复杂设置。先看一个字母、听一个声音、完成一次很轻的练习。',
-    'en': 'No setup first. See one letter, hear one sound, and finish one tiny exercise.',
+    'en':
+        'No setup first. See one letter, hear one sound, and finish one tiny exercise.',
   },
   'onboarding.welcome_primary': <String, String>{
     'zh': '开始学习',
@@ -1377,7 +1420,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   },
   'onboarding.step1_card_note': <String, String>{
     'zh': '先把这个字母记住，它会成为后面拼读和认词的起点。',
-    'en': 'Lock in this letter first. It will anchor later reading and recognition.',
+    'en':
+        'Lock in this letter first. It will anchor later reading and recognition.',
   },
   'onboarding.first_letter_badge': <String, String>{
     'zh': '你的第一个字母',
@@ -1393,7 +1437,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   },
   'onboarding.step2_subtitle': <String, String>{
     'zh': '字母不是抽象符号，它可以被听见，也会出现在真实内容里。',
-    'en': 'A letter is not abstract. You can hear it and meet it in real content.',
+    'en':
+        'A letter is not abstract. You can hear it and meet it in real content.',
   },
   'onboarding.example_note': <String, String>{
     'zh': '一个很基础的音感示例',
@@ -1437,7 +1482,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   },
   'onboarding.complete_subtitle': <String, String>{
     'zh': '你刚刚认识了第一个字母，并完成了第一次练习。',
-    'en': 'You learned your first letter and completed your first mini exercise.',
+    'en':
+        'You learned your first letter and completed your first mini exercise.',
   },
   'onboarding.complete_primary': <String, String>{
     'zh': '继续学习',

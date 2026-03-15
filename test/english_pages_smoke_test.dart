@@ -319,8 +319,10 @@ void main() {
             letter: sampleAlphabetGroups.first.letters.first),
       );
 
+      expect(find.text('Remember These 2 Things First'), findsOneWidget);
+      expect(find.text('Start Light Listening'), findsOneWidget);
+      expect(find.text('Go Deeper Later'), findsOneWidget);
       expect(find.text('Example Word'), findsOneWidget);
-      expect(find.text('Four Common Forms'), findsOneWidget);
       expect(find.text('Write'), findsOneWidget);
       expectNoVisibleChinese(tester);
     });

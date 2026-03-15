@@ -99,4 +99,64 @@ void main() {
     expect(session!.config.mode, ReviewSessionMode.formal);
     expect(session.config.nextLessonId, isNotEmpty);
   });
+
+  test('free-practice sessions do not advance the formal today plan', () async {
+    SharedPreferences.setMockInitialValues(<String, Object>{
+      'completed_lessons': <String>['U1L1'],
+      'started_lessons': <String>['U1L1'],
+      'last_lesson_id': 'U1L1',
+    });
+
+    final initialPlan = await ReviewService.getTodayPlan(kEnglishTestSettings);
+    expect(initialPlan.completedCount, 0);
+
+    final quickSession = await ReviewService.createQuickSession(
+      kEnglishTestSettings,
+    );
+    expect(quickSession, isNotNull);
+    expect(quickSession!.syncWithTodayPlan, isFalse);
+    await ReviewService.recordTaskResult(
+      quickSession.tasks.first,
+      remembered: true,
+      syncWithTodayPlan: quickSession.syncWithTodayPlan,
+    );
+
+    final afterQuick = await ReviewService.getTodayPlan(kEnglishTestSettings);
+    expect(afterQuick.completedCount, 0);
+
+    await ReviewService.recordTaskResult(
+      initialPlan.tasks.first,
+      remembered: false,
+      syncWithTodayPlan: false,
+    );
+
+    final weakSession = await ReviewService.createWeakSession(
+      kEnglishTestSettings,
+    );
+    expect(weakSession, isNotNull);
+    expect(weakSession!.syncWithTodayPlan, isFalse);
+    await ReviewService.recordTaskResult(
+      weakSession.tasks.first,
+      remembered: true,
+      syncWithTodayPlan: weakSession.syncWithTodayPlan,
+    );
+
+    final afterWeak = await ReviewService.getTodayPlan(kEnglishTestSettings);
+    expect(afterWeak.completedCount, 0);
+
+    final typeSession = await ReviewService.createTypeSession(
+      kEnglishTestSettings,
+      ReviewContentType.word,
+    );
+    expect(typeSession, isNotNull);
+    expect(typeSession!.syncWithTodayPlan, isFalse);
+    await ReviewService.recordTaskResult(
+      typeSession.tasks.first,
+      remembered: true,
+      syncWithTodayPlan: typeSession.syncWithTodayPlan,
+    );
+
+    final afterType = await ReviewService.getTodayPlan(kEnglishTestSettings);
+    expect(afterType.completedCount, 0);
+  });
 }

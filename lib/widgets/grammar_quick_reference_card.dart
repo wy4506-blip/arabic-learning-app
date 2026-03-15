@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../l10n/localized_text.dart';
 import '../models/grammar_quick_reference_models.dart';
+import '../services/audio_service.dart';
 import '../theme/app_arabic_typography.dart';
 import '../theme/app_theme.dart';
 import 'app_widgets.dart';
+import 'arabic_text_with_audio.dart';
 
 class GrammarQuickReferenceCard extends StatelessWidget {
   final GrammarQuickReferenceSection section;
@@ -37,7 +39,8 @@ class GrammarQuickReferenceCard extends StatelessWidget {
         : section.examples.take(1).toList(growable: false);
     final bullets = _localizedBullets(context);
     final cardColor = Theme.of(context).cardColor;
-    final blendedAccent = Color.lerp(cardColor, section.accentSurfaceColor, 0.88)!;
+    final blendedAccent =
+        Color.lerp(cardColor, section.accentSurfaceColor, 0.88)!;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
@@ -53,7 +56,9 @@ class GrammarQuickReferenceCard extends StatelessWidget {
               gradient: LinearGradient(
                 colors: <Color>[
                   cardColor,
-                  expanded ? blendedAccent : Color.lerp(cardColor, blendedAccent, 0.45)!,
+                  expanded
+                      ? blendedAccent
+                      : Color.lerp(cardColor, blendedAccent, 0.45)!,
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -294,8 +299,16 @@ class GrammarQuickReferenceExamplePanel extends StatelessWidget {
             style: text.labelLarge?.copyWith(color: accentColor),
           ),
           const SizedBox(height: 8),
-          ArabicText.sentence(
-            example.arabic,
+          ArabicTextWithAudio(
+            textAr: example.arabic,
+            request: LearningAudioRequest.general(
+              scope: 'grammar',
+              type: 'sentence',
+              textAr: example.arabic,
+              textPlain: example.arabic,
+              debugLabel: 'grammar_quick_reference_example',
+            ),
+            variant: ArabicAudioTextVariant.sentence,
             style: const TextStyle(
               fontSize: 25,
               fontWeight: FontWeight.w600,

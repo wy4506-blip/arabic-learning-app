@@ -4,6 +4,7 @@ import '../app_scope.dart';
 import '../l10n/alphabet_content_localizer.dart';
 import '../l10n/localized_text.dart';
 import '../models/alphabet_group.dart';
+import '../services/alphabet_progress_service.dart';
 import '../services/audio_service.dart';
 import '../services/review_service.dart';
 import '../theme/app_arabic_typography.dart';
@@ -28,14 +29,57 @@ class _AlphabetLetterHomePageState extends State<AlphabetLetterHomePage> {
 
   AlphabetLetter get letter => widget.letter;
   String? _playingTarget;
+  AlphabetLearningSnapshot _progress = AlphabetLearningSnapshot.empty;
 
   bool get _isPlayingName => _playingTarget == _namePlaybackKey;
+  bool get _isViewed => _progress.viewedLetters.contains(letter.arabic.trim());
+  bool get _isListenCompleted =>
+      _progress.listenCompletedLetters.contains(letter.arabic.trim());
+  bool get _isWriteCompleted =>
+      _progress.writeCompletedLetters.contains(letter.arabic.trim());
+
+  Future<void> _refreshProgress() async {
+    final snapshot = await AlphabetProgressService.getSnapshot();
+    if (!mounted) return;
+    setState(() => _progress = snapshot);
+  }
+
+  Future<void> _markViewed() async {
+    await AlphabetProgressService.markLetterViewed(letter);
+    await ReviewService.markAlphabetViewed(letter);
+    await _refreshProgress();
+  }
+
+  Future<void> _openListenRead() async {
+    final completed = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AlphabetListenReadPage(letter: letter),
+      ),
+    );
+    if (completed == true) {
+      if (!mounted) return;
+      Navigator.pop(context, true);
+    }
+  }
+
+  Future<void> _openWritePractice() async {
+    final completed = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AlphabetWritePage(letter: letter),
+      ),
+    );
+    if (completed == true) {
+      await _refreshProgress();
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     AudioService.initialize();
-    ReviewService.markAlphabetViewed(letter);
+    _markViewed();
   }
 
   @override
@@ -54,7 +98,14 @@ class _AlphabetLetterHomePageState extends State<AlphabetLetterHomePage> {
 
     setState(() => _playingTarget = _namePlaybackKey);
     try {
-      await AudioService.speakLetter(letter.arabic);
+      await AudioService.playLearningText(
+        LearningAudioRequest.alphabet(
+          type: 'letter',
+          textAr: letter.arabic,
+          textPlain: letter.arabic,
+          debugLabel: 'alphabet_home_letter',
+        ),
+      );
     } catch (_) {
       // Audio unavailable (e.g. Windows without TTS) — ignore gracefully.
     }
@@ -238,6 +289,28 @@ class _AlphabetLetterHomePageState extends State<AlphabetLetterHomePage> {
                     style: text.bodyMedium,
                     textAlign: TextAlign.center,
                   ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      _StatusPill(
+                        label: localizedText(context, zh: '已浏览', en: 'Viewed'),
+                        active: _isViewed,
+                      ),
+                      _StatusPill(
+                        label: localizedText(context,
+                            zh: '听读完成', en: 'Listen Done'),
+                        active: _isListenCompleted,
+                      ),
+                      _StatusPill(
+                        label: localizedText(context,
+                            zh: '书写完成', en: 'Write Done'),
+                        active: _isWriteCompleted,
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -245,53 +318,12 @@ class _AlphabetLetterHomePageState extends State<AlphabetLetterHomePage> {
             Text(
               localizedText(
                 context,
-                zh: '先抓住这几个重点',
-                en: 'Focus on These First',
+                zh: '首轮先记住这 2 点',
+                en: 'Remember These 2 Things First',
               ),
               style: text.titleLarge,
             ),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                _buildFocusChip(
-                  label: localizedText(
-                    context,
-                    zh: '基础音值 ${letter.phoneme}',
-                    en: 'Core Sound ${letter.phoneme}',
-                  ),
-                  icon: Icons.graphic_eq_rounded,
-                ),
-                _buildFocusChip(
-                  label: localizedText(
-                    context,
-                    zh: '13 个读音形式',
-                    en: '13 Sound Forms',
-                  ),
-                  icon: Icons.record_voice_over_rounded,
-                ),
-                _buildFocusChip(
-                  label: localizedText(
-                    context,
-                    zh: '4 种书写形态',
-                    en: '4 Writing Forms',
-                  ),
-                  icon: Icons.draw_rounded,
-                ),
-                _buildFocusChip(
-                  label: localizedText(
-                    context,
-                    zh: letter.connectsAfter ? '可继续连写' : '后方会断开',
-                    en: letter.connectsAfter
-                        ? 'Connects Forward'
-                        : 'Breaks After It',
-                  ),
-                  icon: Icons.link_rounded,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
@@ -308,159 +340,276 @@ class _AlphabetLetterHomePageState extends State<AlphabetLetterHomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    localizedText(context, zh: '示例词', en: 'Example Word'),
-                    style: text.titleMedium,
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ArabicText.word(
-                              letter.example.arabic,
-                              style: text.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              letter.example.latin,
-                              style: text.bodySmall?.copyWith(
-                                color: AppTheme.deepAccent,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              AlphabetContentLocalizer.exampleMeaning(
-                                letter.example,
-                                context.appSettings.meaningLanguage,
-                              ),
-                              style: text.bodyMedium,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Flexible(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 10,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF4FBF8),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Text(
-                            AlphabetContentLocalizer.soundHint(
-                              letter,
-                              context.appSettings.meaningLanguage,
-                            ),
-                            style: text.bodySmall,
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ),
-                    ],
+                  _buildFocusRow(
+                    context,
+                    icon: Icons.graphic_eq_rounded,
+                    title: localizedText(
+                      context,
+                      zh: '先听熟基础音',
+                      en: 'Learn the Core Sound First',
+                    ),
+                    body: localizedText(
+                      context,
+                      zh: '这轮先记住 ${letter.pronunciation}，先不急着把全部读音形式一次学完。',
+                      en: 'For the first pass, just remember ${letter.pronunciation}. You do not need every sound form yet.',
+                    ),
                   ),
                   const SizedBox(height: 14),
-                  Text(
-                    localizedText(
+                  _buildFocusRow(
+                    context,
+                    icon: Icons.visibility_rounded,
+                    title: localizedText(
                       context,
-                      zh: '四种常见字形',
-                      en: 'Four Common Forms',
+                      zh: '先抓最明显的辨识点',
+                      en: 'Use One Strong Visual Clue',
                     ),
-                    style: text.titleSmall,
-                  ),
-                  const SizedBox(height: 10),
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _formExamples.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      childAspectRatio: 1.18,
+                    body: AlphabetContentLocalizer.soundHint(
+                      letter,
+                      context.appSettings.meaningLanguage,
                     ),
-                    itemBuilder: (context, index) {
-                      final item = _formExamples[index];
-                      return _buildFormTile(
-                        context,
-                        title: item.title,
-                        value: item.value,
-                        exampleWord: item.exampleWord,
-                        note: item.note,
-                      );
-                    },
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
-            Text(
-              localizedText(
-                context,
-                zh: '开始学习',
-                en: 'Start Learning',
-              ),
-              style: text.titleLarge,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              localizedText(
-                context,
-                zh: '把听读和书写拆开练习，会更清楚也更不容易累。',
-                en: 'Split listening and writing into two passes. It stays clearer and less tiring.',
-              ),
-              style: text.bodyMedium,
-            ),
-            const SizedBox(height: 16),
-            _buildActionCard(
-              context: context,
-              icon: Icons.volume_up_rounded,
-              iconBg: const Color(0xFFE8F3FF),
-              iconColor: const Color(0xFF4C7CF0),
-              title: localizedText(context, zh: '听读', en: 'Listen'),
-              subtitle: localizedText(
-                context,
-                zh: '学习 13 个读音位、示例词和基础发音',
-                en: 'Study the 13 sound forms, example word, and base pronunciation.',
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        AlphabetListenReadPage(letter: letter),
+            const SizedBox(height: 18),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppTheme.deepAccent,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
                   ),
-                );
-              },
-            ),
-            _buildActionCard(
-              context: context,
-              icon: Icons.edit_rounded,
-              iconBg: const Color(0xFFE8F5F0),
-              iconColor: AppTheme.deepAccent,
-              title: localizedText(context, zh: '书写', en: 'Write'),
-              subtitle: localizedText(
-                context,
-                zh: '学习独立形、词首形、词中形、词尾形与连写规则',
-                en: 'Study isolated, initial, medial, final forms, and connection rules.',
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AlphabetWritePage(letter: letter),
+                ),
+                onPressed: _openListenRead,
+                icon: const Icon(Icons.volume_up_rounded),
+                label: Text(
+                  localizedText(
+                    context,
+                    zh: '开始轻量听读',
+                    en: 'Start Light Listening',
                   ),
-                );
-              },
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.deepAccent,
+                  side: const BorderSide(color: Color(0xFFD0D5DD)),
+                  padding: const EdgeInsets.symmetric(vertical: 13),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                ),
+                onPressed: _playLetterName,
+                icon: Icon(
+                  _isPlayingName ? Icons.stop_rounded : Icons.volume_up_rounded,
+                ),
+                label: Text(
+                  _isPlayingName
+                      ? localizedText(
+                          context,
+                          zh: '停止名称朗读',
+                          en: 'Stop Name Audio',
+                        )
+                      : localizedText(
+                          context,
+                          zh: '先听字母名称',
+                          en: 'Hear the Letter Name',
+                        ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              (!_isListenCompleted)
+                  ? localizedText(
+                      context,
+                      zh: '下一步先完成轻量听读，先把字母本体和一个示例词听熟。',
+                      en: 'Next, finish the light listening step by learning the base letter and one example word.',
+                    )
+                  : (!_isWriteCompleted)
+                      ? localizedText(
+                          context,
+                          zh: '听读已完成。下一步做书写巩固，把独立形和连写规则再过一遍。',
+                          en: 'Listening is done. Next, reinforce writing by reviewing the isolated form and connection rule.',
+                        )
+                      : localizedText(
+                          context,
+                          zh: '这个字母的起步环节已经完成，可以回到分组继续下一个字母。',
+                          en: 'The starter steps for this letter are complete. You can return to the group and continue with the next letter.',
+                        ),
+              style: text.bodySmall?.copyWith(color: AppTheme.textSecondary),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              children: [
+                Text(
+                  localizedText(context, zh: '示例词', en: 'Example Word'),
+                  style: text.labelLarge?.copyWith(
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+                Text(
+                  localizedText(
+                    context,
+                    zh: '书写',
+                    en: 'Write',
+                  ),
+                  style: text.labelLarge?.copyWith(
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 18),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x10000000),
+                    blurRadius: 16,
+                    offset: Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Theme(
+                data: Theme.of(context)
+                    .copyWith(dividerColor: Colors.transparent),
+                child: ExpansionTile(
+                  tilePadding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 4,
+                  ),
+                  childrenPadding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+                  title: Text(
+                    localizedText(
+                      context,
+                      zh: '继续深入（可稍后）',
+                      en: 'Go Deeper Later',
+                    ),
+                    style: text.titleMedium,
+                  ),
+                  subtitle: Text(
+                    localizedText(
+                      context,
+                      zh: '示例词、四种字形和书写巩固都保留在这里。',
+                      en: 'The example word, four forms, and writing practice stay here.',
+                    ),
+                    style: text.bodySmall,
+                  ),
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF7FAF9),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            localizedText(context,
+                                zh: '示例词', en: 'Example Word'),
+                            style: text.titleMedium,
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ArabicText.word(
+                                      letter.example.arabic,
+                                      style: text.headlineSmall?.copyWith(
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      letter.example.latin,
+                                      style: text.bodySmall?.copyWith(
+                                        color: AppTheme.deepAccent,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      AlphabetContentLocalizer.exampleMeaning(
+                                        letter.example,
+                                        context.appSettings.meaningLanguage,
+                                      ),
+                                      style: text.bodyMedium,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          Text(
+                            localizedText(
+                              context,
+                              zh: '四种常见字形',
+                              en: 'Four Common Forms',
+                            ),
+                            style: text.titleSmall,
+                          ),
+                          const SizedBox(height: 10),
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _formExamples.length,
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 10,
+                              childAspectRatio: 1.18,
+                            ),
+                            itemBuilder: (context, index) {
+                              final item = _formExamples[index];
+                              return _buildFormTile(
+                                context,
+                                title: item.title,
+                                value: item.value,
+                                exampleWord: item.exampleWord,
+                                note: item.note,
+                              );
+                            },
+                          ),
+                          const SizedBox(height: 14),
+                          _buildActionCard(
+                            context: context,
+                            icon: Icons.edit_rounded,
+                            iconBg: const Color(0xFFE8F5F0),
+                            iconColor: AppTheme.deepAccent,
+                            title: localizedText(
+                              context,
+                              zh: '书写巩固（可稍后）',
+                              en: 'Writing Practice Later',
+                            ),
+                            subtitle: localizedText(
+                              context,
+                              zh: '先认字母，再回来看独立形、连接形和书写规则。',
+                              en: 'Recognize the letter first, then come back for forms and writing rules.',
+                            ),
+                            onTap: _openWritePractice,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -468,32 +617,38 @@ class _AlphabetLetterHomePageState extends State<AlphabetLetterHomePage> {
     );
   }
 
-  static Widget _buildFocusChip({
-    required String label,
+  Widget _buildFocusRow(
+    BuildContext context, {
     required IconData icon,
+    required String title,
+    required String body,
   }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: AppTheme.deepAccent),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.primaryText,
-            ),
+    final text = Theme.of(context).textTheme;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: const Color(0xFFE8F5F0),
+            borderRadius: BorderRadius.circular(12),
           ),
-        ],
-      ),
+          child: Icon(icon, color: AppTheme.deepAccent, size: 18),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: text.titleSmall),
+              const SizedBox(height: 4),
+              Text(body, style: text.bodyMedium),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -690,6 +845,37 @@ class _LetterFormExample {
     required this.exampleWord,
     required this.note,
   });
+}
+
+class _StatusPill extends StatelessWidget {
+  final String label;
+  final bool active;
+
+  const _StatusPill({
+    required this.label,
+    required this.active,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: active ? const Color(0xFFEAF8F3) : Colors.white,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: active ? const Color(0xFFD8ECE4) : const Color(0xFFE5E7EB),
+        ),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: active ? AppTheme.deepAccent : AppTheme.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+      ),
+    );
+  }
 }
 
 class _HighlightedArabicWord extends StatelessWidget {

@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
 import '../../models/review_models.dart';
-import '../../theme/app_arabic_typography.dart';
+import '../../services/audio_service.dart';
 import '../../theme/app_theme.dart';
 import '../app_widgets.dart';
+import '../arabic_text_with_audio.dart';
 
 class ReviewTaskSection extends StatelessWidget {
   final String title;
@@ -70,7 +71,8 @@ class ReviewTaskPreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasArabic = task.arabicText != null && task.arabicText!.trim().isNotEmpty;
+    final hasArabic =
+        task.arabicText != null && task.arabicText!.trim().isNotEmpty;
 
     return AppSurface(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
@@ -93,8 +95,16 @@ class ReviewTaskPreviewCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 if (hasArabic) ...[
-                  ArabicText.word(
-                    task.arabicText!,
+                  ArabicTextWithAudio(
+                    textAr: task.arabicText!,
+                    request: LearningAudioRequest.general(
+                      scope: 'review',
+                      type: _audioTypeForTask(task.type),
+                      textAr: task.arabicText!,
+                      textPlain: task.audioQueryText ?? task.arabicText!,
+                      debugLabel: 'review_preview_card',
+                    ),
+                    variant: ArabicAudioTextVariant.word,
                     style: const TextStyle(
                       fontSize: 26,
                       height: 1.45,
@@ -119,7 +129,8 @@ class ReviewTaskPreviewCard extends StatelessWidget {
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
-                if (task.helperText != null && task.helperText!.trim().isNotEmpty) ...[
+                if (task.helperText != null &&
+                    task.helperText!.trim().isNotEmpty) ...[
                   const SizedBox(height: 8),
                   Container(
                     width: double.infinity,
@@ -168,6 +179,21 @@ class ReviewTaskPreviewCard extends StatelessWidget {
         return english ? 'Grammar' : '语法';
       case ReviewContentType.alphabet:
         return english ? 'Letter' : '字母';
+    }
+  }
+
+  String _audioTypeForTask(ReviewContentType type) {
+    switch (type) {
+      case ReviewContentType.alphabet:
+        return 'letter';
+      case ReviewContentType.pronunciation:
+        return 'pronunciation';
+      case ReviewContentType.word:
+        return 'word';
+      case ReviewContentType.pair:
+      case ReviewContentType.sentence:
+      case ReviewContentType.grammar:
+        return 'sentence';
     }
   }
 }

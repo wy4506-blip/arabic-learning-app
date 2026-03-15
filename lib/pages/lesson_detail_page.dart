@@ -8,6 +8,7 @@ import '../models/dialogue_line.dart';
 import '../models/grammar_models.dart';
 import '../models/lesson.dart';
 import '../models/review_models.dart';
+import '../models/v2_lesson_progress_models.dart';
 import '../models/word_item.dart';
 import '../l10n/lesson_content_localizer.dart';
 import '../l10n/lesson_localizer.dart';
@@ -15,6 +16,7 @@ import '../l10n/localized_text.dart';
 import '../services/audio_service.dart';
 import '../services/arabic_learning_display_service.dart';
 import '../services/grammar_service.dart';
+import '../services/lesson_progress_service.dart';
 import '../services/lesson_practice_service.dart';
 import '../services/progress_service.dart';
 import '../services/review_service.dart';
@@ -22,6 +24,7 @@ import '../services/vocab_service.dart';
 import '../theme/app_arabic_typography.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_widgets.dart';
+import '../widgets/arabic_text_with_audio.dart';
 import '../widgets/review/lesson_micro_review_card.dart';
 import 'grammar_detail_page.dart';
 import 'lesson_quiz_page.dart';
@@ -51,7 +54,7 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
   List<ReviewTask> _lessonPreviewTasks = const <ReviewTask>[];
   List<ReviewTask> _lessonWrapUpTasks = const <ReviewTask>[];
   ReviewSession? _lessonWrapUpSession;
-  bool _completed = false;
+  V2LessonStatus _lessonStatus = V2LessonStatus.available;
   late bool _unlocked;
   String _expandedSectionId = 'words';
 
@@ -76,9 +79,14 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
       ReviewService.createLessonWrapUpSession(widget.settings, widget.lesson),
     ]);
     final snapshot = results[0] as ProgressSnapshot;
+    final lessonStatus = ProgressService.resolveLessonStatus(
+      lesson: widget.lesson,
+      snapshot: snapshot,
+      unlocked: _unlocked,
+    );
     if (!mounted) return;
     setState(() {
-      _completed = snapshot.completedLessons.contains(widget.lesson.id);
+      _lessonStatus = lessonStatus;
       _relatedGrammarPages = results[1] as List<GrammarPageContent>;
       _lessonPreviewTasks =
           ((results[2] as ReviewSession?)?.tasks ?? const <ReviewTask>[]);
@@ -272,10 +280,13 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
     }
 
     await ReviewService.recordLessonStarted(widget.lesson);
-    await ProgressService.markLessonStarted(widget.lesson.id);
+    await LessonProgressService.markLessonStarted(
+      lessonId: widget.lesson.id,
+      sourceLessonIds: <String>[widget.lesson.id],
+    );
     if (!mounted) return;
 
-    final result = await Navigator.push(
+    final result = await Navigator.push<LessonQuizResult>(
       context,
       MaterialPageRoute(
         builder: (_) => LessonQuizPage(lesson: widget.lesson),
@@ -283,11 +294,53 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
     );
     if (!mounted) return;
 
-    if (result == true) {
+    if (result != null) {
+      final reachedTarget = result.reachedThreshold(0.7);
+      await LessonProgressService.applyEvaluation(
+        lessonId: widget.lesson.id,
+        evaluation: LessonCompletionEvaluation(
+          completedBlockIds: const <String>['lesson_detail', 'practice_quiz'],
+          currentScore: result.accuracy,
+          objectiveResults: <V2ObjectiveProgressRecord>[
+            V2ObjectiveProgressRecord(
+              lessonId: widget.lesson.id,
+              objectiveId: '${widget.lesson.id}_quiz_mastery',
+              status: result.reachedThreshold(0.7)
+                  ? V2ObjectiveStatus.reached
+                  : V2ObjectiveStatus.weak,
+              accuracy: result.accuracy,
+              evidenceCount: result.totalQuestions,
+              threshold: 0.7,
+            ),
+          ],
+        ),
+      );
+      await LessonProgressService.attachReviewSeeds(
+        lessonId: widget.lesson.id,
+        seeds: LessonReviewSeeder.seedRecordsForLesson(widget.lesson),
+      );
       await ReviewService.recordLessonCompleted(widget.lesson);
-      await ProgressService.markLessonCompleted(widget.lesson.id);
       if (!mounted) return;
-      setState(() => _completed = true);
+      setState(() {
+        _lessonStatus = reachedTarget
+            ? V2LessonStatus.completed
+            : V2LessonStatus.coreCompleted;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            localizedText(
+              context,
+              zh: reachedTarget
+                  ? '本课已记录为达标完成。'
+                  : '本课已完成，V2 侧记录为核心完成，建议稍后再巩固一次。',
+              en: reachedTarget
+                  ? 'This lesson is recorded as completed with target reached.'
+                  : 'This lesson is complete, but the V2 sidecar marked it as core completed. A short review is recommended.',
+            ),
+          ),
+        ),
+      );
       await _load();
     }
   }
@@ -348,39 +401,45 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
 
   Future<void> _playWordAudio(LessonWord word) async {
     await _runAudioAction(() {
-      return AudioService.playLessonAudio(
-        asset: word.audioRef.asset,
-        lessonSequence: widget.lesson.sequence,
-        type: 'word',
-        textAr: word.arabic,
-        textPlain: word.text.plain,
-        fallbackText: word.text.plain,
+      return AudioService.playLearningText(
+        LearningAudioRequest.lesson(
+          lessonSequence: widget.lesson.sequence,
+          type: 'word',
+          asset: word.audioRef.asset,
+          textAr: word.arabic,
+          textPlain: word.text.plain,
+          debugLabel: 'lesson_detail_word',
+        ),
       );
     });
   }
 
   Future<void> _playPatternAudio(LessonPattern pattern) async {
     await _runAudioAction(() {
-      return AudioService.playLessonAudio(
-        asset: pattern.audioRef.asset,
-        lessonSequence: widget.lesson.sequence,
-        type: 'sentence',
-        textAr: pattern.arabic,
-        textPlain: pattern.text.plain,
-        fallbackText: pattern.text.plain,
+      return AudioService.playLearningText(
+        LearningAudioRequest.lesson(
+          lessonSequence: widget.lesson.sequence,
+          type: 'sentence',
+          asset: pattern.audioRef.asset,
+          textAr: pattern.arabic,
+          textPlain: pattern.text.plain,
+          debugLabel: 'lesson_detail_pattern',
+        ),
       );
     });
   }
 
   Future<void> _playDialogueAudio(DialogueLine line) async {
     await _runAudioAction(() {
-      return AudioService.playLessonAudio(
-        asset: line.audioRef.asset,
-        lessonSequence: widget.lesson.sequence,
-        type: 'sentence',
-        textAr: line.arabic,
-        textPlain: line.text.plain,
-        fallbackText: line.text.plain,
+      return AudioService.playLearningText(
+        LearningAudioRequest.lesson(
+          lessonSequence: widget.lesson.sequence,
+          type: 'sentence',
+          asset: line.audioRef.asset,
+          textAr: line.arabic,
+          textPlain: line.text.plain,
+          debugLabel: 'lesson_detail_dialogue',
+        ),
       );
     });
   }
@@ -585,7 +644,7 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
                   label: Text(
                     locked
                         ? strings.t('lesson.unlock_continue')
-                        : _completed
+                        : _lessonStatus.isCompletedLike
                             ? strings.t('lesson.retry_practice')
                             : strings.t('lesson.study_then_practice'),
                   ),
@@ -593,7 +652,9 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
               ],
             ),
           ),
-          if (!locked && !_completed && _lessonPreviewTasks.isNotEmpty) ...[
+          if (!locked &&
+              !_lessonStatus.isCompletedLike &&
+              _lessonPreviewTasks.isNotEmpty) ...[
             const SizedBox(height: 16),
             LessonMicroReviewCard(
               title: localizedText(
@@ -616,7 +677,8 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
             ),
           ],
           if (!locked) ...[
-            if (_completed && _lessonWrapUpSession != null) ...[
+            if (_lessonStatus.isCompletedLike &&
+                _lessonWrapUpSession != null) ...[
               const SizedBox(height: 16),
               LessonMicroReviewCard(
                 title: localizedText(
@@ -636,17 +698,18 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
                         en: 'Finish this pass, then continue straight into ${_lessonWrapUpSession!.config.nextLessonLabel}.',
                       ),
                 tasks: _lessonWrapUpTasks.take(3).toList(growable: false),
-                actionLabel: _lessonWrapUpSession!.config.nextLessonLabel == null
-                    ? localizedText(
-                        context,
-                        zh: '开始课后正式复习',
-                        en: 'Start Formal Wrap-Up Review',
-                      )
-                    : localizedText(
-                        context,
-                        zh: '先巩固，再去下一课',
-                        en: 'Reinforce First, Then Next Lesson',
-                      ),
+                actionLabel:
+                    _lessonWrapUpSession!.config.nextLessonLabel == null
+                        ? localizedText(
+                            context,
+                            zh: '开始课后正式复习',
+                            en: 'Start Formal Wrap-Up Review',
+                          )
+                        : localizedText(
+                            context,
+                            zh: '先巩固，再去下一课',
+                            en: 'Reinforce First, Then Next Lesson',
+                          ),
                 onActionTap: _openLessonWrapUpReview,
               ),
             ],
@@ -719,8 +782,17 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                ArabicText.word(
-                                  _displayWord(word.arabic),
+                                ArabicTextWithAudio(
+                                  textAr: _displayWord(word.arabic),
+                                  request: LearningAudioRequest.lesson(
+                                    lessonSequence: widget.lesson.sequence,
+                                    type: 'word',
+                                    asset: word.audioRef.asset,
+                                    textAr: word.arabic,
+                                    textPlain: word.text.plain,
+                                    debugLabel: 'lesson_detail_word_card',
+                                  ),
+                                  variant: ArabicAudioTextVariant.word,
                                   style: const TextStyle(
                                     fontSize: 28,
                                     height: 1.45,
@@ -779,6 +851,10 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
                                       }
                                     });
                                   },
+                                ),
+                                const SizedBox(width: 10),
+                                _AudioActionButton(
+                                  onTap: () => _playWordAudio(word),
                                 ),
                               ],
                             ),
@@ -1046,7 +1122,7 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
                       child: FilledButton(
                         onPressed: practiceCount == 0 ? null : _startPractice,
                         child: Text(
-                          _completed
+                          _lessonStatus.isCompletedLike
                               ? strings.t('lesson.practice_restart')
                               : strings.t('lesson.practice_start'),
                         ),
@@ -1067,7 +1143,8 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
                 lesson: lesson,
                 practiceCount: practiceCount,
               ),
-              if (_completed && _lessonWrapUpTasks.isNotEmpty) ...[
+              if (_lessonStatus.isCompletedLike &&
+                  _lessonWrapUpTasks.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 LessonMicroReviewCard(
                   title: localizedText(

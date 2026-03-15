@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../l10n/localized_text.dart';
+import '../services/audio_service.dart';
 import '../theme/app_arabic_typography.dart';
 import '../theme/app_theme.dart';
+import '../widgets/arabic_text_with_audio.dart';
 
 class QuizScaffold extends StatelessWidget {
   final String levelTitle;
@@ -299,14 +301,25 @@ class QuizScaffold extends StatelessWidget {
     if (promptType == 'arabic') {
       return FittedBox(
         fit: BoxFit.scaleDown,
-        child: ArabicText.word(
-          prompt,
-          style: text.headlineLarge?.copyWith(
-            fontSize: isSmallScreen ? 52 : 60,
-            fontWeight: FontWeight.w700,
-            color: AppTheme.primaryText,
+        child: SizedBox(
+          width: isSmallScreen ? 260 : 320,
+          child: ArabicTextWithAudio(
+            textAr: prompt,
+            request: LearningAudioRequest.general(
+              scope: 'quiz',
+              type: 'word',
+              textAr: prompt,
+              textPlain: prompt,
+              debugLabel: 'quiz_prompt_arabic',
+            ),
+            variant: ArabicAudioTextVariant.word,
+            style: text.headlineLarge?.copyWith(
+              fontSize: isSmallScreen ? 52 : 60,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.primaryText,
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
         ),
       );
     }
@@ -405,9 +418,18 @@ class QuizScaffold extends StatelessWidget {
               children: [
                 Expanded(
                   child: AppArabicTypography.isArabic(option)
-                      ? ArabicText.word(
-                          option,
+                      ? ArabicTextWithAudio(
+                          textAr: option,
+                          request: LearningAudioRequest.general(
+                            scope: 'quiz',
+                            type: 'word',
+                            textAr: option,
+                            textPlain: option,
+                            debugLabel: 'quiz_option_arabic',
+                          ),
+                          variant: ArabicAudioTextVariant.word,
                           style: text.titleMedium?.copyWith(color: textColor),
+                          spacing: 8,
                         )
                       : Text(
                           option,

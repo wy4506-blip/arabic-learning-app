@@ -445,16 +445,44 @@ ${strings.t('profile.about_version')}: $_appVersion
           children: [
             SectionTitle(
               title: strings.t('profile.title'),
+              subtitle: strings.t('profile.page_intro'),
             ),
             const SizedBox(height: 16),
-            Text(
-              strings.t('profile.section_learning_state'),
-              style: Theme.of(context).textTheme.titleSmall,
+            _SettingsSection(
+              title: strings.t('profile.section_course_access'),
+              children: <Widget>[
+                _CurrentPlanCard(
+                  data: plan,
+                  onActionTap: plan.unlocked ? null : _openUnlockPage,
+                ),
+                if (!_unlocked)
+                  _SettingsValueItem(
+                    title: strings.t('profile.content_pack_title'),
+                    value: strings.t('profile.content_pack_trial_value'),
+                    subtitle: strings.t('profile.content_pack_trial_subtitle'),
+                  ),
+                _SettingsValueItem(
+                  title: strings.t('profile.unlock_full_title'),
+                  value: strings.t('profile.unlock_full_value'),
+                  subtitle: strings.t('profile.unlock_full_subtitle'),
+                  onTap: _openUnlockPage,
+                ),
+                _SettingsNavItem(
+                  title: strings.t('profile.restore_purchase'),
+                  subtitle: strings.t('profile.restore_purchase_subtitle'),
+                  onTap: _restorePurchase,
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            _LearningOverviewCard(
-              data: overview,
-              onActionTap: () => _openLearningOverviewAction(overview),
+            const SizedBox(height: 12),
+            _SettingsSection(
+              title: strings.t('profile.section_learning_state'),
+              children: [
+                _LearningOverviewCard(
+                  data: overview,
+                  onActionTap: () => _openLearningOverviewAction(overview),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
             _SettingsSection(
@@ -530,39 +558,8 @@ ${strings.t('profile.about_version')}: $_appVersion
             ),
             const SizedBox(height: 12),
             _SettingsSection(
-              title: strings.t('profile.section_course_access'),
-              children: _unlocked
-                  ? <Widget>[
-                      _CurrentPlanCard(data: plan),
-                    ]
-                  : <Widget>[
-                      _SettingsValueItem(
-                        title: strings.t('profile.content_pack_title'),
-                        value: strings.t('profile.content_pack_trial_value'),
-                        subtitle: strings.t('profile.content_pack_trial_subtitle'),
-                      ),
-                      _SettingsValueItem(
-                        title: strings.t('profile.unlock_full_title'),
-                        value: strings.t('profile.unlock_full_value'),
-                        subtitle: strings.t('profile.unlock_full_subtitle'),
-                        onTap: _openUnlockPage,
-                      ),
-                      _SettingsNavItem(
-                        title: strings.t('profile.restore_purchase'),
-                        subtitle: strings.t('profile.restore_purchase_subtitle'),
-                        onTap: _restorePurchase,
-                      ),
-                    ],
-            ),
-            const SizedBox(height: 12),
-            _SettingsSection(
-              title: strings.t('profile.section_developer_support'),
+              title: strings.t('profile.section_help_feedback'),
               children: [
-                _SettingsNavItem(
-                  title: strings.t('profile.developer_note'),
-                  subtitle: strings.t('profile.developer_note_subtitle'),
-                  onTap: _openDeveloperNotePage,
-                ),
                 _SettingsNavItem(
                   title: strings.t('profile.submit_suggestion'),
                   subtitle: strings.t('profile.submit_suggestion_subtitle'),
@@ -585,6 +582,11 @@ ${strings.t('profile.about_version')}: $_appVersion
             _SettingsSection(
               title: strings.t('profile.section_about_info'),
               children: [
+                _SettingsNavItem(
+                  title: strings.t('profile.developer_note'),
+                  subtitle: strings.t('profile.developer_note_subtitle'),
+                  onTap: _openDeveloperNotePage,
+                ),
                 _SettingsValueItem(
                   title: strings.t('profile.about_version'),
                   value: _appVersion == '--'
@@ -924,21 +926,6 @@ ${strings.t('profile.about_version')}: $_appVersion
         labelBuilder: _meaningLanguageLabel,
         onSelected: (value) => widget.onSettingsChanged(
           widget.settings.copyWith(meaningLanguage: value),
-        ),
-      ),
-    );
-  }
-
-  void _showArabicFontScaleSheet(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (_) => _OptionsSheet<ArabicFontScale>(
-        title: context.strings.t('profile.arabic_font_size'),
-        current: widget.settings.arabicFontScale,
-        options: ArabicFontScale.values,
-        labelBuilder: _fontScaleLabel,
-        onSelected: (value) => widget.onSettingsChanged(
-          widget.settings.copyWith(arabicFontScale: value),
         ),
       ),
     );

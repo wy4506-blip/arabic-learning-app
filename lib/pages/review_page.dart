@@ -23,6 +23,7 @@ class ReviewPage extends StatefulWidget {
 
 class _ReviewPageState extends State<ReviewPage> {
   ReviewDashboardData? _dashboard;
+  ReviewEntrySnapshot? _entrySnapshot;
   bool _loading = true;
   bool _didLoadInitialDashboard = false;
   String? _loadError;
@@ -62,12 +63,17 @@ class _ReviewPageState extends State<ReviewPage> {
     }
 
     try {
-      final dashboard = await ReviewService.buildDashboard(context.appSettings);
+      final results = await Future.wait<dynamic>([
+        ReviewService.buildDashboard(context.appSettings),
+        ReviewService.getEntrySnapshot(context.appSettings),
+      ]);
+      
       if (!mounted) {
         return;
       }
       setState(() {
-        _dashboard = dashboard;
+        _dashboard = results[0] as ReviewDashboardData;
+        _entrySnapshot = results[1] as ReviewEntrySnapshot;
         _loading = false;
         _loadError = null;
       });
@@ -184,7 +190,7 @@ class _ReviewPageState extends State<ReviewPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_dashboard == null) {
+    if (_dashboard == null || _entrySnapshot == null) {
       return Scaffold(
         body: SafeArea(
           child: ListView(
@@ -194,8 +200,8 @@ class _ReviewPageState extends State<ReviewPage> {
                 title: localizedText(context, zh: '复习', en: 'Review'),
                 subtitle: localizedText(
                   context,
-                  zh: '先做今天最值得的一轮正式复习，做完就顺着回到课程。',
-                  en: 'Start with the single most valuable formal review set for today, then return to lessons.',
+                  zh: '复习引擎 - 优先完成最需要的复习任务。',
+                  en: 'Review Engine - prioritize the reviews that matter most.',
                 ),
               ),
               const SizedBox(height: 18),
@@ -214,8 +220,8 @@ class _ReviewPageState extends State<ReviewPage> {
                             child: Text(
                               localizedText(
                                 context,
-                                zh: '正在整理今天适合顺手回顾的内容…',
-                                en: 'Preparing a light review set for today...',
+                                zh: '正在整理复习优先级…',
+                                en: 'Preparing review priorities...',
                               ),
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
@@ -260,9 +266,16 @@ class _ReviewPageState extends State<ReviewPage> {
     }
 
     final dashboard = _dashboard!;
+    final snapshot = _entrySnapshot!;
     final summary = dashboard.summary;
     final todayPlan = summary.todayPlan;
     final typeCounts = summary.typeCounts;
+
+    // Priority signals from review engine entry
+    final hasFormalReview = snapshot.formalTasks.isNotEmpty;
+    final hasLightReview = snapshot.lightTasks.isNotEmpty;
+    final hasOverdueReview = snapshot.overdueTasks.isNotEmpty;
+    final hasStageReinforcement = snapshot.stageReinforcementTasks.isNotEmpty;
 
     return Scaffold(
       body: SafeArea(
@@ -313,6 +326,71 @@ class _ReviewPageState extends State<ReviewPage> {
                   ),
                 ],
               ),
+              if (hasStageReinforcement || hasOverdueReview || hasFormalReview)
+                Column(
+                  children: [
+                    const SizedBox(height: 18),
+                    Container(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                      decoration: BoxDecoration(
+                        color: hasStageReinforcement
+                            ? const Color(0xFFFFF3E0)
+                            : hasOverdueReview
+                                ? const Color(0xFFFFE0E0)
+                                : const Color(0xFFF0F7FF),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            hasStageReinforcement
+                                ? Icons.pending_actions_rounded
+                                : hasOverdueReview
+                                    ? Icons.warning_rounded
+                                    : Icons.trending_up_rounded,
+                            size: 20,
+                            color: hasStageReinforcement
+                                ? const Color(0xFFE65100)
+                                : hasOverdueReview
+                                    ? const Color(0xFFD32F2F)
+                                    : const Color(0xFF1976D2),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              hasStageReinforcement
+                                  ? localizedText(
+                                      context,
+                                      zh:
+                                          '有${snapshot.stageReinforcementTasks.length}项需要阶段巩固',
+                                      en:
+                                          '${snapshot.stageReinforcementTasks.length} items need stage reinforcement',
+                                    )
+                                  : hasOverdueReview
+                                      ? localizedText(
+                                          context,
+                                          zh:
+                                              '有${snapshot.overdueTasks.length}项已超期，建议先补上',
+                                          en:
+                                              '${snapshot.overdueTasks.length} overdue items — please catch up',
+                                        )
+                                      : localizedText(
+                                          context,
+                                          zh:
+                                              '${snapshot.formalTasks.length}项正式复习等待，优先做这个',
+                                          en:
+                                              '${snapshot.formalTasks.length} formal review items waiting — prioritize these',
+                                        ),
+                              style: Theme.of(context).textTheme.labelMedium,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               const SizedBox(height: 18),
               ReviewTodayCard(
                 badge: localizedText(
@@ -414,8 +492,12 @@ class _ReviewPageState extends State<ReviewPage> {
                 title: localizedText(context, zh: '快捷入口', en: 'Quick Actions'),
                 subtitle: localizedText(
                   context,
-                  zh: '先做一小轮，或者只补最需要再看一遍的地方。',
-                  en: 'Run one light pass or focus only on the items that still need another look.',
+                  zh: hasFormalReview || hasLightReview
+                      ? '主线复习在前，下面这些入口留给补漏和自由练习。'
+                      : '先做一小轮，或者只补最需要再看一遍的地方。',
+                  en: hasFormalReview || hasLightReview
+                      ? 'Formal review comes first. Use these secondary entries for targeted catch-up and free practice.'
+                      : 'Run one light pass or focus only on the items that still need another look.',
                 ),
                 actions: [
                   ReviewQuickActionItem(

@@ -44,6 +44,31 @@ class ReviewPlannerContext {
   });
 }
 
+class ReviewSignalSnapshot {
+  final List<ReviewTask> formalReviewTasks;
+  final List<ReviewTask> lightReviewTasks;
+  final List<ReviewTask> overdueReviewTasks;
+  final List<ReviewTask> stageReinforcementTasks;
+  final List<ReviewTask> primaryTasks;
+
+  const ReviewSignalSnapshot({
+    required this.formalReviewTasks,
+    required this.lightReviewTasks,
+    required this.overdueReviewTasks,
+    required this.stageReinforcementTasks,
+    required this.primaryTasks,
+  });
+
+  bool get hasFormalReview => formalReviewTasks.isNotEmpty;
+  bool get hasLightReview => lightReviewTasks.isNotEmpty;
+  bool get hasOverdueReview => overdueReviewTasks.isNotEmpty;
+  bool get hasStageReinforcement => stageReinforcementTasks.isNotEmpty;
+  int get formalReviewCount => formalReviewTasks.length;
+  int get lightReviewCount => lightReviewTasks.length;
+  int get overdueReviewCount => overdueReviewTasks.length;
+  int get stageReinforcementCount => stageReinforcementTasks.length;
+}
+
 class ReviewPlanner {
   ReviewPlanner._();
 
@@ -80,11 +105,25 @@ class ReviewPlanner {
   }
 
   static List<ReviewTask> buildTodayCandidates(ReviewPlannerContext context) {
+    final signals = buildSignals(context);
+    if (signals.primaryTasks.isNotEmpty) {
+      return signals.primaryTasks.take(8).toList(growable: false);
+    }
     final tasks = _sortedCandidates(context);
     return _balancedSelection(tasks, limit: 8);
   }
 
   static List<ReviewTask> buildWeakCandidates(ReviewPlannerContext context) {
+    final signals = buildSignals(context);
+    final weakPool = signals.formalReviewTasks.where((task) {
+      final state = context.learningStates[task.contentId];
+      return (state?.stage == LearningStage.weak) ||
+          (state?.isReviewDue ?? false);
+    }).toList(growable: false);
+    if (weakPool.isNotEmpty) {
+      return weakPool.take(6).toList(growable: false);
+    }
+
     final tasks = _sortedCandidates(context)
         .where((task) {
           final state = context.learningStates[task.contentId];
@@ -97,6 +136,11 @@ class ReviewPlanner {
   }
 
   static List<ReviewTask> buildRecentCandidates(ReviewPlannerContext context) {
+    final signals = buildSignals(context);
+    if (signals.lightReviewTasks.isNotEmpty) {
+      return signals.lightReviewTasks.take(6).toList(growable: false);
+    }
+
     final tasks = _sortedCandidates(context)
         .where((task) {
           final state = context.learningStates[task.contentId];
@@ -111,6 +155,64 @@ class ReviewPlanner {
         .take(6)
         .toList(growable: false);
     return tasks;
+  }
+
+  static ReviewSignalSnapshot buildSignals(ReviewPlannerContext context) {
+    final tasks = _sortedCandidates(context);
+    final currentGroupId = context.progress.currentGroupId ??
+        _groupIdForLessonId(context.progress.activeLessonId);
+
+    final formal = <ReviewTask>[];
+    final light = <ReviewTask>[];
+    final overdue = <ReviewTask>[];
+    final stageReinforcement = <ReviewTask>[];
+    final formalIds = <String>{};
+    final lightIds = <String>{};
+
+    for (final task in tasks) {
+      final state = context.learningStates[task.contentId];
+      final isFormal = _isFormalReviewState(state);
+      final isOverdue = _isOverdue(state, context.now);
+      final taskGroupId = _groupIdForTask(task, context);
+      final isCurrentGroup = currentGroupId != null && taskGroupId == currentGroupId;
+
+      if (isFormal && formalIds.add(task.contentId)) {
+        formal.add(task);
+        if (isOverdue) {
+          overdue.add(task);
+        }
+        if (isCurrentGroup) {
+          stageReinforcement.add(task);
+        }
+        continue;
+      }
+
+      final isLight = _isLightReviewCandidate(task, state, context);
+      if (isLight && lightIds.add(task.contentId)) {
+        light.add(task);
+        if (isCurrentGroup) {
+          stageReinforcement.add(task);
+        }
+      }
+    }
+
+    final formalSelection = _balancedSelection(formal, limit: 8);
+    final lightSelection = _balancedSelection(light, limit: 6);
+    final overdueSelection = overdue.take(6).toList(growable: false);
+    final stageSelection = stageReinforcement.length >= 3
+        ? stageReinforcement.take(4).toList(growable: false)
+        : const <ReviewTask>[];
+    final primaryTasks = formalSelection.isNotEmpty
+        ? formalSelection
+        : (lightSelection.isNotEmpty ? lightSelection : stageSelection);
+
+    return ReviewSignalSnapshot(
+      formalReviewTasks: formalSelection,
+      lightReviewTasks: lightSelection,
+      overdueReviewTasks: overdueSelection,
+      stageReinforcementTasks: stageSelection,
+      primaryTasks: primaryTasks,
+    );
   }
 
   static Map<ReviewContentType, int> buildTypeCounts(
@@ -866,6 +968,70 @@ class ReviewPlanner {
     score += _recencyBonus(state.lastViewedAt, DateTime.now()) ~/ 2;
     score += _recencyBonus(state.lastReviewedAt, DateTime.now());
     return score;
+  }
+
+  static bool _isFormalReviewState(LearningContentState? state) {
+    if (state == null) {
+      return false;
+    }
+    return state.stage == LearningStage.weak ||
+        state.stage == LearningStage.reviewDue ||
+        state.isReviewDue ||
+        state.needsReview;
+  }
+
+  static bool _isOverdue(LearningContentState? state, DateTime now) {
+    final nextReviewAt = state?.nextReviewAt;
+    if (nextReviewAt == null) {
+      return false;
+    }
+    return nextReviewAt.isBefore(now.subtract(const Duration(hours: 12)));
+  }
+
+  static bool _isLightReviewCandidate(
+    ReviewTask task,
+    LearningContentState? state,
+    ReviewPlannerContext context,
+  ) {
+    if (_isFormalReviewState(state)) {
+      return false;
+    }
+    if (_isRecent(state?.lastStudiedAt, context.now) ||
+        _isRecent(state?.lastViewedAt, context.now)) {
+      return true;
+    }
+    switch (task.origin) {
+      case ReviewTaskOrigin.recentLesson:
+      case ReviewTaskOrigin.grammarRecent:
+      case ReviewTaskOrigin.alphabetRecent:
+      case ReviewTaskOrigin.lessonBridge:
+        return true;
+      case ReviewTaskOrigin.due:
+      case ReviewTaskOrigin.weak:
+      case ReviewTaskOrigin.favorite:
+      case ReviewTaskOrigin.grammarRelated:
+      case ReviewTaskOrigin.fallback:
+        return false;
+    }
+  }
+
+  static String? _groupIdForTask(
+    ReviewTask task,
+    ReviewPlannerContext context,
+  ) {
+    if (task.lessonId != null && task.lessonId!.isNotEmpty) {
+      return _groupIdForLessonId(task.lessonId);
+    }
+    final lessonId = context.learningStates[task.contentId]?.lessonId;
+    return _groupIdForLessonId(lessonId);
+  }
+
+  static String? _groupIdForLessonId(String? lessonId) {
+    if (lessonId == null || lessonId.isEmpty) {
+      return null;
+    }
+    final match = RegExp(r'^(U\d+)').firstMatch(lessonId);
+    return match?.group(1);
   }
 
   static bool _isRecent(DateTime? value, DateTime now) {

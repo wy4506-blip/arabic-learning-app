@@ -1,0 +1,137 @@
+{
+  "generatedAt": "2026-03-14T19:18:16.687804Z",
+  "voice": "ar-SA-HamedNeural",
+  "outputFormat": "audio-24khz-48kbitrate-mono-mp3",
+  "items": [
+    {
+      "id": "ALP-B01-001",
+      "category": "letter",
+      "textAr": "أَيْ",
+      "version": "slow",
+      "rate": "-22%",
+      "pitch": "+0st",
+      "fileName": "alphabet_soft_ay_slow.mp3",
+      "assetPath": "assets/audio/alphabet/pronunciation/alphabet_soft_ay_slow.mp3"
+    },
+    {
+      "id": "GRM-B01-001",
+      "category": "short_word",
+      "textAr": "بَ",
+      "version": "slow",
+      "rate": "-22%",
+      "pitch": "+0st",
+      "fileName": "grammar_harakat_fatha_ba_slow.mp3",
+      "assetPath": "assets/audio/grammar/harakat_rules/grammar_harakat_fatha_ba_slow.mp3"
+    },
+    {
+      "id": "GRM-B01-011",
+      "category": "short_word",
+      "textAr": "هذا",
+      "version": "slow",
+      "rate": "-22%",
+      "pitch": "+0st",
+      "fileName": "grammar_demonstrative_hatha_slow.mp3",
+      "assetPath": "assets/audio/grammar/demonstratives/grammar_demonstrative_hatha_slow.mp3"
+    },
+    {
+      "id": "LES-B01-001-S",
+      "category": "statement",
+      "textAr": "هٰذَا كِتَابٌ جَدِيدٌ.",
+      "version": "slow",
+      "rate": "-22%",
+      "pitch": "+0st",
+      "fileName": "u1l3_word_book_class_example_slow.mp3",
+      "assetPath": "assets/audio/lesson_03/sentence/u1l3_word_book_class_example_slow.mp3"
+    },
+    {
+      "id": "LES-B01-001-N",
+      "category": "statement",
+      "textAr": "هٰذَا كِتَابٌ جَدِيدٌ.",
+      "version": "normal",
+      "rate": "-22%",
+      "pitch": "+0st",
+      "fileName": "u1l3_word_book_class_example_normal.mp3",
+      "assetPath": "assets/audio/lesson_03/sentence/u1l3_word_book_class_example_normal.mp3"
+    },
+    {
+      "id": "LES-B01-004-S",
+      "category": "statement",
+      "textAr": "هٰذِهِ سَبُّورَةٌ كَبِيرَةٌ.",
+      "version": "slow",
+      "rate": "-22%",
+      "pitch": "+0st",
+      "fileName": "u1l4_word_board_class_example_slow.mp3",
+      "assetPath": "assets/audio/lesson_04/sentence/u1l4_word_board_class_example_slow.mp3"
+    },
+    {
+      "id": "LES-B01-004-N",
+      "category": "statement",
+      "textAr": "هٰذِهِ سَبُّورَةٌ كَبِيرَةٌ.",
+      "version": "normal",
+      "rate": "-22%",
+      "pitch": "+0st",
+      "fileName": "u1l4_word_board_class_example_normal.mp3",
+      "assetPath": "assets/audio/lesson_04/sentence/u1l4_word_board_class_example_normal.mp3"
+    },
+    {
+      "id": "GRM-B01-019-S",
+      "category": "statement",
+      "textAr": "أَنَا طَالِبٌ",
+      "version": "slow",
+      "rate": "-22%",
+      "pitch": "+0st",
+      "fileName": "grammar_nominal_i_student_slow.mp3",
+      "assetPath": "assets/audio/grammar/nominal_sentence/grammar_nominal_i_student_slow.mp3"
+    },
+    {
+      "id": "GRM-B01-019-N",
+      "category": "statement",
+      "textAr": "أَنَا طَالِبٌ",
+      "version": "normal",
+      "rate": "-22%",
+      "pitch": "+0st",
+      "fileName": "grammar_nominal_i_student_normal.mp3",
+      "assetPath": "assets/audio/grammar/nominal_sentence/grammar_nominal_i_student_normal.mp3"
+    },
+    {
+      "id": "GRM-B01-020-S",
+      "category": "question",
+      "textAr": "هَلْ أَنْتَ طَالِبٌ؟",
+      "version": "slow",
+      "rate": "-22%",
+      "pitch": "+0st",
+      "fileName": "grammar_question_are_you_student_slow.mp3",
+      "assetPath": "assets/audio/grammar/question_sentence/grammar_question_are_you_student_slow.mp3"
+    },
+    {
+      "id": "GRM-B01-020-N",
+      "category": "question",
+      "textAr": "هَلْ أَنْتَ طَالِبٌ؟",
+      "version": "normal",
+      "rate": "-22%",
+      "pitch": "+0st",
+      "fileName": "grammar_question_are_you_student_normal.mp3",
+      "assetPath": "assets/audio/grammar/question_sentence/grammar_question_are_you_student_normal.mp3"
+    },
+    {
+      "id": "LES-B01-009-S",
+      "category": "life_sentence",
+      "textAr": "أَلْبَسُ مِعْطَفًا فِي الشِّتَاءِ.",
+      "version": "slow",
+      "rate": "-22%",
+      "pitch": "+0st",
+      "fileName": "u4l4_word_coat_weather_example_slow.mp3",
+      "assetPath": "assets/audio/lesson_16/sentence/u4l4_word_coat_weather_example_slow.mp3"
+    },
+    {
+      "id": "LES-B01-009-N",
+      "category": "life_sentence",
+      "textAr": "أَلْبَسُ مِعْطَفًا فِي الشِّتَاءِ.",
+      "version": "normal",
+      "rate": "-22%",
+      "pitch": "+0st",
+      "fileName": "u4l4_word_coat_weather_example_normal.mp3",
+      "assetPath": "assets/audio/lesson_16/sentence/u4l4_word_coat_weather_example_normal.mp3"
+    }
+  ]
+}

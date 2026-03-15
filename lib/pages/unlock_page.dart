@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app_scope.dart';
+import '../l10n/localized_text.dart';
 import '../models/lesson.dart';
 import '../services/lesson_service.dart';
 import '../services/progress_service.dart';
@@ -32,9 +33,9 @@ class _UnlockPageState extends State<UnlockPage> {
   Future<void> _load() async {
     try {
       final lessons = await LessonService().loadLessons().timeout(
-        _unlockLoadTimeout,
-        onTimeout: () => <Lesson>[],
-      );
+            _unlockLoadTimeout,
+            onTimeout: () => <Lesson>[],
+          );
       final progress = await ProgressService.getSnapshot().timeout(
         _unlockLoadTimeout,
         onTimeout: () => const ProgressSnapshot(
@@ -134,6 +135,8 @@ class _UnlockPageState extends State<UnlockPage> {
             ),
             const SizedBox(height: 20),
             UnlockHeroCard(data: data),
+            const SizedBox(height: 16),
+            const _UnlockInfoNotice(),
             const SizedBox(height: 24),
             UnlockBenefitsSection(
               title: strings.t('unlock.benefits'),
@@ -292,6 +295,68 @@ class UnlockHeroCard extends StatelessWidget {
                   ),
                 )
                 .toList(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _UnlockInfoNotice extends StatelessWidget {
+  const _UnlockInfoNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+
+    return AppSurface(
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppTheme.softAccent,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(
+              Icons.info_outline_rounded,
+              color: AppTheme.deepAccent,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.strings.t('unlock.title'),
+                  style: text.titleMedium,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  context.strings.t('unlock.subtitle'),
+                  style: text.bodyMedium?.copyWith(
+                    color: AppTheme.textSecondary,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  localizedText(
+                    context,
+                    zh: '旧的“解锁”入口现在改为会员说明页。',
+                    en: 'The old Unlock entry now works as a membership info page.',
+                  ),
+                  style: text.bodySmall?.copyWith(
+                    color: AppTheme.textSecondary,
+                    height: 1.45,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

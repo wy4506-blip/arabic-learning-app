@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:arabic_learning_app/features/onboarding/models/onboarding_state.dart';
+import 'package:arabic_learning_app/services/alphabet_service.dart';
 import 'package:arabic_learning_app/pages/home_page.dart';
 
 import 'test_helpers.dart';
@@ -19,6 +21,12 @@ void main() {
   testWidgets('home today learning card opens the warm-up flow', (
     tester,
   ) async {
+    final groups = await AlphabetService.loadAlphabetGroups();
+    final allLetters = groups
+        .expand((group) => group.letters)
+        .map((letter) => letter.arabic)
+        .toList(growable: false);
+
     await pumpLocalizedTestPage(
       tester,
       HomePage(
@@ -30,14 +38,18 @@ void main() {
         'completed_lessons': <String>['U1L1'],
         'started_lessons': <String>['U1L1'],
         'last_lesson_id': 'U1L1',
+        'alphabet_progress_viewed_letters_v1': allLetters,
+        'alphabet_progress_listen_letters_v1': allLetters,
+        'alphabet_progress_write_letters_v1': allLetters,
       },
     );
 
-    expect(find.text('Start Today\'s Learning'), findsOneWidget);
-    expect(find.text('Formal Review Only'), findsOneWidget);
-    expect(find.text('Skip Review and Learn'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Start Formal Review'),
+        findsOneWidget);
+    expect(find.text('Enter Today\'s Lesson'), findsNothing);
+    expect(find.text('Continue Alphabet Learning'), findsNothing);
 
-    await tester.tap(find.text('Start with Formal Review').first);
+    await tester.tap(find.widgetWithText(FilledButton, 'Start Formal Review'));
     await tester.pumpAndSettle();
 
     expect(find.text('Today\'s Learning'), findsOneWidget);

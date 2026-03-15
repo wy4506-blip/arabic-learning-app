@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:arabic_learning_app/features/onboarding/models/onboarding_state.dart';
 import 'package:arabic_learning_app/pages/home_page.dart';
 import 'package:arabic_learning_app/pages/lesson_detail_page.dart';
+import 'package:arabic_learning_app/services/alphabet_service.dart';
 
 import 'test_helpers.dart';
 
@@ -17,9 +18,16 @@ void main() {
     hasEnteredHomeAfterFirstExperience: true,
   );
 
-  testWidgets('skip review and learn opens the next lesson directly', (
+  testWidgets(
+      'alphabet stage completion naturally hands off to the first lesson', (
     tester,
   ) async {
+    final groups = await AlphabetService.loadAlphabetGroups();
+    final allLetters = groups
+        .expand((group) => group.letters)
+        .map((letter) => letter.arabic)
+        .toList(growable: false);
+
     await pumpLocalizedTestPage(
       tester,
       HomePage(
@@ -28,13 +36,16 @@ void main() {
         onOpenTab: (_) {},
       ),
       sharedPreferences: <String, Object>{
-        'completed_lessons': <String>['U1L1'],
-        'started_lessons': <String>['U1L1'],
-        'last_lesson_id': 'U1L1',
+        'alphabet_progress_viewed_letters_v1': allLetters,
+        'alphabet_progress_listen_letters_v1': allLetters,
+        'alphabet_progress_write_letters_v1': allLetters,
       },
     );
 
-    await tester.tap(find.text('Skip Review and Learn').first);
+    expect(find.text('Start Lesson 1'), findsOneWidget);
+    expect(find.text('Start Formal Review'), findsNothing);
+
+    await tester.tap(find.text('Start Lesson 1').first);
     await tester.pumpAndSettle();
 
     expect(find.byType(LessonDetailPage), findsOneWidget);

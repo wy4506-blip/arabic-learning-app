@@ -7,7 +7,7 @@ import '../l10n/localized_text.dart';
 import '../models/app_settings.dart';
 import '../models/lesson.dart';
 import '../models/review_models.dart';
-import '../pages/grammar_home_page.dart';
+import '../services/alphabet_progress_service.dart';
 import '../services/lesson_service.dart';
 import '../services/progress_service.dart';
 import '../services/review_service.dart';
@@ -17,17 +17,13 @@ import '../theme/app_arabic_typography.dart';
 import '../theme/app_theme.dart';
 import '../view_models/learning_path_view_models.dart' as vm;
 import '../widgets/app_widgets.dart';
-import '../widgets/review/lesson_micro_review_card.dart';
 import 'alphabet_hub_page.dart';
 import 'alphabet_page.dart';
 import 'lesson_detail_page.dart';
 import 'review_session_page.dart';
 import 'unlock_page.dart';
-import 'vocab_book_page.dart';
 
-const Color _homeSand = Color(0xFFF7E8D6);
 const Color _homeApricot = Color(0xFFFFF0E3);
-const Color _homeSky = Color(0xFFE7F1FA);
 const Color _homeMint = Color(0xFFE3F5ED);
 const Color _homeTerracotta = Color(0xFFB56D45);
 const Color _homeBlue = Color(0xFF5B7FA8);
@@ -63,62 +59,6 @@ class HomeMainCardState {
   });
 }
 
-class HomeQuickActionState {
-  final String id;
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final Color tintColor;
-  final Color accentColor;
-  final int? badgeCount;
-  final bool isVisible;
-  final VoidCallback onTap;
-
-  const HomeQuickActionState({
-    required this.id,
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.tintColor,
-    required this.accentColor,
-    required this.onTap,
-    this.badgeCount,
-    this.isVisible = true,
-  });
-}
-
-class HomeTodayLearningCardState {
-  final String badgeText;
-  final String title;
-  final String subtitle;
-  final String lessonLabel;
-  final String lessonTitle;
-  final String lessonMeta;
-  final String totalTimeText;
-  final String primaryButtonText;
-  final String? secondaryButtonText;
-  final String? tertiaryButtonText;
-  final VoidCallback onPrimaryTap;
-  final VoidCallback? onSecondaryTap;
-  final VoidCallback? onTertiaryTap;
-
-  const HomeTodayLearningCardState({
-    required this.badgeText,
-    required this.title,
-    required this.subtitle,
-    required this.lessonLabel,
-    required this.lessonTitle,
-    required this.lessonMeta,
-    required this.totalTimeText,
-    required this.primaryButtonText,
-    this.secondaryButtonText,
-    this.tertiaryButtonText,
-    required this.onPrimaryTap,
-    this.onSecondaryTap,
-    this.onTertiaryTap,
-  });
-}
-
 class HomePage extends StatefulWidget {
   final AppSettings settings;
   final OnboardingState onboardingState;
@@ -139,6 +79,7 @@ class _HomePageState extends State<HomePage> {
   bool _unlocked = false;
   bool _loading = true;
   List<Lesson> _lessons = const [];
+  AlphabetLearningSnapshot _alphabetProgress = AlphabetLearningSnapshot.empty;
   ProgressSnapshot _progress = const ProgressSnapshot(
     completedLessons: <String>{},
     startedLessons: <String>{},
@@ -201,6 +142,10 @@ class _HomePageState extends State<HomePage> {
             recentTasks: <ReviewTask>[],
           ),
         ),
+        AlphabetProgressService.getSnapshot().timeout(
+          _homeLoadTimeout,
+          onTimeout: () => AlphabetLearningSnapshot.empty,
+        ),
       ]);
       if (!mounted) return;
       setState(() {
@@ -208,6 +153,7 @@ class _HomePageState extends State<HomePage> {
         _lessons = results[1] as List<Lesson>;
         _progress = results[2] as ProgressSnapshot;
         _reviewDashboard = results[3] as ReviewDashboardData;
+        _alphabetProgress = results[4] as AlphabetLearningSnapshot;
         _loading = false;
       });
     } catch (_) {
@@ -222,6 +168,7 @@ class _HomePageState extends State<HomePage> {
           streakDays: 0,
         );
         _reviewDashboard = null;
+        _alphabetProgress = AlphabetLearningSnapshot.empty;
         _loading = false;
       });
     }
@@ -248,6 +195,7 @@ class _HomePageState extends State<HomePage> {
       context,
       MaterialPageRoute(builder: (_) => const AlphabetHubPage()),
     );
+    await _load();
   }
 
   Future<void> _openAlphabetLearning() async {
@@ -255,28 +203,13 @@ class _HomePageState extends State<HomePage> {
       context,
       MaterialPageRoute(builder: (_) => const AlphabetPage()),
     );
-  }
-
-  Future<void> _openWordbook() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const VocabBookPage()),
-    );
-  }
-
-  Future<void> _openGrammar() async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => GrammarHomePage(settings: widget.settings),
-      ),
-    );
+    await _load();
   }
 
   Future<void> _openNextTask(Lesson? lesson) async {
     final nextLesson = lesson;
     if (nextLesson == null) {
-      await _openAlphabetLearning();
+      await _openAlphabetHub();
       return;
     }
 
@@ -334,7 +267,7 @@ class _HomePageState extends State<HomePage> {
       ),
     );
     if (result == true) {
-      await _refreshReviewDashboard();
+      await _load();
     }
   }
 
@@ -364,277 +297,211 @@ class _HomePageState extends State<HomePage> {
       ),
     );
     if (result == true) {
-      await _refreshReviewDashboard();
+      await _load();
     }
   }
 
-  HomeTodayLearningCardState? _buildTodayLearningCardState({
+  HomeMainCardState _buildPrimaryCardState({
     required vm.LearningPathSnapshot snapshot,
     required DailyReviewPlan? reviewPlan,
   }) {
-    if (!widget.onboardingState.hasCompletedFirstExperience) {
-      return null;
-    }
-
     final nextLesson = snapshot.recommendedLesson;
-    if (nextLesson == null) {
-      return null;
-    }
-    if (snapshot.nextLessonLocked && !_unlocked) {
-      return null;
-    }
+    final alphabetStarted = _alphabetProgress.hasStarted;
+    final alphabetComplete = _alphabetProgress.isStageComplete;
 
-    final hasWarmUp = (reviewPlan?.pendingCount ?? 0) > 0;
-    final isContinuingFormalReview =
-      hasWarmUp && (reviewPlan?.hasStarted ?? false) && !(reviewPlan?.isCompleted ?? false);
-    final lessonTitle = LessonLocalizer.title(
-      nextLesson,
-      context.appSettings.appLanguage,
-    );
-
-    return HomeTodayLearningCardState(
-      badgeText: localizedText(
-        context,
-        zh: '今日学习',
-        en: 'Today\'s Learning',
-      ),
-      title: localizedText(
-        context,
-        zh: hasWarmUp
-            ? (isContinuingFormalReview ? '继续今天学习' : '开始今天学习')
-            : '直接进入今天课程',
-        en: hasWarmUp
-            ? (isContinuingFormalReview
-                ? 'Continue Today\'s Learning'
-                : 'Start Today\'s Learning')
-            : 'Enter Today\'s Lesson',
-      ),
-      subtitle: hasWarmUp
-          ? localizedText(
-              context,
-            zh: isContinuingFormalReview
-              ? '先把这轮正式复习接上，再进入下一节课。'
-              : '复习之后再学新内容，记得会更稳。',
-              en: isContinuingFormalReview
-              ? 'Pick up this formal review first, then move into the next lesson.'
-              : 'Review first, then new learning will stay with you more steadily.',
-            )
-          : localizedText(
-              context,
-            zh: '今天没有待复习内容，可以直接继续这一课。',
-            en: 'No review is waiting today, so you can continue straight into this lesson.',
-            ),
-      lessonLabel: localizedText(
-        context,
-        zh: '下一节课',
-        en: 'Next Lesson',
-      ),
-      lessonTitle: lessonTitle.isEmpty ? nextLesson.id : lessonTitle,
-      lessonMeta: localizedText(
-        context,
-        zh: '${nextLesson.id} · 课程约 ${nextLesson.estimatedMinutes} 分钟',
-        en: '${nextLesson.id} · lesson about ${nextLesson.estimatedMinutes} min',
-      ),
-      totalTimeText: _todayLearningTotalTimeText(
-        lesson: nextLesson,
-        hasWarmUp: hasWarmUp,
-      ),
-      primaryButtonText: localizedText(
-        context,
-        zh: hasWarmUp
-            ? (isContinuingFormalReview ? '继续正式复习' : '先做正式复习')
-            : '进入课程',
-        en: hasWarmUp
-            ? (isContinuingFormalReview
-                ? 'Continue Formal Review'
-                : 'Start with Formal Review')
-            : 'Enter Lesson',
-      ),
-      secondaryButtonText: hasWarmUp
-          ? localizedText(
-              context,
-              zh: '只做正式复习',
-              en: 'Formal Review Only',
-            )
-          : localizedText(
-              context,
-              zh: '去看复习页',
-              en: 'Open Review Page',
-            ),
-      tertiaryButtonText: hasWarmUp
-          ? localizedText(
-              context,
-              zh: '跳过复习，直接学习',
-              en: 'Skip Review and Learn',
-            )
-          : null,
-      onPrimaryTap:
-          hasWarmUp ? () => _openHomeTodayReviewFlow(nextLesson) : () => _openNextTask(nextLesson),
-      onSecondaryTap: hasWarmUp ? _openStandaloneReviewFlow : _openReviewTab,
-      onTertiaryTap: hasWarmUp ? () => _openNextTask(nextLesson) : null,
-    );
-  }
-
-  String _todayLearningTotalTimeText({
-    required Lesson lesson,
-    required bool hasWarmUp,
-  }) {
-    final lessonMinutes =
-        lesson.estimatedMinutes <= 0 ? 8 : lesson.estimatedMinutes;
-    final minTotal = hasWarmUp ? lessonMinutes + 1 : lessonMinutes;
-    final maxTotal = hasWarmUp ? lessonMinutes + 2 : lessonMinutes + 1;
-    if (minTotal >= maxTotal) {
-      return localizedText(
-        context,
-        zh: '预计约 $maxTotal 分钟',
-        en: 'About $maxTotal min total',
-      );
-    }
-    return localizedText(
-      context,
-      zh: '预计总耗时 $minTotal~$maxTotal 分钟',
-      en: 'About $minTotal-$maxTotal min total',
-    );
-  }
-
-  // ignore: unused_element
-  HomeMainCardState _buildMainCardState({
-    required Lesson? nextLesson,
-    required int learned,
-    required int totalLessons,
-    required int toReview,
-    required double completionRate,
-    required bool nextLessonLocked,
-  }) {
-    final language = context.appSettings.appLanguage;
-
-    if (toReview > 0 && learned > 0) {
+    if (!widget.onboardingState.hasCompletedFirstExperience ||
+        !alphabetComplete) {
       return HomeMainCardState(
-        badgeText: localizedText(context, zh: '今日建议', en: 'Today\'s Tip'),
-        title: localizedText(context, zh: '先复习一下', en: 'Review First'),
-        arabicPreview: 'راجع الآن',
-        nextStepDescription: localizedText(
+        badgeText: localizedText(
           context,
-          zh: '花 2 分钟，回顾刚学过的重点。',
-          en: 'Take two minutes to refresh the most recent points.',
+          zh: alphabetStarted ? '字母阶段' : '学习起点',
+          en: alphabetStarted ? 'Alphabet Stage' : 'Starting Point',
         ),
-        progressText: localizedText(
-          context,
-          zh: '已完成 $learned/$totalLessons 课',
-          en: 'Completed $learned/$totalLessons lessons',
-        ),
-        reviewText: localizedText(
-          context,
-          zh: '待回顾 $toReview 项',
-          en: '$toReview items to review',
-        ),
-        primaryButtonText:
-            localizedText(context, zh: '开始复习', en: 'Start Review'),
-        actionType: vm.HomePrimaryActionType.startReview,
-        onPrimaryTap: _openReviewTab,
-      );
-    }
-
-    if (widget.onboardingState.hasCompletedFirstExperience &&
-        _progress.startedLessons.isEmpty) {
-      return HomeMainCardState(
-        badgeText: localizedText(context, zh: '今日主线', en: 'Today\'s Focus'),
         title: localizedText(
           context,
-          zh: '继续字母学习',
-          en: 'Continue Alphabet Learning',
+          zh: alphabetStarted ? '继续字母学习' : '先完成字母阶段',
+          en: alphabetStarted
+              ? 'Continue Alphabet Learning'
+              : 'Start with the Alphabet',
         ),
-        arabicPreview: 'تابع الحروف',
+        arabicPreview: 'ابدأ من الحروف',
         nextStepDescription: localizedText(
           context,
-          zh: '再学 1 个字母，继续打好基础。',
-          en: 'Learn one more letter and keep strengthening the base.',
+          zh: '先把字母分组、听读和书写走通，再进入正式复习或课程。',
+          en: 'Finish the alphabet groups, listening, and writing first, then move into formal review or lessons.',
         ),
-        progressText: localizedText(
+        progressText: _alphabetProgress.totalGroupCount == 0
+            ? null
+            : localizedText(
+                context,
+                zh: '已完成 ${_alphabetProgress.completedGroupCount}/${_alphabetProgress.totalGroupCount} 组',
+                en: '${_alphabetProgress.completedGroupCount}/${_alphabetProgress.totalGroupCount} groups completed',
+              ),
+        reviewText: _alphabetProgress.totalLetterCount == 0
+            ? null
+            : localizedText(
+                context,
+                zh: '浏览 ${_alphabetProgress.viewedLetterCount} · 听读 ${_alphabetProgress.listenCompletedCount} · 书写 ${_alphabetProgress.writeCompletedCount}',
+                en: 'Browse ${_alphabetProgress.viewedLetterCount} · Listen ${_alphabetProgress.listenCompletedCount} · Write ${_alphabetProgress.writeCompletedCount}',
+              ),
+        progressValue: _alphabetProgress.totalGroupCount == 0
+            ? null
+            : _alphabetProgress.completedGroupCount /
+                _alphabetProgress.totalGroupCount,
+        primaryButtonText: localizedText(
           context,
-          zh: '已完成首学体验',
-          en: 'First experience completed',
+          zh: alphabetStarted ? '继续字母学习' : '开始字母学习',
+          en: alphabetStarted
+              ? 'Continue Alphabet Learning'
+              : 'Start Alphabet Learning',
         ),
-        reviewText: localizedText(
+        secondaryText: localizedText(
           context,
-          zh: '下一步：分组字母',
-          en: 'Next: grouped letters',
+          zh: '查看字母分组',
+          en: 'Open Alphabet Groups',
         ),
-        primaryButtonText: localizedText(context, zh: '继续', en: 'Continue'),
-        secondaryText:
-            localizedText(context, zh: '查看字母表', en: 'Browse Alphabet'),
         actionType: vm.HomePrimaryActionType.continueAlphabet,
-        onPrimaryTap: _openAlphabetLearning,
-        onSecondaryTap: _openAlphabetHub,
+        onPrimaryTap: _openAlphabetHub,
+        onSecondaryTap: _openAlphabetLearning,
       );
     }
 
-    if (!_unlocked && nextLessonLocked && learned >= 3) {
+    final pendingFormalReview = (reviewPlan?.pendingCount ?? 0) > 0;
+    if (pendingFormalReview) {
+      final hasStartedFormalReview = reviewPlan?.hasStarted ?? false;
+      final nextLessonTitle = nextLesson == null
+          ? null
+          : LessonLocalizer.title(nextLesson, context.appSettings.appLanguage);
+
       return HomeMainCardState(
-        badgeText: localizedText(context, zh: '下一步', en: 'Next Step'),
+        badgeText: localizedText(
+          context,
+          zh: '今日正式复习',
+          en: 'Today\'s Formal Review',
+        ),
         title: localizedText(
           context,
-          zh: '继续完整课程',
-          en: 'Continue the Full Course',
+          zh: hasStartedFormalReview ? '继续正式复习' : '先完成正式复习',
+          en: hasStartedFormalReview
+              ? 'Continue Formal Review'
+              : 'Start Formal Review',
+        ),
+        arabicPreview: nextLesson?.titleAr,
+        nextStepDescription: nextLessonTitle == null
+            ? localizedText(
+                context,
+                zh: '先把今天这轮正式复习完成，再继续后面的学习。',
+                en: 'Finish today\'s formal review first, then continue learning.',
+              )
+            : localizedText(
+                context,
+                zh: '先完成今天这轮正式复习，再顺着进入 $nextLessonTitle。',
+                en: 'Finish today\'s formal review first, then continue into $nextLessonTitle.',
+              ),
+        progressText: localizedText(
+          context,
+          zh: '已完成 ${reviewPlan?.completedCount ?? 0}/${reviewPlan?.totalCount ?? 0} 项',
+          en: '${reviewPlan?.completedCount ?? 0}/${reviewPlan?.totalCount ?? 0} items completed',
+        ),
+        reviewText: nextLessonTitle == null
+            ? null
+            : localizedText(
+                context,
+                zh: '下一节：$nextLessonTitle',
+                en: 'Next lesson: $nextLessonTitle',
+              ),
+        primaryButtonText: localizedText(
+          context,
+          zh: hasStartedFormalReview ? '继续正式复习' : '开始正式复习',
+          en: hasStartedFormalReview
+              ? 'Continue Formal Review'
+              : 'Start Formal Review',
+        ),
+        secondaryText: localizedText(
+          context,
+          zh: '去看复习页',
+          en: 'Open Review Page',
+        ),
+        actionType: vm.HomePrimaryActionType.startReview,
+        onPrimaryTap: nextLesson == null
+            ? _openStandaloneReviewFlow
+            : () => _openHomeTodayReviewFlow(nextLesson),
+        onSecondaryTap: _openReviewTab,
+      );
+    }
+
+    if (!_unlocked &&
+        snapshot.nextLessonLocked &&
+        snapshot.completedLessonCount >= 3) {
+      return HomeMainCardState(
+        badgeText: localizedText(context, zh: '当前阶段', en: 'Current Stage'),
+        title: localizedText(
+          context,
+          zh: '先巩固已学内容',
+          en: 'Reinforce What You Learned First',
         ),
         arabicPreview: 'أكمل المسار',
         nextStepDescription: localizedText(
           context,
-          zh: '你已完成免费部分，继续后续内容。',
-          en: 'You finished the free part. Continue the rest of the path.',
+          zh: '起步阶段已经完成。先完成复习与回看，会员说明可在需要时再查看。',
+          en: 'The starter stage is complete. Review and revisit first, then check membership info only if you need it.',
         ),
         progressText: localizedText(
           context,
           zh: '已完成前 3 课',
           en: 'First 3 lessons completed',
         ),
-        reviewText: toReview > 0
-            ? localizedText(
-                context,
-                zh: '待回顾 $toReview 项',
-                en: '$toReview items to review',
-              )
-            : null,
-        primaryButtonText:
-            localizedText(context, zh: '查看完整内容', en: 'View Full Access'),
-        secondaryText:
-            localizedText(context, zh: '回顾已学内容', en: 'Review What You Learned'),
-        actionType: vm.HomePrimaryActionType.continuePremiumTrack,
-        onPrimaryTap: _openUnlock,
-        onSecondaryTap: _openReviewTab,
+        primaryButtonText: localizedText(
+          context,
+          zh: '去复习',
+          en: 'Go Review',
+        ),
+        secondaryText: localizedText(
+          context,
+          zh: '查看会员说明',
+          en: 'View Membership Info',
+        ),
+        actionType: vm.HomePrimaryActionType.startReview,
+        onPrimaryTap: _openReviewTab,
+        onSecondaryTap: _openUnlock,
       );
     }
 
     if (nextLesson != null) {
+      final lessonTitle = LessonLocalizer.title(
+        nextLesson,
+        context.appSettings.appLanguage,
+      );
       return HomeMainCardState(
         badgeText: localizedText(context, zh: '今日主线', en: 'Today\'s Focus'),
         title: localizedText(
           context,
-          zh: '继续${LessonLocalizer.title(nextLesson, language)}',
-          en: 'Continue ${LessonLocalizer.title(nextLesson, language)}',
+          zh: '继续 $lessonTitle',
+          en: 'Continue $lessonTitle',
         ),
         arabicPreview: nextLesson.titleAr,
         nextStepDescription: localizedText(
           context,
-          zh: '今天建议先完成这一小节。',
-          en: 'This is the most useful next step for today.',
+          zh: '字母阶段已完成，现在继续这节课最顺。',
+          en: 'The alphabet stage is complete. This lesson is the best next step now.',
         ),
         progressText: localizedText(
           context,
-          zh: '进度 $learned/$totalLessons',
-          en: 'Progress $learned/$totalLessons',
+          zh: '进度 ${snapshot.completedLessonCount}/${snapshot.totalLessonCount}',
+          en: 'Progress ${snapshot.completedLessonCount}/${snapshot.totalLessonCount}',
         ),
-        reviewText: toReview > 0
-            ? localizedText(
-                context,
-                zh: '待复习 $toReview 项',
-                en: '$toReview items to review',
-              )
-            : null,
-        progressValue: completionRate,
-        primaryButtonText:
-            localizedText(context, zh: '继续学习', en: 'Continue Learning'),
-        secondaryText: localizedText(context, zh: '查看课程', en: 'View Lessons'),
+        reviewText: null,
+        progressValue: snapshot.completionRate,
+        primaryButtonText: localizedText(
+          context,
+          zh: snapshot.hasStartedAny ? '继续学习' : '开始第一课',
+          en: snapshot.hasStartedAny ? 'Continue Learning' : 'Start Lesson 1',
+        ),
+        secondaryText: localizedText(
+          context,
+          zh: '查看课程',
+          en: 'View Lessons',
+        ),
         actionType: vm.HomePrimaryActionType.continueLesson,
         onPrimaryTap: () => _openNextTask(nextLesson),
         onSecondaryTap: _openLessonsTab,
@@ -643,11 +510,7 @@ class _HomePageState extends State<HomePage> {
 
     return HomeMainCardState(
       badgeText: localizedText(context, zh: '今日主线', en: 'Today\'s Focus'),
-      title: localizedText(
-        context,
-        zh: '从字母开始',
-        en: 'Start with the Alphabet',
-      ),
+      title: localizedText(context, zh: '从字母开始', en: 'Start with the Alphabet'),
       arabicPreview: 'ابدأ من الحروف',
       nextStepDescription: localizedText(
         context,
@@ -655,109 +518,11 @@ class _HomePageState extends State<HomePage> {
         en: 'Build letter recognition and sound first, then move into lessons.',
       ),
       primaryButtonText: localizedText(context, zh: '开始', en: 'Start'),
-      secondaryText: localizedText(context, zh: '查看字母表', en: 'Browse Alphabet'),
+      secondaryText: localizedText(context, zh: '查看字母分组', en: 'Open Alphabet Groups'),
       actionType: vm.HomePrimaryActionType.continueAlphabet,
-      onPrimaryTap: _openAlphabetLearning,
-      onSecondaryTap: _openAlphabetHub,
+      onPrimaryTap: _openAlphabetHub,
+      onSecondaryTap: _openAlphabetLearning,
     );
-  }
-
-  HomeMainCardState _materializeMainCardState(
-    vm.HomeMainLearningViewModel viewModel,
-  ) {
-    VoidCallback onPrimaryTap;
-    VoidCallback? onSecondaryTap;
-
-    switch (viewModel.actionType) {
-      case vm.HomePrimaryActionType.continueAlphabet:
-        onPrimaryTap = _openAlphabetLearning;
-        onSecondaryTap = _openAlphabetHub;
-        break;
-      case vm.HomePrimaryActionType.continueLesson:
-        onPrimaryTap = () => _openNextTask(viewModel.lesson);
-        onSecondaryTap = _openLessonsTab;
-        break;
-      case vm.HomePrimaryActionType.startReview:
-        onPrimaryTap = _openReviewTab;
-        break;
-      case vm.HomePrimaryActionType.continuePremiumTrack:
-        onPrimaryTap = _openUnlock;
-        onSecondaryTap = _openReviewTab;
-        break;
-    }
-
-    return HomeMainCardState(
-      badgeText: viewModel.badgeText,
-      title: viewModel.title,
-      arabicPreview: viewModel.arabicPreview,
-      nextStepDescription: viewModel.description,
-      progressText: viewModel.progressText,
-      reviewText: viewModel.reviewText,
-      progressValue: viewModel.progressValue,
-      primaryButtonText: viewModel.primaryButtonText,
-      secondaryText: viewModel.secondaryText,
-      actionType: viewModel.actionType,
-      onPrimaryTap: onPrimaryTap,
-      onSecondaryTap: onSecondaryTap,
-    );
-  }
-
-  List<HomeQuickActionState> _buildQuickActions(int toReview) {
-    return [
-      HomeQuickActionState(
-        id: 'review',
-        title: localizedText(context, zh: '复习', en: 'Review'),
-        subtitle: localizedText(
-          context,
-          zh: '进入正式复习或自由练习',
-          en: 'Open formal review or free practice',
-        ),
-        icon: Icons.refresh_rounded,
-        tintColor: _homeMint,
-        accentColor: AppTheme.accentMintDark,
-        badgeCount: toReview > 0 ? toReview : null,
-        onTap: _openReviewTab,
-      ),
-      HomeQuickActionState(
-        id: 'alphabet',
-        title: localizedText(context, zh: '字母', en: 'Alphabet'),
-        subtitle: localizedText(
-          context,
-          zh: '听读、书写、练习闭环',
-          en: 'Listen, write, and drill letters',
-        ),
-        icon: Icons.sort_by_alpha_rounded,
-        tintColor: _homeSky,
-        accentColor: _homeBlue,
-        onTap: _openAlphabetHub,
-      ),
-      HomeQuickActionState(
-        id: 'wordbook',
-        title: localizedText(context, zh: '单词本', en: 'Wordbook'),
-        subtitle: localizedText(
-          context,
-          zh: '随学随收，随时检索',
-          en: 'Save while learning and search anytime',
-        ),
-        icon: Icons.bookmark_outline_rounded,
-        tintColor: _homeSand,
-        accentColor: _homeTerracotta,
-        onTap: _openWordbook,
-      ),
-      HomeQuickActionState(
-        id: 'grammar',
-        title: localizedText(context, zh: '语法速查', en: 'Grammar'),
-        subtitle: localizedText(
-          context,
-          zh: '规则总表，随时查看',
-          en: 'Quick tables and rules on demand',
-        ),
-        icon: Icons.rule_folder_outlined,
-        tintColor: _homeApricot,
-        accentColor: _homeTerracotta,
-        onTap: _openGrammar,
-      ),
-    ];
   }
 
   @override
@@ -771,36 +536,10 @@ class _HomePageState extends State<HomePage> {
       progress: _progress,
       unlocked: _unlocked,
     );
-    final mainCardViewModel = vm.LearningPathViewModels.buildHomeMainCard(
-      language: context.appSettings.appLanguage,
+
+    final mainCardState = _buildPrimaryCardState(
       snapshot: snapshot,
-      onboardingCompleted: widget.onboardingState.hasCompletedFirstExperience,
-    );
-    final hasLockedLessons = snapshot.hasLockedLessons;
-    final mainCardState = _materializeMainCardState(mainCardViewModel);
-    final quickActions = _buildQuickActions(snapshot.pendingReviewCount)
-        .map(
-          (action) => action.id == 'review'
-              ? HomeQuickActionState(
-                  id: action.id,
-                  title: action.title,
-                  subtitle: action.subtitle,
-                  icon: action.icon,
-                  tintColor: action.tintColor,
-                  accentColor: action.accentColor,
-                  badgeCount:
-                      _reviewDashboard?.summary.todayPlan.pendingCount ??
-                          action.badgeCount,
-                  onTap: action.onTap,
-                )
-              : action,
-        )
-        .where((action) => action.isVisible)
-        .toList();
-    final reviewPlan = _reviewDashboard?.summary.todayPlan;
-    final todayLearningCard = _buildTodayLearningCardState(
-      snapshot: snapshot,
-      reviewPlan: reviewPlan,
+      reviewPlan: _reviewDashboard?.summary.todayPlan,
     );
 
     return Scaffold(
@@ -823,73 +562,8 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 20),
-              if (todayLearningCard != null)
-                _HomeTodayLearningCard(state: todayLearningCard)
-              else
-                _HomeMainLearningCard(state: mainCardState),
-              if (todayLearningCard == null &&
-                  reviewPlan != null &&
-                  reviewPlan.tasks.isNotEmpty) ...[
-                const SizedBox(height: 18),
-                LessonMicroReviewCard(
-                  title: localizedText(
-                    context,
-                    zh: reviewPlan.hasStarted ? '继续今天的回顾' : '今天顺手回顾一下',
-                    en: reviewPlan.hasStarted
-                        ? 'Continue Today\'s Review'
-                        : 'A Light Review for Today',
-                  ),
-                  subtitle: localizedText(
-                    context,
-                    zh: reviewPlan.hasStarted
-                      ? '还有 ${reviewPlan.pendingCount} 项没完成，接上这一轮就好。'
-                      : '今天先回顾这 ${reviewPlan.totalCount} 项，再继续学习会更顺。',
-                    en: reviewPlan.hasStarted
-                      ? '${reviewPlan.pendingCount} items are still waiting. Pick this pass back up.'
-                      : 'Review these ${reviewPlan.totalCount} items first, then continue learning with a clearer head.',
-                  ),
-                  tasks: reviewPlan.tasks.take(3).toList(growable: false),
-                  actionLabel: localizedText(
-                    context,
-                    zh: reviewPlan.hasStarted ? '继续回顾' : '开始回顾',
-                    en: reviewPlan.hasStarted
-                        ? 'Continue Review'
-                        : 'Start Review',
-                  ),
-                  onActionTap: () =>
-                      _openHomeTodayReviewFlow(snapshot.recommendedLesson),
-                ),
-              ],
-              const SizedBox(height: 22),
-              _HomeQuickActionsSection(
-                title: localizedText(
-                  context,
-                  zh: '常用操作',
-                  en: 'Study Tools',
-                ),
-                subtitle: localizedText(
-                  context,
-                  zh: '复习、查找和补充学习都在这里。',
-                  en: 'Review, look things up, or continue learning from here.',
-                ),
-                actions: quickActions,
-              ),
-              if (!_unlocked && hasLockedLessons) ...[
-                const SizedBox(height: 18),
-                _HomeFreeTrackBanner(
-                  title: localizedText(
-                    context,
-                    zh: '前 3 课免费体验',
-                    en: 'First 3 Lessons Free',
-                  ),
-                  subtitle: localizedText(
-                    context,
-                    zh: '先学完入门内容，再决定是否继续完整课程。',
-                    en: 'Finish the beginner content first, then decide whether to continue.',
-                  ),
-                  onTap: _openUnlock,
-                ),
-              ],
+              _HomeMainLearningCard(state: mainCardState),
+              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -1025,145 +699,6 @@ class _HomeMainLearningCard extends StatelessWidget {
   }
 }
 
-class _HomeTodayLearningCard extends StatelessWidget {
-  final HomeTodayLearningCardState state;
-
-  const _HomeTodayLearningCard({
-    required this.state,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-
-    return Container(
-      padding: const EdgeInsets.all(22),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: <Color>[
-            Color(0xFFF7EAD8),
-            Color(0xFFE2F4EC),
-            Color(0xFFE8F1FA),
-          ],
-          stops: <double>[0.0, 0.58, 1.0],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: const <BoxShadow>[
-          BoxShadow(
-            color: Color(0x14000000),
-            blurRadius: 26,
-            offset: Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _HomeStatusBadge(text: state.badgeText),
-          const SizedBox(height: 14),
-          Text(
-            state.title,
-            style: text.headlineMedium?.copyWith(
-              color: const Color(0xFF24313A),
-              height: 1.08,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            state.subtitle,
-            style: text.bodyMedium?.copyWith(
-              color: _homeBlue,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.44),
-              borderRadius: BorderRadius.circular(22),
-              border: Border.all(color: Colors.white.withOpacity(0.28)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Pill(
-                      label: state.lessonLabel,
-                      backgroundColor: Colors.white.withOpacity(0.8),
-                      foregroundColor: _homeTerracotta,
-                    ),
-                    const Spacer(),
-                    Text(
-                      state.totalTimeText,
-                      style: text.bodySmall?.copyWith(
-                        color: const Color(0xFF56656E),
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  state.lessonTitle,
-                  style: text.titleLarge?.copyWith(
-                    color: const Color(0xFF24313A),
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  state.lessonMeta,
-                  style: text.bodySmall?.copyWith(
-                    color: const Color(0xFF56656E),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 18),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: state.onPrimaryTap,
-              child: Text(state.primaryButtonText),
-            ),
-          ),
-          if (state.secondaryButtonText != null && state.onSecondaryTap != null) ...[
-            const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: state.onSecondaryTap,
-                child: Text(state.secondaryButtonText!),
-              ),
-            ),
-          ],
-          if (state.tertiaryButtonText != null && state.onTertiaryTap != null) ...[
-            const SizedBox(height: 10),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton(
-                onPressed: state.onTertiaryTap,
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(state.tertiaryButtonText!),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
 
 class _HomeStatusBadge extends StatelessWidget {
   final String text;
@@ -1336,189 +871,6 @@ class _HomeMainCardActionArea extends StatelessWidget {
           ),
         ],
       ],
-    );
-  }
-}
-
-class _HomeQuickActionsSection extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final List<HomeQuickActionState> actions;
-
-  const _HomeQuickActionsSection({
-    required this.title,
-    required this.subtitle,
-    required this.actions,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _HomeSectionHeader(title: title, subtitle: subtitle),
-        const SizedBox(height: 12),
-        GridView.builder(
-          itemCount: actions.length,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 2.05,
-          ),
-          itemBuilder: (context, index) {
-            final action = actions[index];
-            return _QuickActionCard(state: action);
-          },
-        ),
-      ],
-    );
-  }
-}
-
-class _HomeSectionHeader extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-
-  const _HomeSectionHeader({
-    required this.title,
-    this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(title, style: text.titleMedium),
-        if (subtitle != null) ...[
-          const SizedBox(height: 4),
-          Text(subtitle!, style: text.bodySmall),
-        ],
-      ],
-    );
-  }
-}
-
-class _QuickActionCard extends StatelessWidget {
-  final HomeQuickActionState state;
-
-  const _QuickActionCard({
-    required this.state,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-
-    return AppSurface(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      onTap: state.onTap,
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: state.tintColor,
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(state.icon, color: state.accentColor, size: 20),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(state.title, style: text.titleSmall),
-                const SizedBox(height: 3),
-                Text(
-                  state.subtitle,
-                  style: text.bodySmall,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-          if (state.badgeCount != null) ...[
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-              decoration: BoxDecoration(
-                color: state.tintColor,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                '${state.badgeCount}',
-                style: text.labelSmall?.copyWith(
-                  color: state.accentColor,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _HomeFreeTrackBanner extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  const _HomeFreeTrackBanner({
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
-
-    return AppSurface(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-      onTap: onTap,
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFF4EA),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Icon(
-              Icons.lock_open_rounded,
-              color: _homeTerracotta,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: text.titleSmall),
-                const SizedBox(height: 3),
-                Text(subtitle, style: text.bodySmall),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          const Icon(
-            Icons.chevron_right_rounded,
-            color: Color(0xFF98A2B3),
-          ),
-        ],
-      ),
     );
   }
 }

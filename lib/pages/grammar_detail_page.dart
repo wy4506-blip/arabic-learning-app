@@ -61,11 +61,13 @@ class _GrammarDetailPageState extends State<GrammarDetailPage> {
               _grammarDetailLoadTimeout,
               onTimeout: () => null,
             );
-      final favorite = await GrammarStateService.isFavorite(widget.pageId).timeout(
+      final favorite =
+          await GrammarStateService.isFavorite(widget.pageId).timeout(
         _grammarDetailLoadTimeout,
         onTimeout: () => false,
       );
-      final expandedStates = await GrammarStateService.getExpandStates().timeout(
+      final expandedStates =
+          await GrammarStateService.getExpandStates().timeout(
         _grammarDetailLoadTimeout,
         onTimeout: () => <String, bool>{},
       );
@@ -74,9 +76,9 @@ class _GrammarDetailPageState extends State<GrammarDetailPage> {
         onTimeout: () => false,
       );
       final lessons = await LessonService().loadLessons().timeout(
-        _grammarDetailLoadTimeout,
-        onTimeout: () => <Lesson>[],
-      );
+            _grammarDetailLoadTimeout,
+            onTimeout: () => <Lesson>[],
+          );
 
       await GrammarStateService.recordOpenedPage(widget.pageId).timeout(
         _grammarDetailLoadTimeout,
@@ -137,15 +139,16 @@ class _GrammarDetailPageState extends State<GrammarDetailPage> {
 
   Future<void> _playExample(GrammarExampleData example) async {
     try {
-      if (example.audioPath.isNotEmpty) {
-        await AudioService.playAsset(example.audioPath);
-      } else {
-        await AudioService.speakText(
-          example.arabicPlain.isNotEmpty
-              ? example.arabicPlain
-              : example.arabicWithDiacritics,
-        );
-      }
+      await AudioService.playLearningText(
+        LearningAudioRequest.general(
+          scope: 'grammar',
+          type: 'sentence',
+          asset: example.audioPath,
+          textAr: example.arabicWithDiacritics,
+          textPlain: example.arabicPlain,
+          debugLabel: 'grammar_detail_example',
+        ),
+      );
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -266,7 +269,6 @@ class _GrammarDetailPageState extends State<GrammarDetailPage> {
                 padding: const EdgeInsets.only(bottom: 10),
                 child: GrammarExampleCard(
                   example: example,
-                  onPlay: () => _playExample(example),
                 ),
               ),
             ),
@@ -360,7 +362,9 @@ class _GrammarDetailPageState extends State<GrammarDetailPage> {
           IconButton(
             onPressed: _toggleFavorite,
             icon: Icon(
-              _favorite ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+              _favorite
+                  ? Icons.bookmark_rounded
+                  : Icons.bookmark_border_rounded,
             ),
           ),
         ],
@@ -409,8 +413,7 @@ class _GrammarDetailPageState extends State<GrammarDetailPage> {
           ..._buildSectionWidgets(page),
           if (_relatedLessons.isNotEmpty) ...[
             GrammarBlockHeader(
-              title:
-                  localizedText(context, zh: '关联课程', en: 'Related Lessons'),
+              title: localizedText(context, zh: '关联课程', en: 'Related Lessons'),
               description: localizedText(
                 context,
                 zh: '看完语法后，可以回到这些课程继续练。',

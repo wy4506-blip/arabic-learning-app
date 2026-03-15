@@ -42,8 +42,8 @@ class AlphabetHubPage extends StatelessWidget {
                       Text(
                         localizedText(
                           context,
-                          zh: '字母练习',
-                          en: 'Alphabet Practice',
+                          zh: 'Phase 1 · 字母阶段',
+                          en: 'Phase 1 · Alphabet Stage',
                         ),
                         style: text.titleLarge,
                       ),
@@ -51,8 +51,8 @@ class AlphabetHubPage extends StatelessWidget {
                       Text(
                         localizedText(
                           context,
-                          zh: '28 个字母学完后，在这里逐级巩固',
-                          en: 'Reinforce the 28 letters here, level by level.',
+                          zh: '先完成 7 组基础学习，再逐级进入巩固练习',
+                          en: 'Finish the 7 study groups first, then move into the drill levels.',
                         ),
                         style: text.bodySmall,
                       ),
@@ -270,8 +270,8 @@ class AlphabetHubPage extends StatelessWidget {
                 child: Text(
                   localizedText(
                     context,
-                    zh: '完整学习路径',
-                    en: 'Full Learning Path',
+                    zh: '当前阶段路径',
+                    en: 'Current Stage Path',
                   ),
                   style: text.headlineMedium,
                 ),
@@ -282,8 +282,8 @@ class AlphabetHubPage extends StatelessWidget {
           Text(
             localizedText(
               context,
-              zh: '先完成 7 组字母学习，再回到这里做 4 类练习，识别、发音和 13 音位都会更稳。',
-              en: 'Finish the 7 study groups first, then come back for the 4 drill types.',
+              zh: '先走完 7 组字母分组学习，再回到这里做 4 类巩固练习。这样主路径和练习路径会更清楚。',
+              en: 'Finish the 7 alphabet groups first, then come back for the 4 drill types. That keeps the main path and practice path clearer.',
             ),
             style: text.bodyMedium,
           ),
@@ -340,8 +340,8 @@ class AlphabetHubPage extends StatelessWidget {
               child: Text(
                 localizedText(
                   context,
-                  zh: '去字母入门学习',
-                  en: 'Open Alphabet Basics',
+                  zh: '进入字母分组学习',
+                  en: 'Open Alphabet Groups',
                 ),
               ),
             ),

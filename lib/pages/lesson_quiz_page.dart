@@ -12,6 +12,25 @@ import '../theme/app_arabic_typography.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_widgets.dart';
 
+class LessonQuizResult {
+  final int score;
+  final int totalQuestions;
+
+  const LessonQuizResult({
+    required this.score,
+    required this.totalQuestions,
+  });
+
+  double get accuracy {
+    if (totalQuestions <= 0) {
+      return 0;
+    }
+    return score / totalQuestions;
+  }
+
+  bool reachedThreshold(double threshold) => accuracy >= threshold;
+}
+
 class LessonQuizPage extends StatefulWidget {
   final Lesson lesson;
 
@@ -77,27 +96,25 @@ class _LessonQuizPageState extends State<LessonQuizPage> {
     try {
       switch (_currentItem.audioScope) {
         case LessonPracticeAudioScope.alphabet:
-          if (_currentItem.audioType == 'letter') {
-            await AudioService.speakLetter(audioText);
-            return;
-          }
-          if (_currentItem.audioType == 'pronunciation') {
-            await AudioService.speakPronunciation(audioText);
-            return;
-          }
-          if (_currentItem.audioType == 'word') {
-            await AudioService.speakExampleWord(audioText);
-            return;
-          }
-          await AudioService.speakText(audioText);
+          await AudioService.playLearningText(
+            LearningAudioRequest.alphabet(
+              type: _currentItem.audioType ?? 'word',
+              textAr: audioText,
+              textPlain: audioText,
+              debugLabel: 'lesson_quiz_alphabet_audio',
+            ),
+          );
           return;
         case LessonPracticeAudioScope.lesson:
-          await AudioService.playLessonAudio(
-            asset: _currentItem.audioAsset,
-            lessonSequence: widget.lesson.sequence,
-            type: _currentItem.audioType ?? 'sentence',
-            textPlain: audioText,
-            fallbackText: audioText,
+          await AudioService.playLearningText(
+            LearningAudioRequest.lesson(
+              lessonSequence: widget.lesson.sequence,
+              type: _currentItem.audioType ?? 'sentence',
+              asset: _currentItem.audioAsset,
+              textAr: audioText,
+              textPlain: audioText,
+              debugLabel: 'lesson_quiz_lesson_audio',
+            ),
           );
           return;
       }
@@ -176,6 +193,10 @@ class _LessonQuizPageState extends State<LessonQuizPage> {
   }
 
   void _showResultDialog() {
+    final result = LessonQuizResult(
+      score: _score,
+      totalQuestions: _items.length,
+    );
     showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -191,7 +212,7 @@ class _LessonQuizPageState extends State<LessonQuizPage> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              Navigator.pop(context, true);
+              Navigator.pop(context, result);
             },
             child: Text(_appText(zh: '完成', en: 'Done')),
           ),

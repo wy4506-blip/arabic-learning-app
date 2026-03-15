@@ -61,12 +61,25 @@ class _FirstExperienceFlowPageState extends State<FirstExperienceFlowPage> {
   }
 
   Future<void> _playLetter() async {
-    await AudioService.speakLetter(widget.content.letterArabic);
+    await AudioService.playLearningText(
+      LearningAudioRequest.alphabet(
+        type: 'letter',
+        textAr: widget.content.letterArabic,
+        textPlain: widget.content.letterArabic,
+        debugLabel: 'first_experience_letter',
+      ),
+    );
   }
 
   Future<void> _playExample() async {
-    await AudioService.speakPronunciation(
-      widget.content.exampleArabicWithDiacritics,
+    await AudioService.playLearningText(
+      LearningAudioRequest.general(
+        scope: 'onboarding',
+        type: 'sentence',
+        textAr: widget.content.exampleArabicWithDiacritics,
+        textPlain: widget.content.exampleArabicWithDiacritics,
+        debugLabel: 'first_experience_example',
+      ),
     );
   }
 
