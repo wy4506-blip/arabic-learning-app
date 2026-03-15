@@ -52,7 +52,7 @@ void main() {
     await tester.tap(find.text('Definite Article'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Quick Notes'), findsOneWidget);
+    expect(find.text('Key Points'), findsOneWidget);
     expect(
       find.text(
         'Its pronunciation can assimilate before some letters, but recognition comes first.',

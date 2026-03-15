@@ -162,7 +162,8 @@ void main() {
 
       expect(find.text('Lessons'), findsOneWidget);
       expect(
-        find.text('Continue from your current progress, or revisit what you already learned.'),
+        find.text(
+            'Continue from your current progress, or revisit what you already learned.'),
         findsOneWidget,
       );
       expectNoVisibleChinese(tester);
@@ -252,7 +253,8 @@ void main() {
       expect(find.text('Learning Preferences'), findsOneWidget);
       expect(find.text('Start Learning'), findsWidgets);
       expect(
-        find.text('Manage learning preferences, course access, and support in one place.'),
+        find.text(
+            'Manage learning preferences, course access, and support in one place.'),
         findsNothing,
       );
       expectNoVisibleChinese(tester);
@@ -277,7 +279,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Feedback Board'), findsOneWidget);
+      expect(find.text('Feedback'), findsOneWidget);
       expectNoVisibleChinese(tester);
     });
 

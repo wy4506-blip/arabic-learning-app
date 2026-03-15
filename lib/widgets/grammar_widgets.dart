@@ -227,8 +227,8 @@ class GrammarTableCard extends StatelessWidget {
               label: Text(
                 localizedText(
                   context,
-                  zh: expanded ? '收起整表' : '查看整表',
-                  en: expanded ? 'Collapse Table' : 'View Full Table',
+                  zh: expanded ? '收起表格' : '展开表格',
+                  en: expanded ? 'Hide Table' : 'Show Table',
                 ),
               ),
             ),

@@ -172,7 +172,7 @@ class ReviewTaskPreviewCard extends StatelessWidget {
       case ReviewContentType.pronunciation:
         return english ? 'Pronunciation' : '发音';
       case ReviewContentType.pair:
-        return english ? 'Contrast' : '辨音';
+        return english ? 'Sound Contrast' : '辨音';
       case ReviewContentType.sentence:
         return english ? 'Sentence' : '句子';
       case ReviewContentType.grammar:

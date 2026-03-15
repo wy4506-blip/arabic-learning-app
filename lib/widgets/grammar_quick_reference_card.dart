@@ -165,8 +165,8 @@ class GrammarQuickReferenceCard extends StatelessWidget {
                           Text(
                             localizedText(
                               context,
-                              zh: '快速记忆点',
-                              en: 'Quick Notes',
+                              zh: '记忆重点',
+                              en: 'Key Points',
                             ),
                             style: text.titleSmall?.copyWith(
                               color: section.accentColor,
@@ -223,13 +223,13 @@ class GrammarQuickReferenceCard extends StatelessWidget {
                       expanded
                           ? localizedText(
                               context,
-                              zh: '收起说明',
-                              en: 'Collapse',
+                              zh: '收起',
+                              en: 'Show Less',
                             )
                           : localizedText(
                               context,
-                              zh: '展开查看更多',
-                              en: 'Expand for More',
+                              zh: '展开更多',
+                              en: 'Show More',
                             ),
                     ),
                   ),

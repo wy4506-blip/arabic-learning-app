@@ -67,7 +67,7 @@ class _ReviewPageState extends State<ReviewPage> {
         ReviewService.buildDashboard(context.appSettings),
         ReviewService.getEntrySnapshot(context.appSettings),
       ]);
-      
+
       if (!mounted) {
         return;
       }
@@ -253,7 +253,8 @@ class _ReviewPageState extends State<ReviewPage> {
                           FilledButton(
                             onPressed: _loadDashboard,
                             child: Text(
-                              localizedText(context, zh: '重新加载', en: 'Try Again'),
+                              localizedText(context,
+                                  zh: '重新加载', en: 'Try Again'),
                             ),
                           ),
                         ],
@@ -288,8 +289,8 @@ class _ReviewPageState extends State<ReviewPage> {
                 title: localizedText(context, zh: '复习', en: 'Review'),
                 subtitle: localizedText(
                   context,
-                  zh: '正式复习优先，自由练习放后，尽量让你少做选择。',
-                  en: 'Formal review first, free practice second, with fewer choices to make.',
+                  zh: '先做今天的主复习，再按需补充短练习。',
+                  en: 'Start with today\'s main review, then add shorter practice only if needed.',
                 ),
               ),
               const SizedBox(height: 18),
@@ -361,25 +362,19 @@ class _ReviewPageState extends State<ReviewPage> {
                               hasStageReinforcement
                                   ? localizedText(
                                       context,
-                                      zh:
-                                          '有${snapshot.stageReinforcementTasks.length}项需要阶段巩固',
-                                      en:
-                                          '${snapshot.stageReinforcementTasks.length} items need stage reinforcement',
+                                      zh: '有${snapshot.stageReinforcementTasks.length}项需要补强',
+                                      en: '${snapshot.stageReinforcementTasks.length} items need extra reinforcement',
                                     )
                                   : hasOverdueReview
                                       ? localizedText(
                                           context,
-                                          zh:
-                                              '有${snapshot.overdueTasks.length}项已超期，建议先补上',
-                                          en:
-                                              '${snapshot.overdueTasks.length} overdue items — please catch up',
+                                          zh: '有${snapshot.overdueTasks.length}项已超期，建议优先处理',
+                                          en: '${snapshot.overdueTasks.length} overdue items need attention',
                                         )
                                       : localizedText(
                                           context,
-                                          zh:
-                                              '${snapshot.formalTasks.length}项正式复习等待，优先做这个',
-                                          en:
-                                              '${snapshot.formalTasks.length} formal review items waiting — prioritize these',
+                                          zh: '${snapshot.formalTasks.length}项待复习内容已就绪，建议先处理',
+                                          en: '${snapshot.formalTasks.length} review items are ready',
                                         ),
                               style: Theme.of(context).textTheme.labelMedium,
                               maxLines: 2,
@@ -396,7 +391,9 @@ class _ReviewPageState extends State<ReviewPage> {
                 badge: localizedText(
                   context,
                   zh: summary.todayPlan.isCompleted ? '今天已完成' : '今日复习',
-                  en: summary.todayPlan.isCompleted ? 'Done for Today' : 'Today\'s Review',
+                  en: summary.todayPlan.isCompleted
+                      ? 'Done for Today'
+                      : 'Today\'s Review',
                 ),
                 title: todayPlan.tasks.isEmpty
                     ? localizedText(
@@ -413,13 +410,13 @@ class _ReviewPageState extends State<ReviewPage> {
                         : summary.todayPlan.hasStarted
                             ? localizedText(
                                 context,
-                                zh: '继续今天这轮正式复习',
-                                en: 'Continue Today\'s Formal Review',
+                                zh: '继续今日复习',
+                                en: 'Continue Today\'s Review',
                               )
                             : localizedText(
                                 context,
-                                zh: '先完成今天最值得做的正式复习',
-                                en: 'Start with the most valuable formal review set',
+                                zh: '先完成今天最值得做的一组复习',
+                                en: 'Start with today\'s main review set',
                               ),
                 subtitle: todayPlan.tasks.isEmpty
                     ? localizedText(
@@ -430,13 +427,13 @@ class _ReviewPageState extends State<ReviewPage> {
                     : todayPlan.isCompleted
                         ? localizedText(
                             context,
-                            zh: '今天这组正式复习已经完成。你可以回到课程继续推进，也可以做一轮自由练习。',
-                            en: 'Today\'s formal review is complete. You can return to lessons or do a short free-practice pass.',
+                            zh: '今天这组主复习已经完成。你可以回到课程继续学习，也可以做一轮短练习。',
+                            en: 'Today\'s main review is complete. You can return to lessons or do a short practice pass.',
                           )
                         : localizedText(
                             context,
-                            zh: '内容会优先从待正式复习、薄弱项和刚学完的对象里自动整理。',
-                            en: 'The set is automatically built from due review items, weak spots, and what you just learned.',
+                            zh: '系统会优先整理到期内容、薄弱项和刚学完的对象。',
+                            en: 'This set is built from due items, weak spots, and what you just learned.',
                           ),
                 composition: _compositionLabels(typeCounts, todayPlan.tasks),
                 metaText: todayPlan.tasks.isEmpty
@@ -447,18 +444,19 @@ class _ReviewPageState extends State<ReviewPage> {
                       )
                     : localizedText(
                         context,
-                        zh:
-                            '${todayPlan.totalCount} 项 · 约 ${_estimatedMinutes(todayPlan)} 分钟',
-                        en:
-                            '${todayPlan.totalCount} items · about ${_estimatedMinutes(todayPlan)} min',
+                        zh: '${todayPlan.totalCount} 项 · 约 ${_estimatedMinutes(todayPlan)} 分钟',
+                        en: '${todayPlan.totalCount} items · about ${_estimatedMinutes(todayPlan)} min',
                       ),
                 primaryActionLabel: todayPlan.tasks.isEmpty
                     ? localizedText(context, zh: '刷新看看', en: 'Refresh')
                     : todayPlan.isCompleted
-                        ? localizedText(context, zh: '再来一轮快复习', en: 'Start a Quick Review')
+                        ? localizedText(context,
+                            zh: '开始快速复习', en: 'Start a Quick Review')
                         : summary.todayPlan.hasStarted
-                          ? localizedText(context, zh: '继续正式复习', en: 'Continue Formal Review')
-                          : localizedText(context, zh: '开始正式复习', en: 'Start Formal Review'),
+                            ? localizedText(context,
+                                zh: '继续今日复习', en: 'Continue Today\'s Review')
+                            : localizedText(context,
+                                zh: '开始今日复习', en: 'Start Today\'s Review'),
                 onPrimaryTap: todayPlan.tasks.isEmpty
                     ? () => _loadDashboard()
                     : todayPlan.isCompleted
@@ -493,49 +491,56 @@ class _ReviewPageState extends State<ReviewPage> {
                 subtitle: localizedText(
                   context,
                   zh: hasFormalReview || hasLightReview
-                      ? '主线复习在前，下面这些入口留给补漏和自由练习。'
+                      ? '今天的主复习在前，下面这些入口留给补漏和短练习。'
                       : '先做一小轮，或者只补最需要再看一遍的地方。',
                   en: hasFormalReview || hasLightReview
-                      ? 'Formal review comes first. Use these secondary entries for targeted catch-up and free practice.'
-                      : 'Run one light pass or focus only on the items that still need another look.',
+                      ? 'Today\'s main review comes first. Use these entries for targeted catch-up and short practice.'
+                      : 'Run one short pass or focus on the items that still need another look.',
                 ),
                 actions: [
                   ReviewQuickActionItem(
-                    title: localizedText(context, zh: '5 分钟快复习', en: '5-Minute Review'),
+                    title:
+                        localizedText(context, zh: '快速复习', en: 'Quick Review'),
                     subtitle: localizedText(
                       context,
-                      zh: '自由练习模式，快速清几个点，不占用正式复习配额。',
-                      en: 'Free-practice mode for clearing a few items without consuming the formal review flow.',
+                      zh: '快速过一遍几个关键点，不影响今天的主复习。',
+                      en: 'Clear a few key items without affecting today\'s main review.',
                     ),
-                    badge: todayPlan.tasks.isEmpty ? null : '${todayPlan.pendingCount}',
+                    badge: todayPlan.tasks.isEmpty
+                        ? null
+                        : '${todayPlan.pendingCount}',
                     icon: Icons.bolt_rounded,
                     tintColor: const Color(0xFFFFF1E5),
                     iconColor: const Color(0xFFB56D45),
                     onTap: () => _openSession(
-                      () => ReviewService.createQuickSession(context.appSettings),
+                      () =>
+                          ReviewService.createQuickSession(context.appSettings),
                     ),
                   ),
                   ReviewQuickActionItem(
-                    title: localizedText(context, zh: '薄弱项再练', en: 'Weak Spots'),
+                    title:
+                        localizedText(context, zh: '薄弱项加练', en: 'Weak Spots'),
                     subtitle: localizedText(
                       context,
-                      zh: '把还不稳的内容单独拎出来补一下，适合自由练习。',
-                      en: 'Pull your unstable items into a separate free-practice pass.',
+                      zh: '把还不稳的内容单独补一下。',
+                      en: 'Pull unstable items into a separate short pass.',
                     ),
                     badge: '${dashboard.weakTasks.length}',
                     icon: Icons.track_changes_rounded,
                     tintColor: const Color(0xFFE9F6EF),
                     iconColor: AppTheme.accentMintDark,
                     onTap: () => _openSession(
-                      () => ReviewService.createWeakSession(context.appSettings),
+                      () =>
+                          ReviewService.createWeakSession(context.appSettings),
                     ),
                   ),
                   ReviewQuickActionItem(
-                    title: localizedText(context, zh: '按类型复习', en: 'By Type'),
+                    title: localizedText(context,
+                        zh: '按类型复习', en: 'Review by Type'),
                     subtitle: localizedText(
                       context,
-                      zh: '按对象类型自由挑一组，适合补单点，不替代正式复习。',
-                      en: 'Choose one content type for a focused free-practice pass without replacing formal review.',
+                      zh: '按对象类型挑一组，适合补单点。',
+                      en: 'Choose one content type for a focused short pass.',
                     ),
                     icon: Icons.tune_rounded,
                     tintColor: const Color(0xFFEAF1FB),
@@ -546,14 +551,16 @@ class _ReviewPageState extends State<ReviewPage> {
               ),
               const SizedBox(height: 18),
               ReviewTaskSection(
-                title: localizedText(context, zh: '需要再看一遍', en: 'Worth Another Look'),
+                title: localizedText(context,
+                    zh: '需要再看一遍', en: 'Worth Another Look'),
                 subtitle: localizedText(
                   context,
                   zh: '这些内容还不够稳，回顾一次会更安心。',
                   en: 'These items are not fully stable yet, so one more pass helps.',
                 ),
                 tasks: dashboard.weakTasks,
-                emptyTitle: localizedText(context, zh: '目前没有特别薄弱的内容', en: 'No obvious weak spots right now'),
+                emptyTitle: localizedText(context,
+                    zh: '目前没有特别薄弱的内容', en: 'No obvious weak spots right now'),
                 emptySubtitle: localizedText(
                   context,
                   zh: '当你在复习里点“再看一遍”时，这里会自动留下来方便继续补。',
@@ -563,14 +570,16 @@ class _ReviewPageState extends State<ReviewPage> {
               ),
               const SizedBox(height: 18),
               ReviewTaskSection(
-                title: localizedText(context, zh: '最近学过，建议回看', en: 'Recently Learned'),
+                title: localizedText(context,
+                    zh: '最近学过，建议回看', en: 'Recently Learned'),
                 subtitle: localizedText(
                   context,
                   zh: '查完或学完后能顺着回到这里，少找路，少切换。',
                   en: 'Items you recently learned or checked stay here for a quick return.',
                 ),
                 tasks: dashboard.recentTasks,
-                emptyTitle: localizedText(context, zh: '最近还没有形成回看内容', en: 'No recent review items yet'),
+                emptyTitle: localizedText(context,
+                    zh: '最近还没有形成回看内容', en: 'No recent review items yet'),
                 emptySubtitle: localizedText(
                   context,
                   zh: '学完一节课、看过语法或打开过字母页后，这里会慢慢长出来。',
@@ -616,7 +625,7 @@ class _ReviewPageState extends State<ReviewPage> {
       case ReviewContentType.pronunciation:
         return localizedText(context, zh: '发音', en: 'Pronunciation');
       case ReviewContentType.pair:
-        return localizedText(context, zh: '辨音', en: 'Contrast');
+        return localizedText(context, zh: '辨音', en: 'Sound Contrast');
       case ReviewContentType.sentence:
         return localizedText(context, zh: '句子', en: 'Sentences');
       case ReviewContentType.grammar:

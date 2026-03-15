@@ -416,8 +416,8 @@ class _GrammarDetailPageState extends State<GrammarDetailPage> {
               title: localizedText(context, zh: '关联课程', en: 'Related Lessons'),
               description: localizedText(
                 context,
-                zh: '看完语法后，可以回到这些课程继续练。',
-                en: 'After reading the grammar point, go back to these lessons to practice it in context.',
+                zh: '回到相关课程继续练习。',
+                en: 'Return to related lessons to practice it.',
               ),
             ),
             const SizedBox(height: 12),

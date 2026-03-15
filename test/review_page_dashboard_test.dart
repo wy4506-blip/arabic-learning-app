@@ -21,7 +21,7 @@ void main() {
     expect(find.text('Review'), findsWidgets);
     expect(find.text('Today\'s Snapshot'), findsOneWidget);
     expect(find.text('Quick Actions'), findsOneWidget);
-    expect(find.text('5-Minute Review'), findsOneWidget);
+    expect(find.text('Quick Review'), findsOneWidget);
     expect(find.text('Worth Another Look'), findsOneWidget);
   });
 }

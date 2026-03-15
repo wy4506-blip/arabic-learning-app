@@ -4,10 +4,10 @@ import '../app_scope.dart';
 import '../l10n/alphabet_content_localizer.dart';
 import '../l10n/localized_text.dart';
 import '../models/alphabet_group.dart';
-import '../services/audio_service.dart';
 import '../theme/app_arabic_typography.dart';
 import '../theme/app_theme.dart';
 import '../widgets/alphabet_pronunciation_card.dart';
+import '../widgets/arabic_text_with_audio.dart';
 import 'alphabet_listen_read_page.dart';
 import 'alphabet_write_page.dart';
 
@@ -18,28 +18,6 @@ class AlphabetDetailPage extends StatelessWidget {
     super.key,
     required this.letter,
   });
-
-  Future<void> _playLetter() async {
-    await AudioService.playLearningText(
-      LearningAudioRequest.alphabet(
-        type: 'letter',
-        textAr: letter.arabic,
-        textPlain: letter.arabic,
-        debugLabel: 'alphabet_detail_letter',
-      ),
-    );
-  }
-
-  Future<void> _playExampleWord() async {
-    await AudioService.playLearningText(
-      LearningAudioRequest.alphabet(
-        type: 'word',
-        textAr: letter.example.arabic,
-        textPlain: letter.example.arabic,
-        debugLabel: 'alphabet_detail_example_word',
-      ),
-    );
-  }
 
   void _showPronunciationSheet(
     BuildContext context,
@@ -145,38 +123,46 @@ class AlphabetDetailPage extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 6),
-                  Text(
-                    localizedText(
-                      context,
-                      zh: '基础发音：${letter.pronunciation}',
-                      en: 'Core sound: ${letter.pronunciation}',
-                    ),
-                    style:
-                        text.bodyMedium?.copyWith(color: AppTheme.deepAccent),
-                    textAlign: TextAlign.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      Text(
+                        localizedText(
+                          context,
+                          zh: '基础发音：${letter.pronunciation}',
+                          en: 'Core sound: ${letter.pronunciation}',
+                        ),
+                        style: text.bodyMedium?.copyWith(
+                          color: AppTheme.deepAccent,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      LearningAudioIconButton(
+                        request: LearningAudioRequest.alphabet(
+                          type: 'letter',
+                          textAr: letter.arabic,
+                          textPlain: letter.arabic,
+                          debugLabel: 'alphabet_detail_letter',
+                        ),
+                        tooltip: localizedText(
+                          context,
+                          zh: '播放字母发音',
+                          en: 'Play Letter Audio',
+                        ),
+                        size: 32,
+                        iconSize: 16,
+                        backgroundColor: Colors.white,
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
                   Text(
                     AlphabetContentLocalizer.soundHint(letter, meaningLanguage),
                     style: text.bodyMedium,
                     textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppTheme.deepAccent,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                    ),
-                    onPressed: _playLetter,
-                    icon: const Icon(Icons.volume_up_rounded),
-                    label: Text(
-                      localizedText(context,
-                          zh: '播放字母发音', en: 'Play Letter Audio'),
-                    ),
                   ),
                 ],
               ),
@@ -311,14 +297,18 @@ class AlphabetDetailPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.deepAccent,
-                      side: const BorderSide(color: Color(0xFFD0D5DD)),
+                  LearningAudioIconButton(
+                    request: LearningAudioRequest.alphabet(
+                      type: 'word',
+                      textAr: letter.example.arabic,
+                      textPlain: letter.example.arabic,
+                      debugLabel: 'alphabet_detail_example_word',
                     ),
-                    onPressed: _playExampleWord,
-                    icon: const Icon(Icons.volume_up_rounded),
-                    label: Text(localizedText(context, zh: '播放', en: 'Play')),
+                    tooltip: localizedText(context,
+                        zh: '播放示例词', en: 'Play Example Word'),
+                    size: 40,
+                    iconSize: 18,
+                    backgroundColor: const Color(0xFFEAF8F3),
                   ),
                 ],
               ),

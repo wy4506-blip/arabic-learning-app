@@ -183,8 +183,8 @@ void main() {
         settings: kChineseTestSettings,
       );
 
-      expect(find.text('留言板'), findsOneWidget);
-      expect(find.text('Feedback Board'), findsNothing);
+      expect(find.text('反馈'), findsOneWidget);
+      expect(find.text('Feedback'), findsNothing);
       expectNoVisibleMojibake(tester);
     });
 

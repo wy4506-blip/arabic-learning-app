@@ -443,8 +443,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Keep Entry',
   },
   'profile.feedback_board': <String, String>{
-    'zh': '留言板',
-    'en': 'Feedback Board',
+    'zh': '反馈',
+    'en': 'Feedback',
   },
   'profile.feedback_value': <String, String>{
     'zh': '改进建议 / Bug 反馈',
@@ -467,9 +467,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'First 3 lessons free',
   },
   'profile.page_intro': <String, String>{
-    'zh': '管理会员状态、学习偏好、帮助反馈，以及产品说明入口。',
-    'en':
-        'Manage membership, learning preferences, help, feedback, and product information in one place.',
+    'zh': '管理学习状态、偏好设置与支持信息。',
+    'en': 'Manage learning status, preferences, and support.',
   },
   'profile.section_learning_state': <String, String>{
     'zh': '学习状态',
@@ -488,7 +487,7 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Appearance & Reminder',
   },
   'profile.section_course_access': <String, String>{
-    'zh': '会员状态',
+    'zh': '会员与权益',
     'en': 'Membership',
   },
   'profile.section_content_purchase': <String, String>{
@@ -504,8 +503,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Help & Feedback',
   },
   'profile.section_about_info': <String, String>{
-    'zh': '关于产品与说明',
-    'en': 'About Product & Info',
+    'zh': '关于与说明',
+    'en': 'About & Policies',
   },
   'profile.section_about': <String, String>{
     'zh': '关于',
@@ -536,25 +535,24 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Learning {unit}',
   },
   'profile.overview_suggestion_first_lesson': <String, String>{
-    'zh': '今天完成第 1 节，先建立一个轻量的学习节奏。',
-    'en': 'Finish lesson 1 today and start a light learning rhythm.',
+    'zh': '先完成第 1 节，建立稳定节奏。',
+    'en': 'Finish lesson 1 first and build a steady rhythm.',
   },
   'profile.overview_suggestion_start_learning': <String, String>{
-    'zh': '从字母与发音开始，先完成第一节内容。',
-    'en': 'Start with letters and sounds, then finish the first lesson.',
+    'zh': '先从字母和发音开始，再进入第一课。',
+    'en': 'Start with letters and sounds, then move into lesson 1.',
   },
   'profile.overview_suggestion_continue_learning': <String, String>{
-    'zh': '保持节奏，比学得快更重要。',
-    'en': 'Keeping a rhythm matters more than moving fast.',
+    'zh': '继续当前节奏，比加快更重要。',
+    'en': 'Keeping your rhythm matters more than moving faster.',
   },
   'profile.overview_suggestion_review_first': <String, String>{
-    'zh': '复习之后再学新内容，记得会更稳。',
-    'en': 'Review first, then new learning will stay with you more steadily.',
+    'zh': '先把今天该看的内容过一遍，再学新内容会更稳。',
+    'en': 'Review today\'s due items first, then continue with new learning.',
   },
   'profile.overview_suggestion_completed': <String, String>{
-    'zh': '主线课程已经完成，现在更适合按需回看和复习。',
-    'en':
-        'The main course is done. Now it makes more sense to revisit and review as needed.',
+    'zh': '主线课程已完成，现在更适合按需回看和复习。',
+    'en': 'The core course is complete. Revisit and review as needed now.',
   },
   'profile.overview_suggestion_continue': <String, String>{
     'zh': '继续上一节内容：{lesson}',
@@ -565,13 +563,13 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Review {count} key items first, then keep learning.',
   },
   'profile.overview_suggestion_unlock': <String, String>{
-    'zh': '当前阶段已经走通，先巩固已学内容，再决定是否开启会员。',
+    'zh': '当前阶段已完成，先巩固已学内容，再决定是否查看会员说明。',
     'en':
-        'The current stage is complete. Reinforce what you learned first, then decide whether to enable membership.',
+        'This stage is complete. Reinforce what you learned first, then decide whether to review membership details.',
   },
   'profile.overview_suggestion_keep_going': <String, String>{
-    'zh': '继续保持当前节奏，回看已学内容也很有价值。',
-    'en': 'Keep your rhythm going. Revisiting learned content still matters.',
+    'zh': '保持当前节奏，适时回看已学内容。',
+    'en': 'Keep your current rhythm and revisit learned content when needed.',
   },
   'profile.overview_first_step_progress': <String, String>{
     'zh': '已完成 0/1 节',
@@ -650,9 +648,9 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'You Are on the Core Learning Path',
   },
   'profile.plan_trial_description': <String, String>{
-    'zh': '当前主线可以继续使用。会员用于提升学习效率，并在后续阶段接入时提供更顺滑的衔接。',
+    'zh': '当前主线可继续学习。会员主要用于提升效率，并在后续阶段开放时提供更顺滑的衔接。',
     'en':
-        'Your current main path remains available. Membership is positioned as an efficiency upgrade and smoother continuation into later stages.',
+        'Your main learning path remains available. Membership mainly improves efficiency and later-stage continuity.',
   },
   'profile.plan_trial_footnote': <String, String>{
     'zh': '当前已完成 {completed}/{total} 个起步阶段课时',
@@ -671,9 +669,9 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Membership Is Active',
   },
   'profile.plan_full_description': <String, String>{
-    'zh': '会员已启用，可在后续阶段开放时获得更顺滑的学习衔接。',
+    'zh': '会员已启用，后续阶段开放时会获得更顺滑的衔接。',
     'en':
-        'Membership is active and will provide smoother continuity as later stages become available.',
+        'Membership is active and will support smoother continuity as later stages open.',
   },
   'profile.plan_full_footnote': <String, String>{
     'zh': '当前仍有 {remaining} 节可继续推进的课程内容',
@@ -736,9 +734,9 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Full',
   },
   'profile.content_pack_trial_subtitle': <String, String>{
-    'zh': '当前主线仍可继续，会员不再作为拦截页出现。',
+    'zh': '当前主线仍可继续，会员不再打断学习路径。',
     'en':
-        'Your current path remains available, and membership no longer acts as a blocking screen.',
+        'Your current path remains available, and membership no longer interrupts the learning flow.',
   },
   'profile.content_pack_full_subtitle': <String, String>{
     'zh': '会员已启用，后续阶段开放时会更顺滑接续。',
@@ -754,9 +752,9 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'View',
   },
   'profile.unlock_full_subtitle': <String, String>{
-    'zh': '了解会员如何提升学习效率，而不是阻断当前主线。',
+    'zh': '了解会员如何提升学习效率，而不打断当前主线。',
     'en':
-        'See how membership improves learning efficiency instead of blocking the current path.',
+        'See how membership improves efficiency without blocking the current path.',
   },
   'profile.unlocked_value': <String, String>{
     'zh': '已解锁',
@@ -779,8 +777,8 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Suggestions',
   },
   'profile.submit_suggestion_subtitle': <String, String>{
-    'zh': '把想法告诉我们，帮助产品持续变好。',
-    'en': 'Share your ideas to help the product keep improving.',
+    'zh': '提交想法，帮助我们继续打磨产品。',
+    'en': 'Share ideas that can help improve the product.',
   },
   'profile.report_issue': <String, String>{
     'zh': '问题反馈',
@@ -795,26 +793,26 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Contact Support',
   },
   'profile.contact_support_subtitle': <String, String>{
-    'zh': '需要帮助时，可以直接联系我们。',
+    'zh': '遇到问题时，可以直接联系我们。',
     'en': 'Contact us directly when you need help.',
   },
   'profile.developer_note': <String, String>{
-    'zh': '开发者的话',
-    'en': 'A Note from the Developer',
+    'zh': '开发者说明',
+    'en': 'Developer Note',
   },
   'profile.developer_note_subtitle': <String, String>{
-    'zh': '想和你说说这款 App 为什么会开始。',
-    'en': 'A short note about why this app began.',
+    'zh': '关于这款产品为什么开始的一点说明。',
+    'en': 'A short note on why this product began.',
   },
   'profile.developer_note_body_1': <String, String>{
-    'zh': '这款 App 的起点很简单：希望把阿拉伯语入门做得更轻一些，让第一次接触这门语言的人也能顺着学下去。',
+    'zh': '这款 App 的起点很简单：把阿拉伯语入门做得更轻一些，让第一次接触这门语言的人也能继续学下去。',
     'en':
-        'This app started from a simple goal: make beginner Arabic feel lighter, so first-time learners can keep going without being pushed out early.',
+        'This app started from a simple goal: make beginner Arabic lighter, so first-time learners can keep going.',
   },
   'profile.developer_note_body_2': <String, String>{
-    'zh': '如果你愿意持续用它学习、也愿意告诉我们哪些地方还不够顺，这款产品就会继续一点点变得更好。',
+    'zh': '如果你愿意继续用它学习，也愿意告诉我们哪些地方还不够顺，这款产品就会继续改进。',
     'en':
-        'If you keep learning with it and tell us where the experience still feels rough, the product can keep getting better step by step.',
+        'If you keep learning with it and tell us where the experience still feels rough, the product can keep improving.',
   },
   'profile.contact_support_body': <String, String>{
     'zh': '请描述你遇到的问题、出现页面以及复现步骤，我们会据此继续排查。',
@@ -847,44 +845,44 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Privacy Notice',
   },
   'profile.about_privacy_subtitle': <String, String>{
-    'zh': '查看应用的基础隐私说明。',
-    'en': 'View the basic privacy notice for the app.',
+    'zh': '查看隐私说明。',
+    'en': 'Read the privacy notice.',
   },
   'profile.about_terms': <String, String>{
     'zh': '使用条款',
     'en': 'Terms of Use',
   },
   'profile.about_terms_subtitle': <String, String>{
-    'zh': '查看应用的基础使用说明。',
-    'en': 'View the basic usage notes for the app.',
+    'zh': '查看使用说明。',
+    'en': 'Read the terms of use.',
   },
   'profile.privacy_body_1': <String, String>{
-    'zh': '本应用首发版本主要在本地保存学习进度、设置项和解锁状态，用于改善学习体验与恢复使用状态。',
+    'zh': '首发版本主要在本地保存学习进度、设置项和解锁状态，用于恢复你的学习状态。',
     'en':
-        'In the first release, this app mainly stores learning progress, settings, and unlock status locally to improve the learning experience and restore your state.',
+        'The first release mainly stores learning progress, settings, and unlock status locally so your study state can be restored.',
   },
   'profile.privacy_body_2': <String, String>{
-    'zh': '当你通过反馈入口发送建议或问题时，相关内容会通过系统邮件应用发送给开发者，以便处理产品改进和问题排查。',
+    'zh': '当你发送建议或问题时，内容会通过系统邮件应用发送给开发者，用于产品改进和问题排查。',
     'en':
-        'When you send suggestions or issue reports, that content is passed to your system mail app so the developer can review improvements and investigate problems.',
+        'When you send suggestions or issue reports, the content is passed to your system mail app so the developer can review it.',
   },
   'profile.privacy_body_3': <String, String>{
-    'zh': '后续如果增加在线账号、支付或云同步能力，隐私说明会同步更新并在应用内明确展示。',
+    'zh': '如果后续增加在线账号、支付或云同步能力，隐私说明会同步更新并在应用内展示。',
     'en':
-        'If future versions add online accounts, payments, or cloud sync, this privacy notice will be updated and shown clearly in the app.',
+        'If future versions add online accounts, payments, or cloud sync, this notice will be updated in the app.',
   },
   'profile.terms_body_1': <String, String>{
-    'zh': '本应用用于阿拉伯语入门学习与复习，内容以帮助建立基础识读、词汇和句型能力为目标。',
+    'zh': '本应用用于阿拉伯语入门学习与复习，帮助建立基础识读、词汇和句型能力。',
     'en':
-        'This app is designed for beginner Arabic learning and review, helping you build basic reading, vocabulary, and pattern recognition skills.',
+        'This app is designed for beginner Arabic learning and review, helping you build basic reading, vocabulary, and sentence-pattern skills.',
   },
   'profile.terms_body_2': <String, String>{
-    'zh': '首发版本中的购买、恢复购买和部分反馈流程仍为轻量实现，后续可能根据正式支付与支持系统继续完善。',
+    'zh': '首发版本中的购买、恢复购买和部分反馈流程仍为轻量实现，后续会继续完善。',
     'en':
-        'Some purchase, restore, and support flows in the first release are still lightweight implementations and may evolve with future production systems.',
+        'Some purchase, restore, and support flows in the first release are still lightweight implementations and will continue to improve.',
   },
   'profile.terms_body_3': <String, String>{
-    'zh': '使用过程中如发现内容错误、音频问题或界面异常，欢迎通过应用内反馈入口联系开发者。',
+    'zh': '如果发现内容错误、音频问题或界面异常，欢迎通过应用内反馈入口联系开发者。',
     'en':
         'If you encounter content errors, audio problems, or interface issues, please contact the developer through the in-app feedback entry.',
   },
@@ -1005,16 +1003,17 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Select Reminder Time',
   },
   'feedback.title': <String, String>{
-    'zh': '留言板',
-    'en': 'Feedback Board',
+    'zh': '反馈',
+    'en': 'Feedback',
   },
   'feedback.hero_title': <String, String>{
-    'zh': '把想优化的地方直接写下来',
-    'en': 'Write down what should be improved',
+    'zh': '告诉我们哪里需要改进',
+    'en': 'Tell us what needs attention',
   },
   'feedback.hero_subtitle': <String, String>{
-    'zh': '可以提交改进建议、Bug 现象或使用中觉得别扭的地方。',
-    'en': 'Send product suggestions, bug reports, or anything that feels off.',
+    'zh': '可以提交建议、问题反馈，或指出任何让你觉得不顺的地方。',
+    'en':
+        'Share suggestions, report issues, or point out anything that feels unclear or rough.',
   },
   'feedback.category': <String, String>{
     'zh': '反馈类型',
@@ -1025,29 +1024,29 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
     'en': 'Message',
   },
   'feedback.hint': <String, String>{
-    'zh': '例如：第 4 课标题和阿语不够对齐；复习页返回后状态丢失；希望补一个慢速播放按钮。',
+    'zh': '例如：第 4 课标题不够准确；复习页返回后状态丢失；希望增加慢速播放。',
     'en':
-        'Example: Lesson 4 title alignment feels off; review state resets after returning; please add a slow-play button.',
+        'Example: Lesson 4 title feels off; review state resets after returning; please add slower playback.',
   },
   'feedback.submit': <String, String>{
-    'zh': '发送给开发者',
-    'en': 'Send to Developer',
+    'zh': '发送反馈',
+    'en': 'Send Feedback',
   },
   'feedback.mail_opened': <String, String>{
-    'zh': '已调起邮件应用，发送后开发者即可收到',
-    'en': 'Mail app opened. Send it there to reach the developer.',
+    'zh': '已打开邮件应用，发送后开发者即可收到。',
+    'en': 'Mail app opened. Send the message there to reach the developer.',
   },
   'feedback.mail_copied': <String, String>{
-    'zh': '未找到邮件应用，反馈内容已复制，可稍后粘贴发送',
-    'en': 'No mail app found. The message was copied for later sending.',
+    'zh': '未找到邮件应用，反馈内容已复制，可稍后粘贴发送。',
+    'en': 'No mail app found. The message was copied so you can send it later.',
   },
   'feedback.submitting': <String, String>{
     'zh': '发送中...',
     'en': 'Sending...',
   },
   'feedback.empty_error': <String, String>{
-    'zh': '先写下你的想法或遇到的问题',
-    'en': 'Write your idea or the problem you met first.',
+    'zh': '请先写下你的建议或遇到的问题。',
+    'en': 'Add a short message first.',
   },
   'feedback.category_suggestion': <String, String>{
     'zh': '改进建议',
@@ -1055,7 +1054,7 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   },
   'feedback.category_bug': <String, String>{
     'zh': 'Bug 反馈',
-    'en': 'Bug Report',
+    'en': 'Bug',
   },
   'feedback.category_experience': <String, String>{
     'zh': '体验问题',
@@ -1374,7 +1373,7 @@ const Map<String, Map<String, String>> _strings = <String, Map<String, String>>{
   },
   'lesson.summary_title': <String, String>{
     'zh': '课末小结',
-    'en': 'Lesson Wrap-up',
+    'en': 'Lesson Summary',
   },
   'lesson.summary_subtitle': <String, String>{
     'zh': '把这课最值得带走的内容再压一遍，形成完成感',
