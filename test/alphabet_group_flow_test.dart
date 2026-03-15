@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:arabic_learning_app/app_scope.dart';
 import 'package:arabic_learning_app/data/sample_alphabet_data.dart';
 import 'package:arabic_learning_app/models/alphabet_group.dart';
+import 'package:arabic_learning_app/pages/alphabet_letter_home_page.dart';
 import 'package:arabic_learning_app/pages/alphabet_group_detail_page.dart';
 
 import 'test_helpers.dart';
@@ -29,7 +30,10 @@ void main() {
     }
   }
 
-  Future<void> pumpGroupPage(WidgetTester tester) async {
+  Future<void> pumpGroupPage(
+    WidgetTester tester, {
+    Map<String, Object> sharedPreferences = const <String, Object>{},
+  }) async {
     tester.view.physicalSize = const Size(1440, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
@@ -37,12 +41,25 @@ void main() {
       tester.view.resetDevicePixelRatio();
     });
 
-    SharedPreferences.setMockInitialValues(const <String, Object>{});
+    SharedPreferences.setMockInitialValues(sharedPreferences);
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
-    await prefs.setStringList(viewedKey, const <String>[]);
-    await prefs.setStringList(listenKey, const <String>[]);
-    await prefs.setStringList(writeKey, const <String>[]);
+    if (sharedPreferences.isEmpty) {
+      await prefs.setStringList(viewedKey, const <String>[]);
+      await prefs.setStringList(listenKey, const <String>[]);
+      await prefs.setStringList(writeKey, const <String>[]);
+    } else {
+      final viewed = (sharedPreferences[viewedKey] as List<dynamic>? ?? const [])
+          .cast<String>();
+      final listened =
+          (sharedPreferences[listenKey] as List<dynamic>? ?? const [])
+              .cast<String>();
+      final written = (sharedPreferences[writeKey] as List<dynamic>? ?? const [])
+          .cast<String>();
+      await prefs.setStringList(viewedKey, viewed);
+      await prefs.setStringList(listenKey, listened);
+      await prefs.setStringList(writeKey, written);
+    }
 
     await tester.pumpWidget(
       AppSettingsScope(
@@ -60,7 +77,7 @@ void main() {
     await waitForGroupRefresh(tester);
   }
 
-  Future<void> completeLetterFromGroup(
+  Future<void> openLetterAndFinishListening(
     WidgetTester tester,
     AlphabetLetter letter,
   ) async {
@@ -73,33 +90,59 @@ void main() {
 
     await tester.tap(find.text('Finish This Letter'));
     await tester.pumpAndSettle();
-    await waitForGroupRefresh(tester);
   }
 
-  testWidgets(
-      'group flow refreshes, accumulates progress, and shows completion CTAs',
-      (tester) async {
+  Future<void> waitForPostCompletionState(WidgetTester tester) async {
+    for (var index = 0; index < 30; index++) {
+      await tester.pump(const Duration(milliseconds: 200));
+      final onLetterPage = find.byType(AlphabetLetterHomePage).evaluate().isNotEmpty;
+      final groupCompleteVisible =
+          find.text('This Group Is Complete').evaluate().isNotEmpty;
+      if (!onLetterPage || groupCompleteVisible) {
+        break;
+      }
+    }
+  }
+
+  testWidgets('group flow naturally hands off to the next incomplete letter', (
+    tester,
+  ) async {
     await pumpGroupPage(tester);
 
-    await completeLetterFromGroup(tester, firstLetter);
+    await openLetterAndFinishListening(tester, firstLetter);
 
-    expect(find.text('Group progress 1 / 4'), findsWidgets);
-    expect(find.text('Completed'), findsOneWidget);
-    expect(find.text('Not completed'), findsNWidgets(3));
+    expect(find.byType(AlphabetLetterHomePage), findsOneWidget);
+    final currentPage = tester.widget<AlphabetLetterHomePage>(
+      find.byType(AlphabetLetterHomePage),
+    );
+    expect(currentPage.letter.arabic, secondLetter.arabic);
+  });
 
-    await completeLetterFromGroup(tester, secondLetter);
+  testWidgets('finishing the last incomplete letter returns to the group page', (
+    tester,
+  ) async {
+    await pumpGroupPage(
+      tester,
+      sharedPreferences: <String, Object>{
+        viewedKey: <String>[
+          firstLetter.arabic,
+          secondLetter.arabic,
+          thirdLetter.arabic,
+        ],
+        listenKey: <String>[
+          firstLetter.arabic,
+          secondLetter.arabic,
+          thirdLetter.arabic,
+        ],
+        writeKey: const <String>[],
+      },
+    );
 
-    expect(find.text('Group progress 2 / 4'), findsWidgets);
-    expect(find.text('Completed'), findsNWidgets(2));
-    expect(find.text('Not completed'), findsNWidgets(2));
+    await openLetterAndFinishListening(tester, fourthLetter);
+    await waitForPostCompletionState(tester);
+    await waitForGroupRefresh(tester);
 
-    await completeLetterFromGroup(tester, thirdLetter);
-    await completeLetterFromGroup(tester, fourthLetter);
-
-    expect(find.text('This Group Is Complete'), findsOneWidget);
-    expect(find.text('Continue Next Group'), findsOneWidget);
-    expect(find.text('Practice This Group'), findsOneWidget);
-    expect(find.text('Back to Alphabet Overview'), findsOneWidget);
-    expect(find.text('Group progress 4 / 4'), findsWidgets);
+    expect(find.byType(AlphabetLetterHomePage), findsNothing);
+    expect(find.byType(AlphabetGroupDetailPage), findsOneWidget);
   });
 }

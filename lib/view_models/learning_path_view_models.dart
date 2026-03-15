@@ -2,6 +2,7 @@ import '../l10n/app_strings.dart';
 import '../l10n/lesson_localizer.dart';
 import '../models/app_settings.dart';
 import '../models/lesson.dart';
+import '../models/review_models.dart';
 import '../models/v2_lesson_progress_models.dart';
 import '../services/learning_routing_models.dart';
 import '../services/learning_routing_policy.dart';
@@ -13,6 +14,7 @@ enum HomePrimaryActionType {
   continueAlphabet,
   continueLesson,
   startReview,
+  startWarmUp,
   continuePremiumTrack,
 }
 
@@ -115,6 +117,12 @@ class LearningPathSnapshot {
 
   bool get shouldPrioritizeReview =>
       formalReviewCount > 0 || overdueReviewCount > 0;
+
+  bool get shouldRecommendConsolidation =>
+      !shouldPrioritizeReview &&
+      (stageReinforcementCount > 0 ||
+          lightReviewCount > 0 ||
+          (pendingReviewCount > 0 && recommendedLesson != null));
 
   int get actionableReviewCount =>
       formalReviewCount > 0 ? formalReviewCount : pendingReviewCount;
@@ -377,18 +385,90 @@ class LearningPathViewModels {
     required AppLanguage language,
     required LearningPathSnapshot snapshot,
     required bool onboardingCompleted,
+    required bool alphabetStarted,
+    required bool alphabetCompleted,
+    required int alphabetCompletedGroupCount,
+    required int alphabetTotalGroupCount,
+    required int alphabetViewedCount,
+    required int alphabetListenCompletedCount,
+    required int alphabetWriteCompletedCount,
+    DailyReviewPlan? reviewPlan,
   }) {
-    // 获取 routing decision
+    final pendingFormalReview = snapshot.shouldPrioritizeReview;
+    final hasConsolidationCandidates =
+      !pendingFormalReview &&
+      ((reviewPlan?.pendingCount ?? 0) > 0 || snapshot.shouldRecommendConsolidation);
+    final nextLesson = snapshot.recommendedLesson;
+    final nextLessonTitle =
+        nextLesson == null ? null : LessonLocalizer.title(nextLesson, language);
+
     final route = LearningRoutingPolicy.decideHomeRoute(
+      alphabetCompleted: alphabetCompleted,
       recommendedLessonId: snapshot.recommendedLessonId,
       currentLessonId: snapshot.currentLessonId,
       totalLessonCount: snapshot.totalLessonCount,
       completedLessonCount: snapshot.completedLessonCount,
       onboardingCompleted: onboardingCompleted,
-      shouldPrioritizeReview: snapshot.shouldPrioritizeReview,
+      hasPendingFormalReview: pendingFormalReview,
+      hasConsolidationCandidates: hasConsolidationCandidates,
     );
 
-    // 处理特殊情况（membership/unlock）- 高优先级
+    if (route.mode == LearningMode.onboarding) {
+      return HomeMainLearningViewModel(
+        badgeText: _copy(
+          language,
+          zh: alphabetStarted ? '字母阶段' : '学习起点',
+          en: alphabetStarted ? 'Alphabet Stage' : 'Starting Point',
+        ),
+        title: _copy(
+          language,
+          zh: alphabetStarted ? '继续字母学习' : '先完成字母阶段',
+          en: alphabetStarted
+              ? 'Continue Alphabet Learning'
+              : 'Start with the Alphabet',
+        ),
+        arabicPreview: 'ابدأ من الحروف',
+        description: _copy(
+          language,
+          zh: '先把字母分组和听读主线走通，书写可随后巩固，再进入复习或课程。',
+          en: 'Finish the alphabet groups and listening path first. Writing can follow as reinforcement before moving into review or lessons.',
+        ),
+        progressText: alphabetTotalGroupCount == 0
+            ? null
+            : _copy(
+                language,
+                zh: '已完成 $alphabetCompletedGroupCount/$alphabetTotalGroupCount 组',
+                en: '$alphabetCompletedGroupCount/$alphabetTotalGroupCount groups completed',
+              ),
+        reviewText: alphabetCompletedGroupCount == 0 &&
+                alphabetViewedCount == 0 &&
+                alphabetListenCompletedCount == 0 &&
+                alphabetWriteCompletedCount == 0
+            ? null
+            : _copy(
+                language,
+                zh: '浏览 $alphabetViewedCount · 听读 $alphabetListenCompletedCount · 书写 $alphabetWriteCompletedCount',
+                en: 'Browse $alphabetViewedCount · Listen $alphabetListenCompletedCount · Write $alphabetWriteCompletedCount',
+              ),
+        progressValue: alphabetTotalGroupCount == 0
+            ? null
+            : alphabetCompletedGroupCount / alphabetTotalGroupCount,
+        primaryButtonText: _copy(
+          language,
+          zh: alphabetStarted ? '继续字母学习' : '开始字母学习',
+          en: alphabetStarted
+              ? 'Continue Alphabet Learning'
+              : 'Start Alphabet Learning',
+        ),
+        secondaryText: _copy(
+          language,
+          zh: '查看字母路径',
+          en: 'Open Alphabet Path',
+        ),
+        actionType: HomePrimaryActionType.continueAlphabet,
+      );
+    }
+
     if (!snapshot.unlocked &&
         snapshot.nextLessonLocked &&
         snapshot.completedLessonCount >= 3) {
@@ -418,75 +498,130 @@ class LearningPathViewModels {
       );
     }
 
-    // 根据 routing decision 生成卡片
     switch (route.mode) {
       case LearningMode.onboarding:
         return HomeMainLearningViewModel(
-          badgeText: _copy(language, zh: '今日主线', en: 'Today\'s Focus'),
-          title: _copy(language, zh: '从字母开始', en: 'Start with the Alphabet'),
+          badgeText: _copy(
+            language,
+            zh: alphabetStarted ? '字母阶段' : '学习起点',
+            en: alphabetStarted ? 'Alphabet Stage' : 'Starting Point',
+          ),
+          title: _copy(
+            language,
+            zh: alphabetStarted ? '继续字母学习' : '先完成字母阶段',
+            en: alphabetStarted
+                ? 'Continue Alphabet Learning'
+                : 'Start with the Alphabet',
+          ),
           arabicPreview: 'ابدأ من الحروف',
           description: _copy(
             language,
-            zh: '从字母与发音开始，先完成第一步内容。',
-            en: 'Start with letters and sounds, then finish the first small step.',
+            zh: '先把字母分组和听读主线走通，书写可随后巩固，再进入复习或课程。',
+            en: 'Finish the alphabet groups and listening path first. Writing can follow as reinforcement before moving into review or lessons.',
           ),
-          primaryButtonText: _copy(language, zh: '开始', en: 'Start'),
-          secondaryText: _copy(language, zh: '查看字母表', en: 'Browse Alphabet'),
+          progressText: alphabetTotalGroupCount == 0
+              ? null
+              : _copy(
+                  language,
+                  zh: '已完成 $alphabetCompletedGroupCount/$alphabetTotalGroupCount 组',
+                  en: '$alphabetCompletedGroupCount/$alphabetTotalGroupCount groups completed',
+                ),
+          reviewText: alphabetCompletedGroupCount == 0 &&
+                  alphabetViewedCount == 0 &&
+                  alphabetListenCompletedCount == 0 &&
+                  alphabetWriteCompletedCount == 0
+              ? null
+              : _copy(
+                  language,
+                  zh: '浏览 $alphabetViewedCount · 听读 $alphabetListenCompletedCount · 书写 $alphabetWriteCompletedCount',
+                  en: 'Browse $alphabetViewedCount · Listen $alphabetListenCompletedCount · Write $alphabetWriteCompletedCount',
+                ),
+          progressValue: alphabetTotalGroupCount == 0
+              ? null
+              : alphabetCompletedGroupCount / alphabetTotalGroupCount,
+          primaryButtonText: _copy(
+            language,
+            zh: alphabetStarted ? '继续字母学习' : '开始字母学习',
+            en: alphabetStarted
+                ? 'Continue Alphabet Learning'
+                : 'Start Alphabet Learning',
+          ),
+          secondaryText: _copy(
+            language,
+            zh: '查看字母路径',
+            en: 'Open Alphabet Path',
+          ),
           actionType: HomePrimaryActionType.continueAlphabet,
         );
-
       case LearningMode.reviewFirst:
         return HomeMainLearningViewModel(
           badgeText: _copy(language, zh: '今日建议', en: 'Today\'s Tip'),
-          title: _copy(
-              language,
-              zh: '先完成今天的复习',
-              en: 'Finish Today\'s Review First'),
+          title: _copy(language,
+              zh: '先完成今天的复习', en: 'Finish Today\'s Review First'),
           arabicPreview: 'راجع الآن',
           description: _copy(
             language,
             zh: '复习之后再学新内容，记得会更稳。',
             en: 'Review first, then new learning will stay with you more steadily.',
           ),
-          progressText:
-              'Completed ${snapshot.completedLessonCount}/${snapshot.totalLessonCount} lessons',
+          progressText: _copy(
+            language,
+            zh: '课程进度 ${snapshot.completedLessonCount}/${snapshot.totalLessonCount}',
+            en: 'Progress ${snapshot.completedLessonCount}/${snapshot.totalLessonCount}',
+          ),
           reviewText: _copy(
             language,
             zh: '待回顾 ${snapshot.actionableReviewCount} 项',
             en: '${snapshot.actionableReviewCount} items to review',
           ),
-          primaryButtonText: _copy(language, zh: '开始复习', en: 'Start Review'),
+          primaryButtonText: _copy(
+            language,
+            zh: '开始今日复习',
+            en: 'Start Today\'s Review',
+          ),
           actionType: HomePrimaryActionType.startReview,
         );
 
-      case LearningMode.newLearning:
-        // 检查过渡状态
-        if (onboardingCompleted && !snapshot.hasStartedAny) {
-          return HomeMainLearningViewModel(
-            badgeText: _copy(language, zh: '今日主线', en: 'Today\'s Focus'),
-            title: _copy(
-                language,
-                zh: '开始你的阿语学习',
-                en: 'Start Your Arabic Learning'),
-            arabicPreview: 'تابع الحروف',
-            description: _copy(
-              language,
-              zh: '从字母与发音开始，先完成第一步内容。',
-              en: 'Start with letters and sounds, then finish the first small step.',
-            ),
-            progressText: _copy(
-                language,
-                zh: '已完成首学体验',
-                en: 'First experience completed'),
-            reviewText: _copy(
-                language, zh: '下一步：分组字母', en: 'Next: grouped letters'),
-            primaryButtonText: _copy(language, zh: '继续', en: 'Continue'),
-            secondaryText:
-                _copy(language, zh: '查看字母表', en: 'Browse Alphabet'),
-            actionType: HomePrimaryActionType.continueAlphabet,
-          );
-        }
+      case LearningMode.phaseConsolidation:
+        return HomeMainLearningViewModel(
+          badgeText: _copy(language, zh: '下一步', en: 'Next Best Step'),
+          title: _copy(
+            language,
+            zh: nextLessonTitle == null ? '先热身一下' : '先热身，再继续学习',
+            en: nextLessonTitle == null
+                ? 'Start with a Lesson Warm-Up'
+                : 'Warm Up Before Continuing',
+          ),
+          arabicPreview: nextLesson?.titleAr,
+          description: nextLessonTitle == null
+              ? _copy(
+                  language,
+                  zh: '先快速回顾几个刚学过的点，再继续今天的学习节奏。',
+                  en: 'Review a few recent items first, then move on with a steadier rhythm.',
+                )
+              : _copy(
+                  language,
+                  zh: '先快速过一遍关键点，再顺着进入 $nextLessonTitle。',
+                  en: 'Review a few key points first, then continue into $nextLessonTitle.',
+                ),
+          progressText: _copy(
+            language,
+            zh: '课程进度 ${snapshot.completedLessonCount}/${snapshot.totalLessonCount}',
+            en: 'Progress ${snapshot.completedLessonCount}/${snapshot.totalLessonCount}',
+          ),
+          reviewText: _copy(
+            language,
+            zh: '热身 ${snapshot.pendingReviewCount} 项',
+            en: '${snapshot.pendingReviewCount} warm-up items',
+          ),
+          progressValue: snapshot.completionRate,
+          primaryButtonText: _copy(language, zh: '开始热身', en: 'Start Warm-Up'),
+          secondaryText: _copy(language, zh: '查看课程', en: 'View Lessons'),
+          actionType: HomePrimaryActionType.startWarmUp,
+          lesson: nextLesson,
+        );
 
+      case LearningMode.newLearning:
         // 普通 newLearning 情况
         final lesson = snapshot.recommendedLesson;
         if (lesson != null) {
@@ -525,58 +660,6 @@ class LearningPathViewModels {
         }
 
         // 默认 newLearning（无推荐课）
-        return HomeMainLearningViewModel(
-          badgeText: _copy(language, zh: '今日主线', en: 'Today\'s Focus'),
-          title: _copy(language, zh: '从字母开始', en: 'Start with the Alphabet'),
-          arabicPreview: 'ابدأ من الحروف',
-          description: _copy(
-            language,
-            zh: '从字母与发音开始，先完成第一步内容。',
-            en: 'Start with letters and sounds, then finish the first small step.',
-          ),
-          primaryButtonText: _copy(language, zh: '开始', en: 'Start'),
-          secondaryText: _copy(language, zh: '查看字母表', en: 'Browse Alphabet'),
-          actionType: HomePrimaryActionType.continueAlphabet,
-        );
-
-      case LearningMode.phaseConsolidation:
-        // 第一版暂不处理，回到 newLearning 逻辑
-        final consolidationLesson = snapshot.recommendedLesson;
-        if (consolidationLesson != null) {
-          return HomeMainLearningViewModel(
-            badgeText: _copy(language, zh: '今日主线', en: 'Today\'s Focus'),
-            title: _copy(
-              language,
-              zh: '继续你的学习',
-              en: 'Continue Your Learning',
-            ),
-            arabicPreview: consolidationLesson.titleAr,
-            description: _copy(
-              language,
-              zh: '保持节奏，比学得快更重要。',
-              en: 'Keeping a rhythm matters more than moving fast.',
-            ),
-            progressText: _copy(
-              language,
-              zh: '进度 ${snapshot.completedLessonCount}/${snapshot.totalLessonCount}',
-              en: 'Progress ${snapshot.completedLessonCount}/${snapshot.totalLessonCount}',
-            ),
-            reviewText: snapshot.actionableReviewCount > 0
-                ? _copy(
-                    language,
-                    zh: '待复习 ${snapshot.actionableReviewCount} 项',
-                    en: '${snapshot.actionableReviewCount} items to review',
-                  )
-                : null,
-            progressValue: snapshot.completionRate,
-            primaryButtonText:
-                _copy(language, zh: '继续学习', en: 'Continue Learning'),
-            secondaryText: _copy(language, zh: '查看课程', en: 'View Lessons'),
-            actionType: HomePrimaryActionType.continueLesson,
-            lesson: consolidationLesson,
-          );
-        }
-
         return HomeMainLearningViewModel(
           badgeText: _copy(language, zh: '今日主线', en: 'Today\'s Focus'),
           title: _copy(language, zh: '从字母开始', en: 'Start with the Alphabet'),

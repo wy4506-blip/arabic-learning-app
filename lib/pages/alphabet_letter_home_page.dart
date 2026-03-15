@@ -14,10 +14,12 @@ import 'alphabet_write_page.dart';
 
 class AlphabetLetterHomePage extends StatefulWidget {
   final AlphabetLetter letter;
+  final int? groupId;
 
   const AlphabetLetterHomePage({
     super.key,
     required this.letter,
+    this.groupId,
   });
 
   @override
@@ -248,39 +250,6 @@ class _AlphabetLetterHomePageState extends State<AlphabetLetterHomePage> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.deepAccent,
-                      side: const BorderSide(color: Color(0xFFD0D5DD)),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                    ),
-                    onPressed: _playLetterName,
-                    icon: Icon(
-                      _isPlayingName
-                          ? Icons.stop_rounded
-                          : Icons.volume_up_rounded,
-                    ),
-                    label: Text(
-                      _isPlayingName
-                          ? localizedText(
-                              context,
-                              zh: '停止名称朗读',
-                              en: 'Stop Name Audio',
-                            )
-                          : localizedText(
-                              context,
-                              zh: '朗读阿语字母名称',
-                              en: 'Hear Arabic Letter Name',
-                            ),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
                   Text(
                     AlphabetContentLocalizer.hint(
                       letter,
@@ -435,13 +404,13 @@ class _AlphabetLetterHomePageState extends State<AlphabetLetterHomePage> {
                   : (!_isWriteCompleted)
                       ? localizedText(
                           context,
-                          zh: '听读已完成。下一步做书写巩固，把独立形和连写规则再过一遍。',
-                          en: 'Listening is done. Next, reinforce writing by reviewing the isolated form and connection rule.',
+                          zh: '听读已完成。现在可以继续本组下一个字母，书写巩固可随后补上。',
+                          en: 'Listening is done. You can continue to the next letter in this group now, and add writing reinforcement later.',
                         )
                       : localizedText(
                           context,
-                          zh: '这个字母的起步环节已经完成，可以回到分组继续下一个字母。',
-                          en: 'The starter steps for this letter are complete. You can return to the group and continue with the next letter.',
+                          zh: '这个字母的主线与书写巩固都已完成，可以继续下一个字母。',
+                          en: 'The mainline and writing reinforcement for this letter are both complete. You can continue with the next letter.',
                         ),
               style: text.bodySmall?.copyWith(color: AppTheme.textSecondary),
             ),

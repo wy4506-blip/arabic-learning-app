@@ -77,7 +77,7 @@ void main() {
     expect(session.config.autoContinueToLesson, isTrue);
     expect(session.config.nextLessonId, 'U1L2');
     expect(session.config.allowSkip, isTrue);
-    expect(session.config.headerTitle, 'Quick Warm-Up');
+    expect(session.config.headerTitle, 'Lesson Warm-Up');
     expect(session.tasks.length, inInclusiveRange(2, 5));
   });
 

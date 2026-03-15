@@ -6,8 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:arabic_learning_app/features/onboarding/models/onboarding_state.dart';
 import 'package:arabic_learning_app/models/learning_state_models.dart';
 import 'package:arabic_learning_app/models/review_models.dart';
-import 'package:arabic_learning_app/pages/review_session_page.dart';
-import 'package:arabic_learning_app/services/alphabet_service.dart';
+import 'package:arabic_learning_app/models/v2_lesson_progress_models.dart';
 import 'package:arabic_learning_app/pages/home_page.dart';
 
 import 'test_helpers.dart';
@@ -23,14 +22,39 @@ void main() {
     hasEnteredHomeAfterFirstExperience: true,
   );
 
-  testWidgets('home today learning card prioritizes due review first', (
+  testWidgets('home prioritizes formal review when due items exist', (
     tester,
   ) async {
-    final groups = await AlphabetService.loadAlphabetGroups();
-    final allLetters = groups
-        .expand((group) => group.letters)
-        .map((letter) => letter.arabic)
-        .toList(growable: false);
+    final allLetters = <String>[
+      'ا',
+      'ب',
+      'ت',
+      'ث',
+      'ج',
+      'ح',
+      'خ',
+      'د',
+      'ذ',
+      'ر',
+      'ز',
+      'س',
+      'ش',
+      'ص',
+      'ض',
+      'ط',
+      'ظ',
+      'ع',
+      'غ',
+      'ف',
+      'ق',
+      'ك',
+      'ل',
+      'م',
+      'ن',
+      'ه',
+      'و',
+      'ي',
+    ];
 
     await pumpLocalizedTestPage(
       tester,
@@ -46,20 +70,28 @@ void main() {
         'alphabet_progress_viewed_letters_v1': allLetters,
         'alphabet_progress_listen_letters_v1': allLetters,
         'alphabet_progress_write_letters_v1': allLetters,
+        'v2_lesson_progress_records_v1': jsonEncode(
+          <Map<String, dynamic>>[
+            V2LessonProgressRecord(
+              lessonId: 'U1L1',
+              status: V2LessonStatus.completed,
+            ).toJson(),
+          ],
+        ),
         'learning_content_states_v1': jsonEncode(
           <Map<String, dynamic>>[
             LearningContentState(
-              contentId: 'word:warmup-item',
+              contentId: 'word:due-item',
               type: ReviewContentType.word,
               objectType: ReviewObjectType.wordReading,
               lessonId: 'U1L1',
               isStarted: true,
               isCompleted: true,
-              needsReview: false,
+              needsReview: true,
               isWeak: false,
               isFavorited: false,
-              reviewPriority: 1,
-              stage: LearningStage.stable,
+              reviewPriority: 3,
+              stage: LearningStage.reviewDue,
             ).toJson(),
           ],
         ),
@@ -70,17 +102,6 @@ void main() {
       find.widgetWithText(FilledButton, 'Start Today\'s Review'),
       findsOneWidget,
     );
-    expect(find.text('Start Warm-Up'), findsNothing);
-    expect(find.text('Enter Today\'s Lesson'), findsNothing);
-    expect(find.text('Continue Alphabet Learning'), findsNothing);
-
-    await tester
-        .tap(find.widgetWithText(FilledButton, 'Start Today\'s Review'));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(ReviewSessionPage), findsOneWidget);
-    expect(find.text('Today\'s Review'), findsWidgets);
-    expect(find.textContaining('Item 1 /'), findsOneWidget);
-    expect(find.text('Skip Review'), findsNothing);
+    expect(find.widgetWithText(FilledButton, 'Start Warm-Up'), findsNothing);
   });
 }

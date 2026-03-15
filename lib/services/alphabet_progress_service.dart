@@ -56,6 +56,30 @@ class AlphabetGroupProgress {
   });
 }
 
+enum AlphabetNextActionType {
+  resumeLetter,
+  groupComplete,
+  alphabetComplete,
+}
+
+class AlphabetNextAction {
+  final AlphabetNextActionType actionType;
+  final int? currentGroupId;
+  final String? currentLetterKey;
+  final String? nextLetterKey;
+  final bool isAlphabetComplete;
+  final bool isGroupComplete;
+
+  const AlphabetNextAction({
+    required this.actionType,
+    this.currentGroupId,
+    this.currentLetterKey,
+    this.nextLetterKey,
+    required this.isAlphabetComplete,
+    required this.isGroupComplete,
+  });
+}
+
 class AlphabetProgressService {
   AlphabetProgressService._();
 
@@ -119,11 +143,14 @@ class AlphabetProgressService {
     AlphabetGroup group,
   ) async {
     final snapshot = await getSnapshot(groups: <AlphabetGroup>[group]);
-    final completedLetterCount = group.letters.where((letter) {
-      final letterKey = _letterKey(letter);
-      return snapshot.viewedLetters.contains(letterKey) &&
-          snapshot.listenCompletedLetters.contains(letterKey);
-    }).length;
+    final completedLetterCount = group.letters
+        .where(
+          (letter) => isLetterMainlineCompleted(
+            snapshot: snapshot,
+            letter: letter,
+          ),
+        )
+        .length;
 
     return AlphabetGroupProgress(
       completedLetterCount: completedLetterCount,
@@ -131,6 +158,143 @@ class AlphabetProgressService {
       isCompleted: group.letters.isNotEmpty &&
           completedLetterCount >= group.letters.length,
     );
+  }
+
+  static bool isLetterMainlineCompleted({
+    required AlphabetLearningSnapshot snapshot,
+    required AlphabetLetter letter,
+  }) {
+    final letterKey = _letterKey(letter);
+    return snapshot.viewedLetters.contains(letterKey) &&
+        snapshot.listenCompletedLetters.contains(letterKey);
+  }
+
+  static bool isGroupMainlineCompleted({
+    required AlphabetLearningSnapshot snapshot,
+    required AlphabetGroup group,
+  }) {
+    return group.letters.isNotEmpty &&
+        group.letters.every(
+          (letter) => isLetterMainlineCompleted(
+            snapshot: snapshot,
+            letter: letter,
+          ),
+        );
+  }
+
+  static Future<AlphabetNextAction> getNextAlphabetAction({
+    List<AlphabetGroup>? groups,
+    int? preferredGroupId,
+  }) async {
+    final resolvedGroups = groups ?? await AlphabetService.loadAlphabetGroups();
+    final snapshot = await getSnapshot(groups: resolvedGroups);
+    return buildNextAlphabetAction(
+      snapshot: snapshot,
+      groups: resolvedGroups,
+      preferredGroupId: preferredGroupId,
+    );
+  }
+
+  static AlphabetNextAction buildNextAlphabetAction({
+    required AlphabetLearningSnapshot snapshot,
+    required List<AlphabetGroup> groups,
+    int? preferredGroupId,
+  }) {
+    if (preferredGroupId != null) {
+      final preferredGroup = findGroupById(groups, preferredGroupId);
+      if (preferredGroup != null) {
+        final preferredLetter = firstIncompleteLetter(
+          snapshot: snapshot,
+          group: preferredGroup,
+        );
+        if (preferredLetter != null) {
+          final letterKey = _letterKey(preferredLetter);
+          return AlphabetNextAction(
+            actionType: AlphabetNextActionType.resumeLetter,
+            currentGroupId: preferredGroup.id,
+            currentLetterKey: letterKey,
+            nextLetterKey: letterKey,
+            isAlphabetComplete: false,
+            isGroupComplete: false,
+          );
+        }
+
+        final alphabetComplete = groups.every(
+          (group) => isGroupMainlineCompleted(snapshot: snapshot, group: group),
+        );
+        return AlphabetNextAction(
+          actionType: alphabetComplete
+              ? AlphabetNextActionType.alphabetComplete
+              : AlphabetNextActionType.groupComplete,
+          currentGroupId: preferredGroup.id,
+          isAlphabetComplete: alphabetComplete,
+          isGroupComplete: true,
+        );
+      }
+    }
+
+    for (final group in groups) {
+      final letter = firstIncompleteLetter(snapshot: snapshot, group: group);
+      if (letter != null) {
+        final letterKey = _letterKey(letter);
+        return AlphabetNextAction(
+          actionType: AlphabetNextActionType.resumeLetter,
+          currentGroupId: group.id,
+          currentLetterKey: letterKey,
+          nextLetterKey: letterKey,
+          isAlphabetComplete: false,
+          isGroupComplete: false,
+        );
+      }
+    }
+
+    return const AlphabetNextAction(
+      actionType: AlphabetNextActionType.alphabetComplete,
+      isAlphabetComplete: true,
+      isGroupComplete: true,
+    );
+  }
+
+  static AlphabetGroup? findGroupById(
+    List<AlphabetGroup> groups,
+    int? groupId,
+  ) {
+    if (groupId == null) {
+      return null;
+    }
+    for (final group in groups) {
+      if (group.id == groupId) {
+        return group;
+      }
+    }
+    return null;
+  }
+
+  static AlphabetLetter? findLetterByKey(
+    AlphabetGroup group,
+    String? letterKey,
+  ) {
+    if (letterKey == null || letterKey.isEmpty) {
+      return null;
+    }
+    for (final letter in group.letters) {
+      if (_letterKey(letter) == letterKey) {
+        return letter;
+      }
+    }
+    return null;
+  }
+
+  static AlphabetLetter? firstIncompleteLetter({
+    required AlphabetLearningSnapshot snapshot,
+    required AlphabetGroup group,
+  }) {
+    for (final letter in group.letters) {
+      if (!isLetterMainlineCompleted(snapshot: snapshot, letter: letter)) {
+        return letter;
+      }
+    }
+    return null;
   }
 
   static Future<void> _append(String key, String value) async {

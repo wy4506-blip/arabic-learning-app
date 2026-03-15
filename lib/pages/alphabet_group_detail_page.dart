@@ -14,10 +14,12 @@ import 'alphabet_quiz_hub_page.dart';
 
 class AlphabetGroupDetailPage extends StatefulWidget {
   final AlphabetGroup group;
+  final String? initialLetterKey;
 
   const AlphabetGroupDetailPage({
     super.key,
     required this.group,
+    this.initialLetterKey,
   });
 
   @override
@@ -28,6 +30,7 @@ class AlphabetGroupDetailPage extends StatefulWidget {
 class _AlphabetGroupDetailPageState extends State<AlphabetGroupDetailPage> {
   final ScrollController _scrollController = ScrollController();
   int _reloadVersion = 0;
+  bool _didAutoOpenInitialLetter = false;
   AlphabetLearningSnapshot _snapshot = AlphabetLearningSnapshot.empty;
   AlphabetGroupProgress _groupProgress = const AlphabetGroupProgress(
     completedLetterCount: 0,
@@ -87,12 +90,40 @@ class _AlphabetGroupDetailPageState extends State<AlphabetGroupDetailPage> {
         ),
       );
     }
+
+    _maybeOpenInitialLetter();
+  }
+
+  void _maybeOpenInitialLetter() {
+    if (_didAutoOpenInitialLetter || widget.initialLetterKey == null) {
+      return;
+    }
+    final targetLetter = AlphabetProgressService.findLetterByKey(
+      group,
+      widget.initialLetterKey,
+    );
+    if (targetLetter == null ||
+        AlphabetProgressService.isLetterMainlineCompleted(
+          snapshot: _snapshot,
+          letter: targetLetter,
+        )) {
+      return;
+    }
+
+    _didAutoOpenInitialLetter = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _openLetter(targetLetter);
+    });
   }
 
   bool _isLetterCompleted(AlphabetLetter letter) {
-    final letterKey = letter.arabic.trim();
-    return _snapshot.viewedLetters.contains(letterKey) &&
-        _snapshot.listenCompletedLetters.contains(letterKey);
+    return AlphabetProgressService.isLetterMainlineCompleted(
+      snapshot: _snapshot,
+      letter: letter,
+    );
   }
 
   Future<void> _openLetter(AlphabetLetter letter) async {
@@ -100,7 +131,10 @@ class _AlphabetGroupDetailPageState extends State<AlphabetGroupDetailPage> {
     final completed = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
-        builder: (context) => AlphabetLetterHomePage(letter: letter),
+        builder: (context) => AlphabetLetterHomePage(
+          letter: letter,
+          groupId: group.id,
+        ),
       ),
     );
     if (completed == true && !wasCompleted && mounted) {
@@ -133,6 +167,29 @@ class _AlphabetGroupDetailPageState extends State<AlphabetGroupDetailPage> {
       _scrollController.jumpTo(0);
     }
     await _reloadGroupProgress(showCompletionFeedback: true);
+
+    if (!mounted || completed != true || _groupProgress.isCompleted) {
+      return;
+    }
+
+    final allGroups = await AlphabetService.loadAlphabetGroups();
+    final action = await AlphabetProgressService.getNextAlphabetAction(
+      groups: allGroups,
+      preferredGroupId: group.id,
+    );
+    if (!mounted || action.actionType != AlphabetNextActionType.resumeLetter) {
+      return;
+    }
+
+    final nextLetter = AlphabetProgressService.findLetterByKey(
+      group,
+      action.currentLetterKey,
+    );
+    if (nextLetter == null || nextLetter.arabic.trim() == letter.arabic.trim()) {
+      return;
+    }
+
+    await _openLetter(nextLetter);
   }
 
   Future<void> _continueToNextGroup() async {
@@ -331,8 +388,8 @@ class _AlphabetGroupDetailPageState extends State<AlphabetGroupDetailPage> {
                 _buildGuideChip(
                   label: localizedText(
                     context,
-                    zh: '最后练书写',
-                    en: 'Finish with Writing',
+                    zh: '可选书写巩固',
+                    en: 'Optional Writing',
                   ),
                   icon: Icons.edit_rounded,
                 ),
@@ -434,7 +491,7 @@ class _AlphabetGroupDetailPageState extends State<AlphabetGroupDetailPage> {
                       localizedText(
                         context,
                         zh: '你已经完成了这一组的首轮字母学习，可以继续下一组或转入练习。',
-                        en: 'You finished the first pass for this group. Continue to the next group or switch to practice.',
+                        en: 'You finished the mainline pass for this group. Continue to the next group, and keep writing or drills as follow-up reinforcement.',
                       ),
                       style: text.bodyMedium,
                     ),

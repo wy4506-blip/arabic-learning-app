@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:arabic_learning_app/features/onboarding/models/onboarding_state.dart';
+import 'package:arabic_learning_app/pages/alphabet_hub_page.dart';
+import 'package:arabic_learning_app/pages/alphabet_letter_home_page.dart';
 import 'package:arabic_learning_app/pages/home_page.dart';
 import 'package:arabic_learning_app/services/alphabet_service.dart';
 
@@ -50,6 +52,9 @@ void main() {
     await tester.tap(find.text('Start Alphabet Learning'));
     await tester.pumpAndSettle();
 
+    expect(find.byType(AlphabetLetterHomePage), findsOneWidget);
+    expect(find.byType(AlphabetHubPage), findsNothing);
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(
       'alphabet_progress_viewed_letters_v1',
@@ -64,6 +69,8 @@ void main() {
       firstGroupLetters,
     );
 
+    await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded).first);
+    await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded).first);
     await tester.pumpAndSettle();
 

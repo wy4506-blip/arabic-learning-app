@@ -42,10 +42,10 @@ void main() {
       },
     );
 
-    expect(find.text('Start Lesson 1'), findsOneWidget);
+    expect(find.text('Continue Learning'), findsOneWidget);
     expect(find.text('Start Formal Review'), findsNothing);
 
-    await tester.tap(find.text('Start Lesson 1').first);
+    await tester.tap(find.text('Continue Learning').first);
     await tester.pumpAndSettle();
 
     expect(find.byType(LessonDetailPage), findsOneWidget);

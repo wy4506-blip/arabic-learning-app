@@ -37,7 +37,8 @@ class ReviewEntrySnapshot {
   int get lightReviewCount => lightTasks.length;
   int get overdueReviewCount => overdueTasks.length;
   int get stageReinforcementCount => stageReinforcementTasks.length;
-  int get primaryReviewCount => hasFormalReview ? formalReviewCount : lightReviewCount;
+  int get primaryReviewCount =>
+      hasFormalReview ? formalReviewCount : lightReviewCount;
 }
 
 class ReviewService {
@@ -78,8 +79,8 @@ class ReviewService {
     final context = await ReviewPlanner.loadContext(settings, now: moment);
     final reviewSignals = ReviewPlanner.buildSignals(context);
     final freshTasks = reviewSignals.hasFormalReview
-      ? reviewSignals.formalReviewTasks
-      : ReviewPlanner.buildTodayCandidates(context);
+        ? reviewSignals.formalReviewTasks
+        : ReviewPlanner.buildTodayCandidates(context);
     final todayKey = reviewDateKey(moment);
 
     if (raw == null || raw.isEmpty) {
@@ -146,9 +147,8 @@ class ReviewService {
         .toList(growable: false);
 
     return ReviewEntrySnapshot(
-      formalTasks: formalTasks.isNotEmpty
-          ? formalTasks
-          : signals.formalReviewTasks,
+      formalTasks:
+          formalTasks.isNotEmpty ? formalTasks : signals.formalReviewTasks,
       lightTasks: signals.lightReviewTasks,
       overdueTasks: signals.overdueReviewTasks,
       stageReinforcementTasks: signals.stageReinforcementTasks,
@@ -167,7 +167,6 @@ class ReviewService {
 
     final nextLesson =
         _findNextLesson(context.lessons, context.progress.lastLessonId);
-
     final activePlan = plan.hasStarted ? plan : plan.copyWith(startedAt: now);
     if (!plan.hasStarted) {
       await _saveTodayPlan(activePlan);
@@ -242,10 +241,10 @@ class ReviewService {
         nextLessonId: nextLessonId,
         allowSkip: true,
         headerTitle:
-            settings.appLanguage == AppLanguage.en ? 'Quick Warm-Up' : '热身复习',
+            settings.appLanguage == AppLanguage.en ? 'Lesson Warm-Up' : '课前热身',
         headerSubtitle: settings.appLanguage == AppLanguage.en
-            ? 'Review quickly first, then move into the next lesson.'
-            : '先快速回顾，再进入下一课',
+            ? 'Review a few key points first, then move into the next lesson.'
+            : '先快速回顾几个关键点，再进入下一课。',
       ),
     );
   }
@@ -272,12 +271,10 @@ class ReviewService {
     return ReviewSession(
       id: 'quick:${DateTime.now().millisecondsSinceEpoch}',
       kind: ReviewSessionKind.quick,
-      title: settings.appLanguage == AppLanguage.en
-          ? '5-Minute Review'
-          : '5 分钟快复习',
+      title: settings.appLanguage == AppLanguage.en ? 'Quick Review' : '快速复习',
       subtitle: settings.appLanguage == AppLanguage.en
-          ? 'Quickly clear a few high-value items without changing your rhythm.'
-          : '不打断节奏，顺手过几个高价值内容就够了。',
+          ? 'Review a few high-value items, then move on.'
+          : '快速过一遍几个关键点，然后继续。',
       tasks: tasks,
       countTowardActivity: true,
       syncWithTodayPlan: false,
@@ -292,10 +289,13 @@ class ReviewService {
   ) async {
     final context = await ReviewPlanner.loadContext(settings);
     final signals = ReviewPlanner.buildSignals(context);
-    final tasks = signals.formalReviewTasks.where((task) {
-      final state = context.learningStates[task.contentId];
-      return state?.stage == LearningStage.weak || state?.isWeak == true;
-    }).take(6).toList(growable: false);
+    final tasks = signals.formalReviewTasks
+        .where((task) {
+          final state = context.learningStates[task.contentId];
+          return state?.stage == LearningStage.weak || state?.isWeak == true;
+        })
+        .take(6)
+        .toList(growable: false);
     if (tasks.isEmpty) {
       return null;
     }
@@ -303,10 +303,10 @@ class ReviewService {
     return ReviewSession(
       id: 'weak:${DateTime.now().millisecondsSinceEpoch}',
       kind: ReviewSessionKind.weak,
-      title: settings.appLanguage == AppLanguage.en ? 'Weak Spots' : '薄弱项再练',
+      title: settings.appLanguage == AppLanguage.en ? 'Weak Spots' : '薄弱项加练',
       subtitle: settings.appLanguage == AppLanguage.en
-          ? 'Give the items that still feel shaky one gentle extra pass.'
-          : '把还不稳的点温和地再过一遍，更容易留下来。',
+          ? 'Give the items that still feel shaky one more pass.'
+          : '把还不稳的内容再过一遍。',
       tasks: tasks,
       countTowardActivity: true,
       syncWithTodayPlan: false,
@@ -331,8 +331,8 @@ class ReviewService {
       kind: ReviewSessionKind.typeFocus,
       title: _typeSessionTitle(settings, type),
       subtitle: settings.appLanguage == AppLanguage.en
-          ? 'Stay in one content type and keep the decision cost low.'
-          : '只看一种内容类型，少切换，脑子更轻松。',
+          ? 'Stay with one content type for a lower-effort pass.'
+          : '一次只看一种内容，复习更轻。',
       tasks: tasks,
       countTowardActivity: true,
       syncWithTodayPlan: false,
@@ -359,12 +359,10 @@ class ReviewService {
     return ReviewSession(
       id: 'lesson-preview:${lesson.id}:${DateTime.now().millisecondsSinceEpoch}',
       kind: ReviewSessionKind.lessonPreview,
-      title: settings.appLanguage == AppLanguage.en
-          ? 'Before This Lesson'
-          : '课前回顾',
+      title: settings.appLanguage == AppLanguage.en ? 'Lesson Warm-Up' : '课前热身',
       subtitle: settings.appLanguage == AppLanguage.en
           ? 'Review a couple of recent points first, then move into the lesson.'
-          : '先回顾两三个刚学过的点，再进入这节会更顺。',
+          : '先回顾两三个刚学过的点，再进入本课。',
       tasks: tasks,
       countTowardActivity: false,
       syncWithTodayPlan: true,
@@ -393,10 +391,10 @@ class ReviewService {
     return ReviewSession(
       id: 'lesson-wrap:${lesson.id}:${DateTime.now().millisecondsSinceEpoch}',
       kind: ReviewSessionKind.lessonWrapUp,
-      title: settings.appLanguage == AppLanguage.en ? 'Lesson Wrap-Up' : '课后巩固',
+      title: settings.appLanguage == AppLanguage.en ? 'Lesson Review' : '课后回顾',
       subtitle: settings.appLanguage == AppLanguage.en
-          ? 'A short reinforcement loop while this lesson is still fresh.'
-          : '趁这节内容还热，顺手再巩固一下会更容易记住。',
+          ? 'A short reinforcement pass while this lesson is still fresh.'
+          : '趁这节内容还新鲜，再快速回顾一遍。',
       tasks: tasks,
       countTowardActivity: true,
       syncWithTodayPlan: true,
@@ -420,8 +418,8 @@ class ReviewService {
       kind: ReviewSessionKind.single,
       title: settings.appLanguage == AppLanguage.en ? 'Quick Review' : '快速回顾',
       subtitle: settings.appLanguage == AppLanguage.en
-          ? 'Revisit just this one item and head back when you are ready.'
-          : '只看这一条，回顾完就能继续刚才的学习。',
+          ? 'Revisit this item, then head back when you are ready.'
+          : '只回顾这一条，结束后就能继续学习。',
       tasks: <ReviewTask>[task],
       countTowardActivity: false,
       syncWithTodayPlan: true,
@@ -865,17 +863,17 @@ class ReviewService {
     final english = settings.appLanguage == AppLanguage.en;
     switch (type) {
       case ReviewContentType.word:
-        return english ? 'Word Review' : '按单词复习';
+        return english ? 'Word Review' : '单词复习';
       case ReviewContentType.pronunciation:
-        return english ? 'Pronunciation Review' : '按发音复习';
+        return english ? 'Pronunciation Review' : '发音复习';
       case ReviewContentType.pair:
-        return english ? 'Distinction Review' : '按易混对复习';
+        return english ? 'Sound Contrast' : '辨音复习';
       case ReviewContentType.sentence:
-        return english ? 'Sentence Review' : '按句子复习';
+        return english ? 'Sentence Review' : '句子复习';
       case ReviewContentType.grammar:
-        return english ? 'Grammar Review' : '按语法复习';
+        return english ? 'Grammar Review' : '语法复习';
       case ReviewContentType.alphabet:
-        return english ? 'Alphabet Review' : '按字母复习';
+        return english ? 'Letter Review' : '字母复习';
     }
   }
 

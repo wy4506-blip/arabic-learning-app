@@ -7,21 +7,24 @@ class LearningRoutingPolicy {
   /// Decide home route based on progress overview and user state.
   ///
   /// Rules (in order of priority):
-  /// 1. !onboardingCompleted → onboarding + continueAlphabet
-  /// 2. shouldPrioritizeReview && completedLessonCount > 0 → reviewFirst + startReview
-  /// 3. totalLessonCount > 0 && completedLessonCount >= totalLessonCount → reviewFirst + startReview
-  /// 4. recommendedLessonId != null → newLearning + startLesson + targetLessonId=recommendedLessonId
-  /// 5. default → newLearning + startLesson + targetLessonId=currentLessonId ?? recommendedLessonId
+  /// 1. !onboardingCompleted || !alphabetCompleted → onboarding + continueAlphabet
+  /// 2. hasPendingFormalReview → reviewFirst + startReview
+  /// 3. hasConsolidationCandidates → phaseConsolidation + startReview
+  /// 4. totalLessonCount > 0 && completedLessonCount >= totalLessonCount → reviewFirst + startReview
+  /// 5. recommendedLessonId != null → newLearning + startLesson + targetLessonId=recommendedLessonId
+  /// 6. default → newLearning + startLesson + targetLessonId=currentLessonId ?? recommendedLessonId
   static LearningRoute decideHomeRoute({
+    required bool alphabetCompleted,
     required String? recommendedLessonId,
     required String? currentLessonId,
     required int totalLessonCount,
     required int completedLessonCount,
     required bool onboardingCompleted,
-    required bool shouldPrioritizeReview,
+    required bool hasPendingFormalReview,
+    required bool hasConsolidationCandidates,
   }) {
-    // Rule 1: !onboardingCompleted
-    if (!onboardingCompleted) {
+    // Rule 1: !onboardingCompleted || !alphabetCompleted
+    if (!onboardingCompleted || !alphabetCompleted) {
       return LearningRoute(
         mode: LearningMode.onboarding,
         primaryAction: LearningActionType.continueAlphabet,
@@ -30,17 +33,27 @@ class LearningRoutingPolicy {
       );
     }
 
-    // Rule 2: shouldPrioritizeReview && completedLessonCount > 0
-    if (shouldPrioritizeReview && completedLessonCount > 0) {
+    // Rule 2: hasPendingFormalReview
+    if (hasPendingFormalReview) {
       return LearningRoute(
         mode: LearningMode.reviewFirst,
         primaryAction: LearningActionType.startReview,
         targetLessonId: null,
-        decisionReason: 'high_pressure_review',
+        decisionReason: 'formal_review_due',
       );
     }
 
-    // Rule 3: totalLessonCount > 0 && completedLessonCount >= totalLessonCount
+    // Rule 3: hasConsolidationCandidates
+    if (hasConsolidationCandidates) {
+      return LearningRoute(
+        mode: LearningMode.phaseConsolidation,
+        primaryAction: LearningActionType.startReview,
+        targetLessonId: recommendedLessonId,
+        decisionReason: 'phase_consolidation',
+      );
+    }
+
+    // Rule 4: totalLessonCount > 0 && completedLessonCount >= totalLessonCount
     if (totalLessonCount > 0 && completedLessonCount >= totalLessonCount) {
       return LearningRoute(
         mode: LearningMode.reviewFirst,
@@ -50,7 +63,7 @@ class LearningRoutingPolicy {
       );
     }
 
-    // Rule 4: recommendedLessonId != null
+    // Rule 5: recommendedLessonId != null
     if (recommendedLessonId != null) {
       return LearningRoute(
         mode: LearningMode.newLearning,
@@ -60,7 +73,7 @@ class LearningRoutingPolicy {
       );
     }
 
-    // Rule 5: default
+    // Rule 6: default
     final fallbackLessonId = currentLessonId ?? recommendedLessonId;
     return LearningRoute(
       mode: LearningMode.newLearning,

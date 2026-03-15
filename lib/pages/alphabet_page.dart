@@ -245,8 +245,8 @@ class _AlphabetPageState extends State<AlphabetPage> {
                       _buildSummaryChip(
                         label: localizedText(
                           context,
-                          zh: '听读 + 书写 + 练习',
-                          en: 'Listen + Write + Drill',
+                          zh: '听读主线 + 书写巩固',
+                          en: 'Listening Path + Writing Support',
                         ),
                         icon: Icons.task_alt_rounded,
                       ),

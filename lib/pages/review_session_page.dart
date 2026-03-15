@@ -483,8 +483,8 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
       return widget.session.config.headerTitle ??
           localizedText(
             context,
-            zh: '热身复习',
-            en: 'Quick Warm-Up',
+            zh: '课前热身',
+            en: 'Lesson Warm-Up',
           );
     }
     return widget.session.title;
@@ -496,7 +496,7 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
           localizedText(
             context,
             zh: '先快速回顾，再进入下一课。',
-            en: 'Review quickly first, then move into the next lesson.',
+            en: 'Review a few key points first, then move into the next lesson.',
           );
     }
     return widget.session.subtitle;
@@ -507,20 +507,20 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
       return localizedText(
         context,
         zh: '热身完成，即将进入下一课',
-        en: 'Warm-Up Done, Opening the Next Lesson',
+        en: 'Warm-Up Complete, Opening the Next Lesson',
       );
     }
     if (_isFormalReview) {
       return _completedTodayPlan
           ? localizedText(
               context,
-              zh: '今日正式复习已完成',
-              en: 'Today\'s Formal Review Is Complete',
+              zh: '今日复习已完成',
+              en: 'Today\'s Review Is Complete',
             )
           : localizedText(
               context,
-              zh: '这轮正式复习已完成',
-              en: 'This Formal Review Pass Is Complete',
+              zh: '这轮复习已完成',
+              en: 'This Review Pass Is Complete',
             );
     }
     return _completedTodayPlan
@@ -548,27 +548,27 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
       return localizedText(
         context,
         zh: '今天建议先看的内容已经完成，可以回到课程继续学习。',
-        en: 'The suggested review for today is done. You can head back into learning with a clearer head.',
+        en: 'Today\'s suggested review is done. You can return to lessons now.',
       );
     }
     if (_canContinueToNextLesson) {
       return localizedText(
         context,
-        zh: '这轮正式复习已经完成，现在可以顺着进入下一课。',
-        en: 'This formal review pass is done. You can continue straight into the next lesson now.',
+        zh: '这轮复习已经完成，现在可以进入下一课。',
+        en: 'This review pass is done. You can continue into the next lesson now.',
       );
     }
     if (!_isFormalReview) {
       return localizedText(
         context,
-        zh: '这轮自由练习已经完成，可以继续课程，也可以再挑一组内容顺手练一遍。',
-        en: 'This free-practice pass is done. You can return to lessons or pick another small set.',
+        zh: '这轮练习已经完成，可以继续课程，也可以再挑一组内容。',
+        en: 'This practice pass is done. You can return to lessons or pick another set.',
       );
     }
     return localizedText(
       context,
-      zh: '这组内容已经回顾完成，可以先回到原本的学习路径。',
-      en: 'This set has been reviewed once more. You can return to your normal learning path now.',
+      zh: '这组内容已经回顾完成，可以回到原本的学习路径。',
+      en: 'This set has been reviewed. You can return to your learning path now.',
     );
   }
 
@@ -1109,7 +1109,7 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
       case ReviewContentType.pronunciation:
         return localizedText(context, zh: '发音', en: 'Pronunciation');
       case ReviewContentType.pair:
-        return localizedText(context, zh: '辨音', en: 'Contrast');
+        return localizedText(context, zh: '辨音', en: 'Sound Contrast');
       case ReviewContentType.sentence:
         return localizedText(context, zh: '句子', en: 'Sentence');
       case ReviewContentType.grammar:
@@ -1128,7 +1128,7 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
       case ReviewActionType.read:
         return localizedText(context, zh: '读一读', en: 'Read');
       case ReviewActionType.distinguish:
-        return localizedText(context, zh: '分一分', en: 'Distinguish');
+        return localizedText(context, zh: '辨一辨', en: 'Distinguish');
       case ReviewActionType.repeat:
         return localizedText(context, zh: '跟读', en: 'Repeat');
     }

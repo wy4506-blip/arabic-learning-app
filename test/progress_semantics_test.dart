@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:arabic_learning_app/data/sample_lessons.dart';
 import 'package:arabic_learning_app/models/app_settings.dart';
+import 'package:arabic_learning_app/models/learning_state_models.dart';
+import 'package:arabic_learning_app/models/review_models.dart';
 import 'package:arabic_learning_app/models/v2_lesson_progress_models.dart';
 import 'package:arabic_learning_app/services/progress_service.dart';
 import 'package:arabic_learning_app/view_models/learning_path_view_models.dart';
@@ -145,5 +147,87 @@ void main() {
     expect(currentPhase.canEnter, isTrue);
     expect(nextPhase.lesson?.id, lesson5.id);
     expect(nextPhase.canEnter, isTrue);
+  });
+
+  test('buildOverview promotes completed lessons to due_for_review from learning states', () {
+    final snapshot = buildSnapshot(
+      completedLessons: <String>{lesson1.id},
+      startedLessons: <String>{lesson1.id},
+      currentLessonId: lesson1.id,
+      currentGroupId: lesson1.unitId,
+      currentPhaseId: 'phase_u1',
+      lessonProgressRecords: <String, V2LessonProgressRecord>{
+        lesson1.id: V2LessonProgressRecord(
+          lessonId: lesson1.id,
+          status: V2LessonStatus.completed,
+        ),
+      },
+    );
+
+    final overview = ProgressService.buildOverview(
+      lessons: lessons,
+      snapshot: snapshot,
+      unlocked: true,
+      learningStates: <String, LearningContentState>{
+        'word:${lesson1.id}': LearningContentState(
+          contentId: 'word:${lesson1.id}',
+          type: ReviewContentType.word,
+          objectType: ReviewObjectType.wordReading,
+          lessonId: lesson1.id,
+          isStarted: true,
+          isCompleted: true,
+          needsReview: true,
+          isWeak: false,
+          isFavorited: false,
+          reviewPriority: 2,
+          stage: LearningStage.reviewDue,
+        ),
+      },
+    );
+
+    expect(overview.lessonStatusFor(lesson1.id), V2LessonStatus.dueForReview);
+    expect(overview.reviewDueLessonCount, 1);
+    expect(overview.recommendedLessonId, lesson2.id);
+  });
+
+  test('buildOverview returns lessons to the mainline after review is cleared', () {
+    final snapshot = buildSnapshot(
+      completedLessons: <String>{lesson1.id},
+      startedLessons: <String>{lesson1.id},
+      currentLessonId: lesson1.id,
+      currentGroupId: lesson1.unitId,
+      currentPhaseId: 'phase_u1',
+      lessonProgressRecords: <String, V2LessonProgressRecord>{
+        lesson1.id: V2LessonProgressRecord(
+          lessonId: lesson1.id,
+          status: V2LessonStatus.dueForReview,
+        ),
+      },
+    );
+
+    final overview = ProgressService.buildOverview(
+      lessons: lessons,
+      snapshot: snapshot,
+      unlocked: true,
+      learningStates: <String, LearningContentState>{
+        'word:${lesson1.id}': LearningContentState(
+          contentId: 'word:${lesson1.id}',
+          type: ReviewContentType.word,
+          objectType: ReviewObjectType.wordReading,
+          lessonId: lesson1.id,
+          isStarted: true,
+          isCompleted: true,
+          needsReview: false,
+          isWeak: false,
+          isFavorited: false,
+          reviewPriority: 0,
+          stage: LearningStage.stable,
+        ),
+      },
+    );
+
+    expect(overview.lessonStatusFor(lesson1.id), V2LessonStatus.completed);
+    expect(overview.reviewDueLessonCount, 0);
+    expect(overview.recommendedLessonId, lesson2.id);
   });
 }

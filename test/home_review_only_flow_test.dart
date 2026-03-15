@@ -31,7 +31,7 @@ void main() {
     );
 
     expect(find.text('Start Alphabet Learning'), findsOneWidget);
-    expect(find.text('Open Alphabet Groups'), findsOneWidget);
+    expect(find.text('Open Alphabet Path'), findsOneWidget);
     expect(find.text('Start Lesson 1'), findsNothing);
     expect(find.text('Start Formal Review'), findsNothing);
   });

@@ -52,7 +52,7 @@ void main() {
     await tester.pump();
 
     expect(
-      find.text('Warm-Up Done, Opening the Next Lesson'),
+      find.text('Warm-Up Complete, Opening the Next Lesson'),
       findsOneWidget,
     );
     expect(find.text('Enter Now'), findsOneWidget);
@@ -96,7 +96,7 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'I Can Say It'));
     await tester.pump();
 
-    expect(find.text('This Formal Review Pass Is Complete'), findsOneWidget);
+    expect(find.text('This Review Pass Is Complete'), findsOneWidget);
     expect(find.text('Enter Now'), findsNothing);
     expect(find.text('Back Home'), findsNothing);
     expect(find.text('Return to Learning'), findsOneWidget);
@@ -108,7 +108,7 @@ void main() {
     const session = ReviewSession(
       id: 'lesson-wrap:test',
       kind: ReviewSessionKind.lessonWrapUp,
-      title: 'Lesson Wrap-Up',
+      title: 'Lesson Review',
       subtitle: 'A short reinforcement loop.',
       tasks: <ReviewTask>[
         ReviewTask(
@@ -198,7 +198,7 @@ void main() {
     const session = ReviewSession(
       id: 'pair:test',
       kind: ReviewSessionKind.single,
-      title: 'Contrast Review',
+      title: 'Sound Contrast',
       subtitle: 'Split the pair clearly.',
       tasks: <ReviewTask>[
         ReviewTask(

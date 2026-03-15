@@ -7,6 +7,7 @@ import '../models/app_settings.dart';
 import '../models/dialogue_line.dart';
 import '../models/grammar_models.dart';
 import '../models/lesson.dart';
+import '../models/learning_state_models.dart';
 import '../models/review_models.dart';
 import '../models/v2_lesson_progress_models.dart';
 import '../models/word_item.dart';
@@ -16,6 +17,7 @@ import '../l10n/localized_text.dart';
 import '../services/audio_service.dart';
 import '../services/arabic_learning_display_service.dart';
 import '../services/grammar_service.dart';
+import '../services/learning_state_service.dart';
 import '../services/learning_routing_models.dart';
 import '../services/learning_routing_policy.dart';
 import '../services/lesson_progress_service.dart';
@@ -81,21 +83,25 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
     final results = await Future.wait<dynamic>([
       ProgressService.getSnapshot(),
       LessonService().loadLessons(),
+      LearningStateService.getAllStates(),
       GrammarService.getPagesForLesson(widget.lesson.id),
       ReviewService.createLessonPreviewSession(widget.settings, widget.lesson),
       ReviewService.createLessonWrapUpSession(widget.settings, widget.lesson),
     ]);
     final snapshot = results[0] as ProgressSnapshot;
     final lessons = results[1] as List<Lesson>;
+    final learningStates = results[2] as Map<String, LearningContentState>;
     final lessonStatus = ProgressService.resolveLessonStatus(
       lesson: widget.lesson,
       snapshot: snapshot,
       unlocked: _unlocked,
+      learningStates: learningStates,
     );
     final overview = ProgressService.buildOverview(
       lessons: lessons,
       snapshot: snapshot,
       unlocked: _unlocked,
+      learningStates: learningStates,
     );
     final postLessonRoute = _resolvePostLessonRoute(
       resultStatus: lessonStatus,
@@ -105,10 +111,10 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
     setState(() {
       _lessonStatus = lessonStatus;
       _postLessonRoute = postLessonRoute;
-      _relatedGrammarPages = results[2] as List<GrammarPageContent>;
+      _relatedGrammarPages = results[3] as List<GrammarPageContent>;
       _lessonPreviewTasks =
-          ((results[3] as ReviewSession?)?.tasks ?? const <ReviewTask>[]);
-      _lessonWrapUpSession = results[4] as ReviewSession?;
+          ((results[4] as ReviewSession?)?.tasks ?? const <ReviewTask>[]);
+      _lessonWrapUpSession = results[5] as ReviewSession?;
       _lessonWrapUpTasks = _lessonWrapUpSession?.tasks ?? const <ReviewTask>[];
     });
   }
@@ -117,15 +123,13 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
     required V2LessonStatus resultStatus,
     required String? nextLessonId,
   }) {
-    final isPostLessonState =
-        resultStatus == V2LessonStatus.coreCompleted ||
+    final isPostLessonState = resultStatus == V2LessonStatus.coreCompleted ||
         resultStatus.isCompletedLike;
     if (!isPostLessonState) {
       return null;
     }
 
-    final targetReached =
-        resultStatus != V2LessonStatus.coreCompleted &&
+    final targetReached = resultStatus != V2LessonStatus.coreCompleted &&
         resultStatus != V2LessonStatus.dueForReview;
 
     return LearningRoutingPolicy.decidePostLessonRoute(
