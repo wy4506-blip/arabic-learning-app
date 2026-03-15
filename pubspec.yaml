@@ -26,42 +26,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/data/
-    - assets/audio/alphabet/letter/
-    - assets/audio/alphabet/pronunciation/
-    - assets/audio/alphabet/word/
-    - assets/audio/lesson_01/word/
-    - assets/audio/lesson_01/sentence/
-    - assets/audio/lesson_02/word/
-    - assets/audio/lesson_02/sentence/
-    - assets/audio/lesson_03/word/
-    - assets/audio/lesson_03/sentence/
-    - assets/audio/lesson_04/word/
-    - assets/audio/lesson_04/sentence/
-    - assets/audio/lesson_05/word/
-    - assets/audio/lesson_05/sentence/
-    - assets/audio/lesson_06/word/
-    - assets/audio/lesson_06/sentence/
-    - assets/audio/lesson_07/word/
-    - assets/audio/lesson_07/sentence/
-    - assets/audio/lesson_08/word/
-    - assets/audio/lesson_08/sentence/
-    - assets/audio/lesson_09/word/
-    - assets/audio/lesson_09/sentence/
-    - assets/audio/lesson_10/word/
-    - assets/audio/lesson_10/sentence/
-    - assets/audio/lesson_11/word/
-    - assets/audio/lesson_11/sentence/
-    - assets/audio/lesson_12/word/
-    - assets/audio/lesson_12/sentence/
-    - assets/audio/lesson_13/word/
-    - assets/audio/lesson_13/sentence/
-    - assets/audio/lesson_14/word/
-    - assets/audio/lesson_14/sentence/
-    - assets/audio/lesson_15/word/
-    - assets/audio/lesson_15/sentence/
-    - assets/audio/lesson_16/word/
-    - assets/audio/lesson_16/sentence/
-    - assets/audio/words/
+    - assets/audio/
     - assets/grammar/
   fonts:
     - family: ArabicDisplay

@@ -114,6 +114,102 @@ void main() {
     expect(ttsCalls, isEmpty);
   });
 
+  test('prefers manifest human audio before explicit ai asset paths', () async {
+    final assetCalls = <String>[];
+    final ttsCalls = <String>[];
+
+    AudioManifestService.debugLoadTestData(
+      manifestItems: <Map<String, dynamic>>[
+        <String, dynamic>{
+          'id': 'lesson_sentence_human_normal',
+          'scope': 'lesson',
+          'lessonId': 'lesson_03',
+          'type': 'sentence',
+          'speed': 'normal',
+          'textAr': 'هٰذَا كِتَابٌ جَدِيدٌ.',
+          'textPlain': 'هذا كتاب جديد',
+          'relativeAssetPath':
+              'lesson_03/sentence/l03_s_001_normal__human__20260314-stage01.mp3',
+          'voiceType': 'human',
+        },
+        <String, dynamic>{
+          'id': 'lesson_sentence_ai_normal',
+          'scope': 'lesson',
+          'lessonId': 'lesson_03',
+          'type': 'sentence',
+          'speed': 'normal',
+          'textAr': 'هٰذَا كِتَابٌ جَدِيدٌ.',
+          'textPlain': 'هذا كتاب جديد',
+          'relativeAssetPath': 'lesson_03/sentence/l03_s_001_normal.mp3',
+          'voiceType': 'ai',
+        },
+      ],
+      bundledAssetPaths: <String>{
+        'assets/audio/lesson_03/sentence/l03_s_001_normal__human__20260314-stage01.mp3',
+        'assets/audio/lesson_03/sentence/u1l3_word_book_class_example_normal.mp3',
+      },
+    );
+    AudioService.debugSetPlaybackOverrides(
+      assetPlaybackHandler: (path) async => assetCalls.add(path),
+      ttsPlaybackHandler: (text) async => ttsCalls.add(text),
+      windowsTtsDisabled: false,
+    );
+
+    await AudioService.playLearningText(
+      const LearningAudioRequest.lesson(
+        lessonSequence: 3,
+        type: 'sentence',
+        asset: 'lesson_03/sentence/u1l3_word_book_class_example_normal.mp3',
+        textAr: 'هٰذَا كِتَابٌ جَدِيدٌ.',
+        textPlain: 'هذا كتاب جديد',
+      ),
+    );
+
+    expect(
+      assetCalls,
+      <String>[
+        'audio/lesson_03/sentence/l03_s_001_normal__human__20260314-stage01.mp3',
+      ],
+    );
+    expect(ttsCalls, isEmpty);
+  });
+
+  test('uses explicit asset as fallback when manifest has no matching entry',
+      () async {
+    final assetCalls = <String>[];
+    final ttsCalls = <String>[];
+
+    AudioManifestService.debugLoadTestData(
+      manifestItems: const <Map<String, dynamic>>[],
+      bundledAssetPaths: <String>{
+        'assets/audio/lesson_03/sentence/u1l3_word_book_class_example_normal.mp3',
+      },
+    );
+    AudioService.debugSetPlaybackOverrides(
+      assetPlaybackHandler: (path) async => assetCalls.add(path),
+      ttsPlaybackHandler: (text) async => ttsCalls.add(text),
+      windowsTtsDisabled: false,
+    );
+
+    await AudioService.playLearningText(
+      const LearningAudioRequest.lesson(
+        lessonSequence: 3,
+        type: 'sentence',
+        asset: 'lesson_03/sentence/u1l3_word_book_class_example_normal.mp3',
+        textAr: 'هٰذَا كِتَابٌ جَدِيدٌ.',
+        textPlain: 'هذا كتاب جديد',
+      ),
+    );
+
+    expect(
+      assetCalls,
+      <String>[
+        'audio/lesson_03/sentence/u1l3_word_book_class_example_normal.mp3'
+      ],
+    );
+    expect(ttsCalls, isEmpty);
+  });
+
   test('uses tts only after all asset fallbacks are exhausted', () async {
     final assetCalls = <String>[];
     final ttsCalls = <String>[];

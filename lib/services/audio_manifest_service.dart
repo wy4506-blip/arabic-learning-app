@@ -143,7 +143,7 @@ class AudioManifestService {
     await _ensureBundledAssetsLoaded();
 
     final candidates = <AudioAssetCandidate>[];
-    final seen = <String>{};
+    final seenRequestedPaths = <String>{};
 
     Future<void> addExplicitCandidate(String value) async {
       final normalized = _normalizeRelativeAssetPath(value);
@@ -151,27 +151,27 @@ class AudioManifestService {
         return;
       }
 
-      final playable = await resolveBundledRelativeAssetPath(normalized);
-      final key = 'explicit|$normalized';
-      if (seen.add(key)) {
-        candidates.add(
-          AudioAssetCandidate(
-            origin: 'explicit',
-            requestedRelativePath: normalized,
-            playableRelativePath: playable,
-            voiceType: 'explicit',
-            speed: 'explicit',
-          ),
-        );
+      if (!seenRequestedPaths.add(normalized)) {
+        return;
       }
+
+      final playable = await resolveBundledRelativeAssetPath(normalized);
+      candidates.add(
+        AudioAssetCandidate(
+          origin: 'explicit',
+          requestedRelativePath: normalized,
+          playableRelativePath: playable,
+          voiceType: 'explicit',
+          speed: 'explicit',
+        ),
+      );
     }
 
     final normalizedExplicit = explicitAsset?.trim() ?? '';
-    if (normalizedExplicit.isNotEmpty) {
-      await addExplicitCandidate(normalizedExplicit);
-    }
-
     if (_items == null) {
+      if (normalizedExplicit.isNotEmpty) {
+        await addExplicitCandidate(normalizedExplicit);
+      }
       return candidates;
     }
 
@@ -190,11 +190,13 @@ class AudioManifestService {
     );
 
     for (final candidate in manifestCandidates) {
-      final key =
-          '${candidate.origin}|${candidate.manifestId}|${candidate.requestedRelativePath}';
-      if (seen.add(key)) {
+      if (seenRequestedPaths.add(candidate.requestedRelativePath)) {
         candidates.add(candidate);
       }
+    }
+
+    if (normalizedExplicit.isNotEmpty) {
+      await addExplicitCandidate(normalizedExplicit);
     }
 
     return candidates;
