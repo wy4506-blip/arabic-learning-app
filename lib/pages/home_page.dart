@@ -206,7 +206,10 @@ class _HomePageState extends State<HomePage> {
     await _load();
   }
 
-  Future<void> _openNextTask(Lesson? lesson) async {
+  Future<void> _openNextTask(
+    Lesson? lesson, {
+    bool fromHomeTodayPlan = false,
+  }) async {
     final nextLesson = lesson;
     if (nextLesson == null) {
       await _openAlphabetHub();
@@ -233,6 +236,7 @@ class _HomePageState extends State<HomePage> {
           lesson: nextLesson,
           settings: widget.settings,
           isUnlocked: _unlocked,
+          fromHomeTodayPlan: fromHomeTodayPlan,
         ),
       ),
     );
@@ -253,7 +257,7 @@ class _HomePageState extends State<HomePage> {
     }
     if (session == null) {
       if (nextLesson != null) {
-        await _openNextTask(nextLesson);
+        await _openNextTask(nextLesson, fromHomeTodayPlan: true);
       } else {
         _openReviewTab();
       }
@@ -503,7 +507,10 @@ class _HomePageState extends State<HomePage> {
           en: 'View Lessons',
         ),
         actionType: vm.HomePrimaryActionType.continueLesson,
-        onPrimaryTap: () => _openNextTask(nextLesson),
+        onPrimaryTap: () => _openNextTask(
+          nextLesson,
+          fromHomeTodayPlan: true,
+        ),
         onSecondaryTap: _openLessonsTab,
       );
     }

@@ -49,5 +49,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(LessonDetailPage), findsOneWidget);
+    final detailPage = tester.widget<LessonDetailPage>(
+      find.byType(LessonDetailPage),
+    );
+    expect(detailPage.fromHomeTodayPlan, isTrue);
   });
 }

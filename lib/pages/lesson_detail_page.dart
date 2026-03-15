@@ -38,12 +38,14 @@ class LessonDetailPage extends StatefulWidget {
   final Lesson lesson;
   final AppSettings settings;
   final bool isUnlocked;
+  final bool fromHomeTodayPlan;
 
   const LessonDetailPage({
     super.key,
     required this.lesson,
     required this.settings,
     required this.isUnlocked,
+    this.fromHomeTodayPlan = false,
   });
 
   @override
@@ -130,7 +132,7 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
       resultStatus: resultStatus,
       targetReached: targetReached,
       nextLessonId: nextLessonId,
-      fromHomeTodayPlan: false,
+      fromHomeTodayPlan: widget.fromHomeTodayPlan,
     );
   }
 
