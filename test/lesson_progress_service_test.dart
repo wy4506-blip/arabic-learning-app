@@ -102,6 +102,8 @@ void main() {
   test(
       'attachReviewSeeds keeps completed lessons completed for future-due seeds',
       () async {
+    final futureDueAt = DateTime.now().add(const Duration(days: 1));
+
     await LessonProgressService.applyEvaluation(
       lessonId: 'V2-U1-09',
       evaluation: LessonCompletionEvaluation(
@@ -129,7 +131,7 @@ void main() {
           actionType: ReviewActionType.distinguish,
           itemRefId: 'demonstrative_pair',
           initialStage: LearningStage.reviewDue,
-          dueAt: DateTime(2026, 3, 16, 7),
+          dueAt: futureDueAt,
         ),
       ],
     );

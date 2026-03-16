@@ -29,7 +29,6 @@ import '../services/vocab_service.dart';
 import '../theme/app_arabic_typography.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_widgets.dart';
-import '../widgets/arabic_text_with_audio.dart';
 import '../widgets/review/lesson_micro_review_card.dart';
 import 'grammar_detail_page.dart';
 import 'lesson_quiz_page.dart';
@@ -854,22 +853,14 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                ArabicTextWithAudio(
-                                  textAr: _displayWord(word.arabic),
-                                  request: LearningAudioRequest.lesson(
-                                    lessonSequence: widget.lesson.sequence,
-                                    type: 'word',
-                                    asset: word.audioRef.asset,
-                                    textAr: word.arabic,
-                                    textPlain: word.text.plain,
-                                    debugLabel: 'lesson_detail_word_card',
-                                  ),
-                                  variant: ArabicAudioTextVariant.word,
+                                ArabicText.word(
+                                  _displayWord(word.arabic),
                                   style: const TextStyle(
                                     fontSize: 28,
                                     height: 1.45,
                                     fontWeight: FontWeight.w600,
                                   ),
+                                  textAlign: TextAlign.right,
                                 ),
                                 const SizedBox(height: 6),
                                 ArabicText.label(
@@ -923,10 +914,6 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
                                       }
                                     });
                                   },
-                                ),
-                                const SizedBox(width: 10),
-                                _AudioActionButton(
-                                  onTap: () => _playWordAudio(word),
                                 ),
                               ],
                             ),
@@ -1813,27 +1800,38 @@ class _LockedLessonGate extends StatelessWidget {
 
 class _AudioActionButton extends StatelessWidget {
   final VoidCallback onTap;
+  final double size;
 
   const _AudioActionButton({
     required this.onTap,
+    this.size = 38,
   });
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: context.strings.t('common.play_audio'),
-      onPressed: onTap,
-      icon: Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-          color: AppTheme.bgCardSoft,
+    return Tooltip(
+      message: context.strings.t('common.play_audio'),
+      child: Material(
+        color: AppTheme.bgCardSoft,
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
+          side: BorderSide(
+            color: AppTheme.accentMintDark.withValues(alpha: 0.12),
+          ),
         ),
-        child: const Icon(
-          Icons.volume_up_rounded,
-          size: 20,
-          color: AppTheme.accentMintDark,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: onTap,
+          child: SizedBox(
+            width: size,
+            height: size,
+            child: const Icon(
+              Icons.volume_up_rounded,
+              size: 20,
+              color: AppTheme.accentMintDark,
+            ),
+          ),
         ),
       ),
     );

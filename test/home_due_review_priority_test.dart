@@ -98,10 +98,8 @@ void main() {
       },
     );
 
-    expect(
-      find.widgetWithText(FilledButton, 'Start Today\'s Review'),
-      findsOneWidget,
-    );
+    expect(find.widgetWithText(FilledButton, 'Start Pilot Review'),
+        findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'Start Warm-Up'), findsNothing);
   });
 }

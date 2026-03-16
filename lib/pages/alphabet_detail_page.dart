@@ -4,6 +4,7 @@ import '../app_scope.dart';
 import '../l10n/alphabet_content_localizer.dart';
 import '../l10n/localized_text.dart';
 import '../models/alphabet_group.dart';
+import '../services/audio_service.dart';
 import '../theme/app_arabic_typography.dart';
 import '../theme/app_theme.dart';
 import '../widgets/alphabet_pronunciation_card.dart';
@@ -172,14 +173,18 @@ class AlphabetDetailPage extends StatelessWidget {
               children: [
                 Expanded(
                   child: _ActionCard(
-                    icon: Icons.volume_up_rounded,
+                    icon: Icons.headphones_rounded,
                     color: const Color(0xFF4C7CF0),
                     background: const Color(0xFFE9F1FF),
-                    title: localizedText(context, zh: '听读', en: 'Listen'),
+                    title: localizedText(
+                      context,
+                      zh: '进入听读',
+                      en: 'Open Listening Practice',
+                    ),
                     subtitle: localizedText(
                       context,
-                      zh: '13 项标准发音与播放',
-                      en: '13 standard forms with playback',
+                      zh: '进入 13 项标准发音与跟读训练',
+                      en: 'Open the 13 sound forms and shadowing practice',
                     ),
                     onTap: () {
                       Navigator.push(
@@ -198,7 +203,11 @@ class AlphabetDetailPage extends StatelessWidget {
                     icon: Icons.edit_rounded,
                     color: AppTheme.deepAccent,
                     background: const Color(0xFFE8F5F0),
-                    title: localizedText(context, zh: '书写', en: 'Write'),
+                    title: localizedText(
+                      context,
+                      zh: '进入书写',
+                      en: 'Open Writing Practice',
+                    ),
                     subtitle: localizedText(
                       context,
                       zh: '四种字形与连写规则',

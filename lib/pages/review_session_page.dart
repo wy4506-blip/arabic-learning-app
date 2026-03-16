@@ -693,25 +693,7 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
               if (task.arabicText != null &&
                   task.arabicText!.trim().isNotEmpty) ...[
                 Center(
-                  child: ArabicTextWithAudio(
-                    textAr: task.arabicText!,
-                    request: LearningAudioRequest.general(
-                      scope: 'review',
-                      type: task.type == ReviewContentType.word
-                          ? 'word'
-                          : 'sentence',
-                      textAr: task.arabicText!,
-                      textPlain: task.audioQueryText ?? task.arabicText!,
-                      debugLabel: 'review_task_prompt',
-                    ),
-                    variant: ArabicAudioTextVariant.sentence,
-                    style: const TextStyle(
-                      fontSize: 38,
-                      height: 1.55,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+                  child: _buildTaskPromptText(context, task),
                 ),
                 const SizedBox(height: 12),
               ],
@@ -920,6 +902,44 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
           ),
         );
     }
+  }
+
+  Widget _buildTaskPromptText(BuildContext context, ReviewTask task) {
+    final usesGuideAudio = switch (task.actionType) {
+      ReviewActionType.listen => true,
+      ReviewActionType.repeat => true,
+      ReviewActionType.read => true,
+      ReviewActionType.distinguish => true,
+      ReviewActionType.recognize => false,
+    };
+
+    final promptStyle = const TextStyle(
+      fontSize: 38,
+      height: 1.55,
+      fontWeight: FontWeight.w600,
+    );
+
+    if (usesGuideAudio) {
+      return ArabicText.sentence(
+        task.arabicText!,
+        style: promptStyle,
+        textAlign: TextAlign.center,
+      );
+    }
+
+    return ArabicTextWithAudio(
+      textAr: task.arabicText!,
+      request: LearningAudioRequest.general(
+        scope: 'review',
+        type: task.type == ReviewContentType.word ? 'word' : 'sentence',
+        textAr: task.arabicText!,
+        textPlain: task.audioQueryText ?? task.arabicText!,
+        debugLabel: 'review_task_prompt',
+      ),
+      variant: ArabicAudioTextVariant.sentence,
+      style: promptStyle,
+      textAlign: TextAlign.center,
+    );
   }
 
   List<String> _pairItems(ReviewTask task) {

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../app_scope.dart';
+import '../data/v2_micro_lessons.dart';
 import '../features/onboarding/models/onboarding_state.dart';
 import '../l10n/localized_text.dart';
+import '../l10n/v2_micro_lesson_localizer.dart';
 import '../models/app_settings.dart';
 import '../models/lesson.dart';
 import '../models/learning_state_models.dart';
 import '../models/review_models.dart';
+import '../models/v2_micro_lesson.dart';
 import '../services/alphabet_progress_service.dart';
 import '../services/alphabet_service.dart';
 import '../services/lesson_service.dart';
@@ -15,6 +18,7 @@ import '../services/progress_service.dart';
 import '../services/review_service.dart';
 import '../services/review_sync_service.dart';
 import '../services/unlock_service.dart';
+import '../services/v2_learning_snapshot_service.dart';
 import '../theme/app_arabic_typography.dart';
 import '../theme/app_theme.dart';
 import '../view_models/learning_path_view_models.dart' as vm;
@@ -25,6 +29,8 @@ import 'alphabet_page.dart';
 import 'lesson_detail_page.dart';
 import 'review_session_page.dart';
 import 'unlock_page.dart';
+import 'v2_micro_lesson_page.dart';
+import 'v2_review_entry_page.dart';
 
 const Color _homeApricot = Color(0xFFFFF0E3);
 const Color _homeMint = Color(0xFFE3F5ED);
@@ -102,6 +108,8 @@ class _HomePageState extends State<HomePage> {
     dueCount: 0,
     overdueCount: 0,
   );
+  Map<String, LearningContentState> _learningStates =
+      const <String, LearningContentState>{};
 
   @override
   void initState() {
@@ -117,7 +125,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _handleReviewChange() {
-    _refreshReviewDashboard();
+    _load();
   }
 
   Future<void> _load() async {
@@ -191,8 +199,7 @@ class _HomePageState extends State<HomePage> {
       final unlocked = results[0] as bool;
       final lessons = results[1] as List<Lesson>;
       final progress = results[2] as ProgressSnapshot;
-      final learningStates =
-          results[7] as Map<String, LearningContentState>;
+      final learningStates = results[7] as Map<String, LearningContentState>;
       final progressOverview = ProgressService.buildOverview(
         lessons: lessons,
         snapshot: progress,
@@ -208,6 +215,7 @@ class _HomePageState extends State<HomePage> {
         _alphabetProgress = results[4] as AlphabetLearningSnapshot;
         _reviewEntry = results[5] as ReviewEntrySnapshot;
         _learningStateSummary = results[6] as LearningStateSummary;
+        _learningStates = learningStates;
         _progressOverview = progressOverview;
         _loading = false;
       });
@@ -236,6 +244,7 @@ class _HomePageState extends State<HomePage> {
           dueCount: 0,
           overdueCount: 0,
         );
+        _learningStates = const <String, LearningContentState>{};
         _loading = false;
       });
     }
@@ -363,6 +372,21 @@ class _HomePageState extends State<HomePage> {
     await _load();
   }
 
+  Future<void> _openV2MicroLesson(String lessonId) async {
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => V2MicroLessonPage(
+          lessonId: lessonId,
+          settings: widget.settings,
+        ),
+      ),
+    );
+    if (result == true) {
+      await _load();
+    }
+  }
+
   void _openLessonsTab() => widget.onOpenTab(1);
 
   void _openReviewTab() => widget.onOpenTab(2);
@@ -418,6 +442,26 @@ class _HomePageState extends State<HomePage> {
       context,
       MaterialPageRoute(
         builder: (_) => ReviewSessionPage(session: session),
+      ),
+    );
+    if (result == true) {
+      await _load();
+    }
+  }
+
+  Future<void> _openV2ReviewEntry(List<V2DueReviewItem> dueReviewItems) async {
+    if (dueReviewItems.isEmpty) {
+      await _openStandaloneReviewFlow();
+      return;
+    }
+
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => V2ReviewEntryPage(
+          settings: widget.settings,
+          dueReviewItems: dueReviewItems,
+        ),
       ),
     );
     if (result == true) {
@@ -492,6 +536,189 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  bool get _shouldUseV2PrimaryEntry {
+    return widget.onboardingState.hasCompletedFirstExperience &&
+        _alphabetProgress.isStageComplete;
+  }
+
+  HomeMainCardState _buildV2PrimaryCardState({
+    required V2LearningSnapshot snapshot,
+  }) {
+    final recommendedLessonId = snapshot.recommendedLessonId;
+    final emptyTitle = localizedText(
+      context,
+      zh: '当前没有新的样板课',
+      en: 'No pilot lesson is queued right now',
+    );
+    String recommendedLessonTitle = emptyTitle;
+    if (recommendedLessonId != null) {
+      for (final lesson in v2PilotMicroLessons) {
+        if (lesson.lessonId == recommendedLessonId) {
+          recommendedLessonTitle = V2MicroLessonLocalizer.lessonTitle(
+            lesson,
+            widget.settings.appLanguage,
+          );
+          break;
+        }
+      }
+      if (recommendedLessonTitle == emptyTitle) {
+        recommendedLessonTitle = recommendedLessonId;
+      }
+    }
+
+    final completedCount = snapshot.lessonStatuses.values
+        .where((status) => status.isCompletedLike)
+        .length;
+    final totalCount = snapshot.lessonStatuses.length;
+
+    final String buttonText;
+    final VoidCallback onPrimaryTap;
+    final String title;
+    final String description;
+    switch (snapshot.recommendedAction.actionType) {
+      case V2RecommendedActionType.startLesson:
+        title = recommendedLessonTitle;
+        description = localizedText(
+          context,
+          zh: '首页现在直接给出样板主线里的下一个真实动作。',
+          en: 'Home now sends you straight into the next real action in the pilot path.',
+        );
+        buttonText = localizedText(
+          context,
+          zh: '开始这节 V2 小课',
+          en: 'Start This V2 Lesson',
+        );
+        onPrimaryTap = recommendedLessonId == null
+            ? _openLessonsTab
+            : () => _openV2MicroLesson(recommendedLessonId);
+        break;
+      case V2RecommendedActionType.continueLesson:
+        title = recommendedLessonTitle;
+        description = localizedText(
+          context,
+          zh: '你还有一节进行中的样板课，先把它走完。',
+          en: 'You already have a pilot lesson in progress. Finish that first.',
+        );
+        buttonText = localizedText(
+          context,
+          zh: '继续这节 V2 小课',
+          en: 'Continue This V2 Lesson',
+        );
+        onPrimaryTap = recommendedLessonId == null
+            ? _openLessonsTab
+            : () => _openV2MicroLesson(recommendedLessonId);
+        break;
+      case V2RecommendedActionType.startReview:
+        title = localizedText(
+          context,
+          zh: '先完成样板复习',
+          en: 'Clear Pilot Review First',
+        );
+        description = localizedText(
+          context,
+          zh: '系统检测到样板链路里已有到期或薄弱复习，先处理它，再继续主线。',
+          en: 'The pilot path has due or weak review items. Clear them first, then continue the mainline.',
+        );
+        buttonText = localizedText(
+          context,
+          zh: '开始样板复习',
+          en: 'Start Pilot Review',
+        );
+        onPrimaryTap = snapshot.dueReviewItems.isEmpty
+            ? _openStandaloneReviewFlow
+            : () => _openV2ReviewEntry(snapshot.dueReviewItems);
+        break;
+      case V2RecommendedActionType.startConsolidation:
+        title = localizedText(
+          context,
+          zh: '先做样板巩固',
+          en: 'Consolidate Before Advancing',
+        );
+        description = localizedText(
+          context,
+          zh: '当前阶段需要先做一轮简短巩固，再进入后续新课。',
+          en: 'This phase needs a short consolidation pass before moving on.',
+        );
+        buttonText = localizedText(
+          context,
+          zh: '先做巩固',
+          en: 'Start Consolidation',
+        );
+        onPrimaryTap = _openStandaloneReviewFlow;
+        break;
+      case V2RecommendedActionType.startNextPhase:
+        title = localizedText(
+          context,
+          zh: '进入下一阶段',
+          en: 'Advance to the Next Phase',
+        );
+        description = localizedText(
+          context,
+          zh: '当前样板阶段已经走通，可以进入下一段内容。',
+          en: 'The current pilot phase is complete. You can move into the next phase.',
+        );
+        buttonText = localizedText(
+          context,
+          zh: '进入下一阶段',
+          en: 'Start Next Phase',
+        );
+        onPrimaryTap = _openLessonsTab;
+        break;
+      case V2RecommendedActionType.noAction:
+        title = emptyTitle;
+        description = localizedText(
+          context,
+          zh: '当前没有新的主动作可执行，可以查看完整学习路径。',
+          en: 'There is no new primary action right now. You can inspect the full learning path.',
+        );
+        buttonText = localizedText(
+          context,
+          zh: '查看学习路径',
+          en: 'View Learning Path',
+        );
+        onPrimaryTap = _openLessonsTab;
+        break;
+    }
+
+    return HomeMainCardState(
+      badgeText: localizedText(
+        context,
+        zh: 'V2 样板主线',
+        en: 'V2 Pilot Path',
+      ),
+      title: title,
+      arabicPreview: null,
+      nextStepDescription: description,
+      progressText: localizedText(
+        context,
+        zh: '样板进度 $completedCount/$totalCount',
+        en: 'Pilot progress $completedCount/$totalCount',
+      ),
+      reviewText: snapshot.dueReviewItems.isEmpty
+          ? null
+          : localizedText(
+              context,
+              zh: '待复习 ${snapshot.dueReviewItems.length} 项',
+              en: snapshot.dueReviewItems.length == 1
+                  ? '1 item due'
+                  : '${snapshot.dueReviewItems.length} items due',
+            ),
+      progressValue: totalCount == 0 ? null : completedCount / totalCount,
+      primaryButtonText: buttonText,
+      secondaryText: localizedText(
+        context,
+        zh: '查看完整学习路径',
+        en: 'See Full Learning Path',
+      ),
+      actionType: snapshot.recommendedAction.actionType ==
+              V2RecommendedActionType.startReview
+          ? vm.HomePrimaryActionType.startReview
+          : vm.HomePrimaryActionType.continueLesson,
+      onPrimaryTap: onPrimaryTap,
+      onSecondaryTap: _openLessonsTab,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) {
@@ -507,10 +734,19 @@ class _HomePageState extends State<HomePage> {
       learningStateSummary: _learningStateSummary,
     );
 
-    final mainCardState = _buildPrimaryCardState(
-      snapshot: snapshot,
-      reviewPlan: _reviewDashboard?.summary.todayPlan,
+    final v2Snapshot = V2LearningSnapshotService.buildSnapshot(
+      lessons: v2PilotMicroLessons,
+      lessonRecords: _progress.lessonProgressRecords,
+      learningStates: _learningStates,
+      reviewEntry: _reviewEntry,
     );
+
+    final mainCardState = _shouldUseV2PrimaryEntry
+        ? _buildV2PrimaryCardState(snapshot: v2Snapshot)
+        : _buildPrimaryCardState(
+            snapshot: snapshot,
+            reviewPlan: _reviewDashboard?.summary.todayPlan,
+          );
 
     return Scaffold(
       body: SafeArea(
@@ -668,7 +904,6 @@ class _HomeMainLearningCard extends StatelessWidget {
     );
   }
 }
-
 
 class _HomeStatusBadge extends StatelessWidget {
   final String text;

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:arabic_learning_app/app_scope.dart';
 import 'package:arabic_learning_app/models/app_settings.dart';
+import 'package:arabic_learning_app/services/alphabet_service.dart';
 
 const AppSettings kEnglishTestSettings = AppSettings(
   appLanguage: AppLanguage.en,
@@ -69,6 +70,26 @@ Future<void> pumpLocalizedTestPage(
 
   await tester.pump();
   await pumpUntilLoaded(tester);
+}
+
+Future<List<String>> loadAllAlphabetLetters() async {
+  final groups = await AlphabetService.loadAlphabetGroups();
+  return groups
+      .expand((group) => group.letters)
+      .map((letter) => letter.arabic)
+      .toList(growable: false);
+}
+
+Map<String, Object> completedAlphabetProgressPrefs(
+  List<String> allLetters, {
+  Map<String, Object> extra = const <String, Object>{},
+}) {
+  return <String, Object>{
+    'alphabet_progress_viewed_letters_v1': allLetters,
+    'alphabet_progress_listen_letters_v1': allLetters,
+    'alphabet_progress_write_letters_v1': allLetters,
+    ...extra,
+  };
 }
 
 String collectVisibleText(WidgetTester tester) {

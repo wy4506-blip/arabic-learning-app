@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:arabic_learning_app/features/onboarding/models/onboarding_state.dart';
 import 'package:arabic_learning_app/pages/home_page.dart';
-import 'package:arabic_learning_app/pages/lesson_detail_page.dart';
+import 'package:arabic_learning_app/pages/v2_micro_lesson_page.dart';
 import 'package:arabic_learning_app/services/alphabet_service.dart';
 
 import 'test_helpers.dart';
@@ -42,16 +42,12 @@ void main() {
       },
     );
 
-    expect(find.text('Continue Learning'), findsOneWidget);
+    expect(find.text('Start This V2 Lesson'), findsOneWidget);
     expect(find.text('Start Formal Review'), findsNothing);
 
-    await tester.tap(find.text('Continue Learning').first);
+    await tester.tap(find.text('Start This V2 Lesson').first);
     await tester.pumpAndSettle();
 
-    expect(find.byType(LessonDetailPage), findsOneWidget);
-    final detailPage = tester.widget<LessonDetailPage>(
-      find.byType(LessonDetailPage),
-    );
-    expect(detailPage.fromHomeTodayPlan, isTrue);
+    expect(find.byType(V2MicroLessonPage), findsOneWidget);
   });
 }

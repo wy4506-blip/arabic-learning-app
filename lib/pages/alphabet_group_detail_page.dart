@@ -7,6 +7,7 @@ import '../models/alphabet_group.dart';
 import '../services/alphabet_progress_service.dart';
 import '../services/alphabet_service.dart';
 import '../services/audio_service.dart';
+import '../theme/app_arabic_typography.dart';
 import '../theme/app_theme.dart';
 import '../widgets/arabic_text_with_audio.dart';
 import 'alphabet_letter_home_page.dart';
@@ -409,28 +410,22 @@ class _AlphabetGroupDetailPageState extends State<AlphabetGroupDetailPage> {
                 children: group.letters
                     .map(
                       (letter) => Container(
-                        width: 64,
+                        width: 56,
+                        height: 56,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF4FBF8),
                           borderRadius: BorderRadius.circular(18),
+                          border: Border.all(color: const Color(0xFFDCEFE8)),
                         ),
                         child: Center(
-                          child: ArabicTextWithAudio(
-                            textAr: letter.arabic,
-                            request: LearningAudioRequest.alphabet(
-                              type: 'letter',
-                              textAr: letter.arabic,
-                              textPlain: letter.arabic,
-                              debugLabel: 'alphabet_group_chip',
-                            ),
-                            variant: ArabicAudioTextVariant.word,
+                          child: ArabicText.word(
+                            letter.arabic,
                             style: text.titleLarge?.copyWith(
                               fontSize: 24,
                               fontWeight: FontWeight.w700,
                             ),
                             textAlign: TextAlign.center,
-                            spacing: 4,
                           ),
                         ),
                       ),
@@ -652,21 +647,13 @@ class _AlphabetGroupDetailPageState extends State<AlphabetGroupDetailPage> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Center(
-                    child: ArabicTextWithAudio(
-                      textAr: letter.arabic,
-                      request: LearningAudioRequest.alphabet(
-                        type: 'letter',
-                        textAr: letter.arabic,
-                        textPlain: letter.arabic,
-                        debugLabel: 'alphabet_group_card_letter',
-                      ),
-                      variant: ArabicAudioTextVariant.word,
+                    child: ArabicText.word(
+                      letter.arabic,
                       style: text.titleLarge?.copyWith(
                         fontSize: 28,
                         fontWeight: FontWeight.w700,
                       ),
                       textAlign: TextAlign.center,
-                      spacing: 4,
                     ),
                   ),
                 ),
@@ -675,19 +662,35 @@ class _AlphabetGroupDetailPageState extends State<AlphabetGroupDetailPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ArabicTextWithAudio(
-                        textAr: letter.arabicName,
-                        request: LearningAudioRequest.alphabet(
-                          type: 'letter',
-                          textAr: letter.arabicName,
-                          textPlain: letter.arabicName,
-                          debugLabel: 'alphabet_group_card_name',
-                        ),
-                        variant: ArabicAudioTextVariant.word,
-                        style: text.titleMedium,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        spacing: 6,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: ArabicText.word(
+                              letter.arabicName,
+                              style: text.titleMedium,
+                              textAlign: TextAlign.right,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          LearningAudioIconButton(
+                            request: LearningAudioRequest.alphabet(
+                              type: 'letter',
+                              textAr: letter.arabicName,
+                              textPlain: letter.arabicName,
+                              debugLabel: 'alphabet_group_card_name',
+                            ),
+                            tooltip: localizedText(
+                              context,
+                              zh: '播放字母名称',
+                              en: 'Play Letter Name',
+                            ),
+                            size: 36,
+                            iconSize: 18,
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -749,11 +752,6 @@ class _AlphabetGroupDetailPageState extends State<AlphabetGroupDetailPage> {
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(width: 8),
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  color: Color(0xFF98A2B3),
                 ),
               ],
             ),

@@ -22,6 +22,7 @@ class LearningAudioIconButton extends StatelessWidget {
   final double size;
   final double iconSize;
   final EdgeInsetsGeometry padding;
+  final BorderSide? borderSide;
 
   const LearningAudioIconButton({
     super.key,
@@ -32,6 +33,7 @@ class LearningAudioIconButton extends StatelessWidget {
     this.size = 40,
     this.iconSize = 20,
     this.padding = EdgeInsets.zero,
+    this.borderSide,
   });
 
   Future<void> _play(BuildContext context) async {
@@ -59,6 +61,8 @@ class LearningAudioIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final resolvedForeground = foregroundColor ?? AppTheme.deepAccent;
     final resolvedBackground = backgroundColor ?? const Color(0xFFEAF8F3);
+    final resolvedBorder = borderSide ??
+        BorderSide(color: resolvedForeground.withValues(alpha: 0.12));
 
     return Padding(
       padding: padding,
@@ -67,7 +71,8 @@ class LearningAudioIconButton extends StatelessWidget {
             tooltip ?? localizedText(context, zh: '播放发音', en: 'Play audio'),
         child: Material(
           color: resolvedBackground,
-          borderRadius: BorderRadius.circular(999),
+          shape: StadiumBorder(side: resolvedBorder),
+          clipBehavior: Clip.antiAlias,
           child: InkWell(
             borderRadius: BorderRadius.circular(999),
             onTap: () => _play(context),

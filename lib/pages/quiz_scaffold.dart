@@ -418,18 +418,10 @@ class QuizScaffold extends StatelessWidget {
               children: [
                 Expanded(
                   child: AppArabicTypography.isArabic(option)
-                      ? ArabicTextWithAudio(
-                          textAr: option,
-                          request: LearningAudioRequest.general(
-                            scope: 'quiz',
-                            type: 'word',
-                            textAr: option,
-                            textPlain: option,
-                            debugLabel: 'quiz_option_arabic',
-                          ),
-                          variant: ArabicAudioTextVariant.word,
+                      ? ArabicText.word(
+                          option,
                           style: text.titleMedium?.copyWith(color: textColor),
-                          spacing: 8,
+                          textAlign: TextAlign.right,
                         )
                       : Text(
                           option,

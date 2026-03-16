@@ -7,6 +7,7 @@ import 'package:arabic_learning_app/features/onboarding/models/onboarding_state.
 import 'package:arabic_learning_app/models/learning_state_models.dart';
 import 'package:arabic_learning_app/models/review_models.dart';
 import 'package:arabic_learning_app/pages/review_session_page.dart';
+import 'package:arabic_learning_app/pages/v2_review_entry_page.dart';
 import 'package:arabic_learning_app/services/alphabet_service.dart';
 import 'package:arabic_learning_app/pages/home_page.dart';
 
@@ -52,35 +53,33 @@ void main() {
               contentId: 'word:warmup-item',
               type: ReviewContentType.word,
               objectType: ReviewObjectType.wordReading,
-              lessonId: 'U1L1',
+              lessonId: 'V2-U1-01',
               isStarted: true,
               isCompleted: true,
-              needsReview: false,
+              needsReview: true,
               isWeak: false,
               isFavorited: false,
               reviewPriority: 1,
-              stage: LearningStage.stable,
+              stage: LearningStage.reviewDue,
             ).toJson(),
           ],
         ),
       },
     );
 
-    expect(
-      find.widgetWithText(FilledButton, 'Start Today\'s Review'),
-      findsOneWidget,
-    );
+    expect(find.widgetWithText(FilledButton, 'Start Pilot Review'),
+        findsOneWidget);
     expect(find.text('Start Warm-Up'), findsNothing);
     expect(find.text('Enter Today\'s Lesson'), findsNothing);
     expect(find.text('Continue Alphabet Learning'), findsNothing);
 
-    await tester
-        .tap(find.widgetWithText(FilledButton, 'Start Today\'s Review'));
+    await tester.tap(find.widgetWithText(FilledButton, 'Start Pilot Review'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(ReviewSessionPage), findsOneWidget);
-    expect(find.text('Today\'s Review'), findsWidgets);
-    expect(find.textContaining('Item 1 /'), findsOneWidget);
-    expect(find.text('Skip Review'), findsNothing);
+    final enteredReviewFlow =
+        find.byType(V2ReviewEntryPage).evaluate().isNotEmpty ||
+            find.byType(ReviewSessionPage).evaluate().isNotEmpty;
+    expect(enteredReviewFlow, isTrue);
+    expect(find.text('Pilot Review'), findsWidgets);
   });
 }

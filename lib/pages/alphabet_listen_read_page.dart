@@ -428,14 +428,6 @@ class _AlphabetListenReadPageState extends State<AlphabetListenReadPage> {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  FilledButton.icon(
-                    style: FilledButton.styleFrom(
-                        backgroundColor: AppTheme.deepAccent),
-                    onPressed: _playExampleWord,
-                    icon: const Icon(Icons.volume_up_rounded),
-                    label: Text(localizedText(context, zh: '播放', en: 'Play')),
-                  ),
                 ],
               ),
             ),
