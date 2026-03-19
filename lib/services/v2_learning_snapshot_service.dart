@@ -106,7 +106,12 @@ class V2LearningSnapshotService {
   }) {
     final lessonStatuses = <String, V2CanonicalLessonStatus>{};
     final objectiveProgress = <String, V2ObjectiveProgressRecord>{};
-    final dueReviewItems = _collectDueReviewItems(learningStates);
+    final allowedLessonIds =
+        lessons.map((lesson) => lesson.lessonId).toSet();
+    final dueReviewItems = _collectDueReviewItems(
+      learningStates,
+      allowedLessonIds: allowedLessonIds,
+    );
 
     for (final record in lessonRecords.values) {
       for (final objective in record.objectiveResults) {
@@ -143,10 +148,13 @@ class V2LearningSnapshotService {
 
     final phaseBuckets = <String, List<V2CanonicalLessonStatus>>{};
     for (final lesson in lessons) {
-      phaseBuckets.putIfAbsent(
-          lesson.phaseId, () => <V2CanonicalLessonStatus>[])
-        ..add(lessonStatuses[lesson.lessonId] ??
-            V2CanonicalLessonStatus.notStarted);
+      final bucket = phaseBuckets.putIfAbsent(
+        lesson.phaseId,
+        () => <V2CanonicalLessonStatus>[],
+      );
+      bucket.add(
+        lessonStatuses[lesson.lessonId] ?? V2CanonicalLessonStatus.notStarted,
+      );
     }
 
     final phaseStatuses = <String, V2PhaseStatus>{
@@ -198,13 +206,15 @@ class V2LearningSnapshotService {
   }
 
   static List<V2DueReviewItem> _collectDueReviewItems(
-    Map<String, LearningContentState> learningStates,
-  ) {
+    Map<String, LearningContentState> learningStates, {
+    required Set<String> allowedLessonIds,
+  }) {
     final now = DateTime.now();
     final items = learningStates.values
         .where(
           (state) =>
               state.lessonId != null &&
+              allowedLessonIds.contains(state.lessonId) &&
               state.isStarted &&
               (state.isWeak ||
                   state.isReviewDue ||

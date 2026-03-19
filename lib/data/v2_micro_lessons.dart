@@ -1,42 +1,6 @@
 import '../models/review_models.dart';
 import '../models/v2_micro_lesson.dart';
 
-V2MicroLesson _lesson({
-  required String lessonId,
-  required String phaseId,
-  required String groupId,
-  required String title,
-  required String outcomeSummary,
-  required int estimatedMinutes,
-  required V2MicroLessonType lessonType,
-  required List<V2MicroLessonObjective> objectives,
-  required V2MicroLessonEntryCondition entryCondition,
-  required List<V2MicroContentItem> contentItems,
-  required List<V2MicroPracticeItem> practiceItems,
-  required V2MicroCompletionRule completionRule,
-  required List<V2MicroReviewSeedRule> reviewSeedRules,
-  required List<V2NextActionHint> nextActionHints,
-  List<String> sourceLessonIds = const <String>[],
-}) {
-  return V2MicroLesson(
-    lessonId: lessonId,
-    phaseId: phaseId,
-    groupId: groupId,
-    title: title,
-    outcomeSummary: outcomeSummary,
-    estimatedMinutes: estimatedMinutes,
-    lessonType: lessonType,
-    objectives: objectives,
-    entryCondition: entryCondition,
-    contentItems: contentItems,
-    practiceItems: practiceItems,
-    completionRule: completionRule,
-    reviewSeedRules: reviewSeedRules,
-    nextActionHints: nextActionHints,
-    sourceLessonIds: sourceLessonIds,
-  );
-}
-
 const List<V2MicroLesson> v2PilotMicroLessons = <V2MicroLesson>[
   V2MicroLesson(
     lessonId: 'V2-ALPHA-CL-01',

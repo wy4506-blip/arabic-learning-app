@@ -34,6 +34,7 @@ class V2ReviewFlowService {
     required AppSettings settings,
     required ReviewSession baseSession,
     required List<V2DueReviewItem> dueReviewItems,
+    List<ReviewTask>? candidateTasks,
   }) {
     final priorityOrder = <String, int>{
       for (var index = 0; index < dueReviewItems.length; index += 1)
@@ -41,8 +42,9 @@ class V2ReviewFlowService {
     };
 
     final focusedTasks = _buildDueFocusedTasks(
-      baseTasks: baseSession.tasks,
+      candidateTasks: candidateTasks ?? baseSession.tasks,
       dueReviewItems: dueReviewItems,
+      settings: settings,
     );
     final tasks = List<ReviewTask>.of(
       focusedTasks,
@@ -72,8 +74,9 @@ class V2ReviewFlowService {
   }
 
   static List<ReviewTask> _buildDueFocusedTasks({
-    required List<ReviewTask> baseTasks,
+    required List<ReviewTask> candidateTasks,
     required List<V2DueReviewItem> dueReviewItems,
+    required AppSettings settings,
   }) {
     final pickedIds = <String>{};
     final focused = <ReviewTask>[];
@@ -81,7 +84,7 @@ class V2ReviewFlowService {
     for (final dueItem in dueReviewItems) {
       ReviewTask? best;
       var bestScore = -1;
-      for (final task in baseTasks) {
+      for (final task in candidateTasks) {
         if (pickedIds.contains(task.contentId)) {
           continue;
         }
@@ -96,10 +99,91 @@ class V2ReviewFlowService {
       if (best != null && bestScore >= 40) {
         focused.add(best);
         pickedIds.add(best.contentId);
+      } else {
+        focused.add(_buildFallbackTask(settings: settings, dueItem: dueItem));
       }
     }
 
     return focused;
+  }
+  static ReviewTask _buildFallbackTask({
+    required AppSettings settings,
+    required V2DueReviewItem dueItem,
+  }) {
+    final promptText = _promptTextFor(dueItem.contentId);
+    return ReviewTask(
+      contentId: dueItem.contentId,
+      type: reviewContentTypeForObject(dueItem.objectType),
+      objectType: dueItem.objectType,
+      actionType: dueItem.actionType,
+      origin: dueItem.isWeak ? ReviewTaskOrigin.weak : ReviewTaskOrigin.due,
+      title: _fallbackTitle(settings, dueItem.objectType),
+      subtitle: _fallbackSubtitle(settings, dueItem.actionType),
+      arabicText: promptText,
+      audioQueryText: promptText,
+      lessonId: dueItem.lessonId,
+      sourceId: promptText,
+      estimatedSeconds: 25,
+      priority: dueItem.priority,
+    );
+  }
+
+  static String _promptTextFor(String contentId) {
+    final parts = contentId.split(':');
+    final raw = parts.length > 1 ? parts.sublist(1).join(' ') : contentId;
+    return raw.replaceAll('_', ' ').trim();
+  }
+
+  static String _fallbackTitle(
+    AppSettings settings,
+    ReviewObjectType objectType,
+  ) {
+    switch (objectType) {
+      case ReviewObjectType.letterName:
+        return settings.appLanguage == AppLanguage.en ? 'Letter Name' : '字母名称';
+      case ReviewObjectType.letterSound:
+        return settings.appLanguage == AppLanguage.en ? 'Letter Sound' : '字母发音';
+      case ReviewObjectType.letterForm:
+        return settings.appLanguage == AppLanguage.en ? 'Letter Form' : '字母字形';
+      case ReviewObjectType.symbolReading:
+        return settings.appLanguage == AppLanguage.en ? 'Sound Reading' : '读音符号';
+      case ReviewObjectType.wordReading:
+        return settings.appLanguage == AppLanguage.en ? 'Word Reading' : '单词朗读';
+      case ReviewObjectType.confusionPair:
+        return settings.appLanguage == AppLanguage.en ? 'Contrast Pair' : '易混对比';
+      case ReviewObjectType.sentencePattern:
+        return settings.appLanguage == AppLanguage.en ? 'Sentence Pattern' : '句型复习';
+      case ReviewObjectType.grammarReference:
+        return settings.appLanguage == AppLanguage.en ? 'Grammar Reference' : '语法复习';
+    }
+  }
+
+  static String _fallbackSubtitle(
+    AppSettings settings,
+    ReviewActionType actionType,
+  ) {
+    switch (actionType) {
+      case ReviewActionType.listen:
+        return settings.appLanguage == AppLanguage.en
+            ? 'Listen once and confirm it feels clear.'
+            : '听一遍并确认你已经清楚。';
+      case ReviewActionType.read:
+        return settings.appLanguage == AppLanguage.en
+            ? 'Read it once to clear this review item.'
+            : '读一遍，清掉这条复习项。';
+      case ReviewActionType.distinguish:
+        return settings.appLanguage == AppLanguage.en
+            ? 'Compare it carefully before moving on.'
+            : '先仔细区分，再继续学习。';
+      case ReviewActionType.repeat:
+        return settings.appLanguage == AppLanguage.en
+            ? 'Say it once to finish this blocked review item.'
+            : '说一遍，完成这条阻塞复习。';
+      case ReviewActionType.recognize:
+        return settings.appLanguage == AppLanguage.en
+            ? 'Recognize it once to continue forward.'
+            : '识别一次，然后继续前进。';
+    }
   }
 
   static int _matchScore({

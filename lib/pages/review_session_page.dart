@@ -511,7 +511,7 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
       );
     }
     if (_isFormalReview) {
-      return _completedTodayPlan
+      return (_isHomeTodayPlan && _completedTodayPlan)
           ? localizedText(
               context,
               zh: '今日复习已完成',
@@ -544,7 +544,7 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
         en: 'You will move into the next lesson in a moment, or you can jump in right away.',
       );
     }
-    if (_completedTodayPlan) {
+    if (_isHomeTodayPlan && _completedTodayPlan) {
       return localizedText(
         context,
         zh: '今天建议先看的内容已经完成，可以回到课程继续学习。',
@@ -913,7 +913,7 @@ class _ReviewSessionPageState extends State<ReviewSessionPage> {
       ReviewActionType.recognize => false,
     };
 
-    final promptStyle = const TextStyle(
+    const promptStyle = TextStyle(
       fontSize: 38,
       height: 1.55,
       fontWeight: FontWeight.w600,

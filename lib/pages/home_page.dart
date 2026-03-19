@@ -275,12 +275,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> _refreshReviewDashboard() async {
-    final dashboard = await ReviewService.buildDashboard(widget.settings);
-    if (!mounted) return;
-    setState(() => _reviewDashboard = dashboard);
-  }
-
   Future<void> _openUnlock() async {
     final result = await Navigator.push(
       context,

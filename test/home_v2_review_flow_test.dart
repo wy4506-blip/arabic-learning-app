@@ -14,7 +14,7 @@ import 'package:arabic_learning_app/services/review_sync_service.dart';
 import 'v2_home_flow_test_helpers.dart';
 
 ReviewTask _buildDueTask({
-  String contentId = 'sentence_pattern:صباح الخير',
+  String contentId = 'sentence_pattern:氐亘丕丨 丕賱禺賷乇',
   String lessonId = 'V2-U1-01',
 }) {
   return ReviewTask(
@@ -25,11 +25,11 @@ ReviewTask _buildDueTask({
     origin: ReviewTaskOrigin.due,
     title: 'Morning greeting',
     subtitle: 'Repeat the greeting naturally.',
-    arabicText: 'صَبَاحُ الْخَيْرِ',
+    arabicText: '氐賻亘賻丕丨購 丕賱賿禺賻賷賿乇賽',
     transliteration: 'sabah al-khayr',
     helperText: 'Use it as a complete greeting.',
     lessonId: lessonId,
-    sourceId: 'صباح الخير',
+    sourceId: '氐亘丕丨 丕賱禺賷乇',
     estimatedSeconds: 30,
     priority: 5,
   );
@@ -37,16 +37,17 @@ ReviewTask _buildDueTask({
 
 Map<String, Object> _reviewPrefs({
   required List<V2LessonProgressRecord> lessonRecords,
-  required LearningContentState learningState,
+  required List<LearningContentState> learningStates,
 }) {
   final now = DateTime.now();
-  final dueTask = _buildDueTask(
-    contentId: learningState.contentId,
-    lessonId: learningState.lessonId!,
-  );
   final reviewPlan = DailyReviewPlan(
     dateKey: reviewDateKey(now),
-    tasks: <ReviewTask>[dueTask],
+    tasks: <ReviewTask>[
+      _buildDueTask(
+        contentId: learningStates.first.contentId,
+        lessonId: learningStates.first.lessonId!,
+      ),
+    ],
     completedTaskIds: const <String>[],
     startedAt: now,
   );
@@ -54,9 +55,7 @@ Map<String, Object> _reviewPrefs({
     lessonRecords.map((record) => record.toJson()).toList(growable: false),
   );
   final learningStatesJson = jsonEncode(
-    <Map<String, dynamic>>[
-      learningState.toJson(),
-    ],
+    learningStates.map((state) => state.toJson()).toList(growable: false),
   );
   final reviewPlanJson = jsonEncode(reviewPlan.toJson());
   return <String, Object>{
@@ -74,19 +73,21 @@ Map<String, Object> _reviewFirstPrefs() {
         status: V2LessonStatus.completed,
       ),
     ],
-    learningState: LearningContentState(
-      contentId: 'sentence_pattern:صباح الخير',
-      type: ReviewContentType.sentence,
-      objectType: ReviewObjectType.sentencePattern,
-      lessonId: 'V2-U1-01',
-      isStarted: true,
-      isCompleted: true,
-      needsReview: true,
-      isWeak: true,
-      isFavorited: false,
-      reviewPriority: 5,
-      stage: LearningStage.weak,
-    ),
+    learningStates: const <LearningContentState>[
+      LearningContentState(
+        contentId: 'sentence_pattern:氐亘丕丨 丕賱禺賷乇',
+        type: ReviewContentType.sentence,
+        objectType: ReviewObjectType.sentencePattern,
+        lessonId: 'V2-U1-01',
+        isStarted: true,
+        isCompleted: true,
+        needsReview: true,
+        isWeak: true,
+        isFavorited: false,
+        reviewPriority: 5,
+        stage: LearningStage.weak,
+      ),
+    ],
   );
 }
 
@@ -101,19 +102,81 @@ Map<String, Object> _completedForTodayPrefs() {
       .toList(growable: false);
   return _reviewPrefs(
     lessonRecords: completedRecords,
-    learningState: LearningContentState(
-      contentId: 'sentence_pattern:تمام',
-      type: ReviewContentType.sentence,
-      objectType: ReviewObjectType.sentencePattern,
-      lessonId: 'V2-U1-05',
-      isStarted: true,
-      isCompleted: true,
-      needsReview: true,
-      isWeak: true,
-      isFavorited: false,
-      reviewPriority: 5,
-      stage: LearningStage.weak,
-    ),
+    learningStates: const <LearningContentState>[
+      LearningContentState(
+        contentId: 'sentence_pattern:鬲賲丕賲',
+        type: ReviewContentType.sentence,
+        objectType: ReviewObjectType.sentencePattern,
+        lessonId: 'V2-U1-05',
+        isStarted: true,
+        isCompleted: true,
+        needsReview: true,
+        isWeak: true,
+        isFavorited: false,
+        reviewPriority: 5,
+        stage: LearningStage.weak,
+      ),
+    ],
+  );
+}
+
+Map<String, Object> _partialTodayPlanPrefs() {
+  return _reviewPrefs(
+    lessonRecords: const <V2LessonProgressRecord>[
+      V2LessonProgressRecord(
+        lessonId: 'V2-U1-01',
+        status: V2LessonStatus.completed,
+      ),
+    ],
+    learningStates: const <LearningContentState>[
+      LearningContentState(
+        contentId: 'sentence_pattern:氐亘丕丨 丕賱禺賷乇',
+        type: ReviewContentType.sentence,
+        objectType: ReviewObjectType.sentencePattern,
+        lessonId: 'V2-U1-01',
+        isStarted: true,
+        isCompleted: true,
+        needsReview: true,
+        isWeak: true,
+        isFavorited: false,
+        reviewPriority: 5,
+        stage: LearningStage.weak,
+      ),
+      LearningContentState(
+        contentId: 'sentence_pattern:ana_bikhayr',
+        type: ReviewContentType.sentence,
+        objectType: ReviewObjectType.sentencePattern,
+        lessonId: 'V2-U1-01',
+        isStarted: true,
+        isCompleted: true,
+        needsReview: true,
+        isWeak: false,
+        isFavorited: false,
+        reviewPriority: 4,
+        stage: LearningStage.reviewDue,
+      ),
+    ],
+  );
+}
+
+Map<String, Object> _nonV2DuePrefs() {
+  return _reviewPrefs(
+    lessonRecords: const <V2LessonProgressRecord>[],
+    learningStates: const <LearningContentState>[
+      LearningContentState(
+        contentId: 'sentence_pattern:legacy_due_item',
+        type: ReviewContentType.sentence,
+        objectType: ReviewObjectType.sentencePattern,
+        lessonId: 'L03',
+        isStarted: true,
+        isCompleted: true,
+        needsReview: true,
+        isWeak: true,
+        isFavorited: false,
+        reviewPriority: 5,
+        stage: LearningStage.weak,
+      ),
+    ],
   );
 }
 
@@ -162,6 +225,8 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'I Can Say It'));
     await pumpForTransition(tester);
 
+    expect(find.text('This Review Pass Is Complete'), findsOneWidget);
+    expect(find.text('Today\'s Review Is Complete'), findsNothing);
     expect(find.text('Return to Learning'), findsOneWidget);
     await tester.tap(find.widgetWithText(FilledButton, 'Return to Learning'));
     await pumpForTransition(tester);
@@ -198,6 +263,8 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'I Can Say It'));
     await pumpForTransition(tester);
 
+    expect(find.text('This Review Pass Is Complete'), findsOneWidget);
+    expect(find.text('Today\'s Review Is Complete'), findsNothing);
     expect(find.text('Return to Learning'), findsOneWidget);
     await tester.tap(find.widgetWithText(FilledButton, 'Return to Learning'));
     await pumpForTransition(tester);
@@ -282,6 +349,61 @@ void main() {
     expect(find.byType(HomePage), findsOneWidget);
     expect(find.text('Clear Pilot Review First'), findsNothing);
     expect(find.textContaining('1 item due'), findsNothing);
+    expect(
+        find.widgetWithText(FilledButton, 'Start Pilot Review'), findsNothing);
+    expect(find.widgetWithText(FilledButton, 'Start This V2 Lesson'),
+        findsOneWidget);
+
+    await settleTail(tester);
+  });
+
+  testWidgets(
+      'home review-first flow clears every due item even when the stored today plan only includes a subset',
+      (tester) async {
+    await pumpV2Home(
+      tester,
+      sharedPreferences: _partialTodayPlanPrefs(),
+    );
+
+    expect(find.text('Clear Pilot Review First'), findsOneWidget);
+    expect(find.textContaining('2 items due'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Start Pilot Review'));
+    await pumpReviewFlowLaunch(tester);
+    await waitForReviewSession(tester);
+
+    expect(find.byType(ReviewSessionPage), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(FilledButton, 'I Can Say It'));
+    await pumpForTransition(tester);
+    await tester.tap(find.widgetWithText(FilledButton, 'I Can Say It'));
+    await pumpForTransition(tester);
+
+    expect(find.text('Return to Learning'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Return to Learning'));
+    await pumpForTransition(tester);
+
+    expect(find.byType(HomePage), findsOneWidget);
+    expect(find.text('Clear Pilot Review First'), findsNothing);
+    expect(find.textContaining('items due'), findsNothing);
+    expect(
+        find.widgetWithText(FilledButton, 'Start Pilot Review'), findsNothing);
+    expect(find.widgetWithText(FilledButton, 'Start This V2 Lesson'),
+        findsOneWidget);
+
+    await settleTail(tester);
+  });
+
+  testWidgets(
+      'home ignores due review that does not belong to a V2 lesson',
+      (tester) async {
+    await pumpV2Home(
+      tester,
+      sharedPreferences: _nonV2DuePrefs(),
+    );
+
+    expect(find.text('Clear Pilot Review First'), findsNothing);
+    expect(find.textContaining('item due'), findsNothing);
     expect(
         find.widgetWithText(FilledButton, 'Start Pilot Review'), findsNothing);
     expect(find.widgetWithText(FilledButton, 'Start This V2 Lesson'),

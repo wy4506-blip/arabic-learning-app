@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../app_scope.dart';
 import '../data/v2_micro_lessons.dart';
 import '../l10n/localized_text.dart';
 import '../l10n/v2_micro_lesson_localizer.dart';
@@ -77,20 +76,6 @@ class V2MicroLessonCompletionPage extends StatelessWidget {
     final learnedOutcome = lesson.lessonId == 'fallback'
         ? result.completionSummary.learnedOutcome
         : V2MicroLessonLocalizer.outcomeSummary(lesson, language);
-    final learningFeedback = _localizedLearningFeedback(
-      achieved: achieved,
-      unstable: unstable,
-      language: language,
-    );
-    final reviewSummary = _localizedReviewSummary(
-      result.createdReviewSeeds,
-      language,
-    );
-    final nextStepSummary = _localizedNextStepSummary(
-      actionType: result.recommendedAction.actionType,
-      recommendedLessonId: result.recommendedLessonId,
-      language: language,
-    );
 
     return Scaffold(
       appBar: AppBar(
@@ -117,13 +102,14 @@ class V2MicroLessonCompletionPage extends StatelessWidget {
                 style: text.titleLarge,
               ),
               const SizedBox(height: 10),
-              Text(
-                learnedOutcome,
-                style: text.bodyLarge,
-              ),
+              Text(learnedOutcome, style: text.bodyLarge),
               const SizedBox(height: 10),
               Text(
-                learningFeedback,
+                _localizedLearningFeedback(
+                  achieved: achieved,
+                  unstable: unstable,
+                  language: language,
+                ),
                 style: text.bodyMedium,
               ),
               const SizedBox(height: 20),
@@ -140,7 +126,7 @@ class V2MicroLessonCompletionPage extends StatelessWidget {
                 ...achieved.map(
                   (item) => Padding(
                     padding: const EdgeInsets.only(bottom: 6),
-                    child: Text('• $item', style: text.bodyMedium),
+                    child: Text('- $item', style: text.bodyMedium),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -167,7 +153,7 @@ class V2MicroLessonCompletionPage extends StatelessWidget {
                 ...unstable.map(
                   (item) => Padding(
                     padding: const EdgeInsets.only(bottom: 6),
-                    child: Text('• $item', style: text.bodyMedium),
+                    child: Text('- $item', style: text.bodyMedium),
                   ),
                 ),
               const SizedBox(height: 16),
@@ -180,7 +166,10 @@ class V2MicroLessonCompletionPage extends StatelessWidget {
                 style: text.titleMedium,
               ),
               const SizedBox(height: 8),
-              Text(reviewSummary, style: text.bodyMedium),
+              Text(
+                _localizedReviewSummary(result.createdReviewSeeds, language),
+                style: text.bodyMedium,
+              ),
               const SizedBox(height: 16),
               Text(
                 localizedText(
@@ -191,7 +180,14 @@ class V2MicroLessonCompletionPage extends StatelessWidget {
                 style: text.titleMedium,
               ),
               const SizedBox(height: 8),
-              Text(nextStepSummary, style: text.bodyMedium),
+              Text(
+                _localizedNextStepSummary(
+                  actionType: result.recommendedAction.actionType,
+                  recommendedLessonId: result.recommendedLessonId,
+                  language: language,
+                ),
+                style: text.bodyMedium,
+              ),
               const Spacer(),
               SizedBox(
                 width: double.infinity,
@@ -241,7 +237,7 @@ class V2MicroLessonCompletionPage extends StatelessWidget {
         case V2RecommendedActionType.startNextPhase:
           return '下一步建议进入下一阶段。';
         case V2RecommendedActionType.noAction:
-          return '当前没有新的主动作可执行。';
+          return '当前没有新的主动任务可执行。';
       }
     }
 
@@ -323,11 +319,11 @@ class V2MicroLessonCompletionPage extends StatelessWidget {
         case ReviewObjectType.letterForm:
           return '字形识别';
         case ReviewObjectType.symbolReading:
-          return '短元音辨音';
+          return '短元音听辨';
         case ReviewObjectType.wordReading:
           return '词语认读';
         case ReviewObjectType.confusionPair:
-          return '易混对区分';
+          return '易混对比';
         case ReviewObjectType.sentencePattern:
           return '句型跟说';
         case ReviewObjectType.grammarReference:
