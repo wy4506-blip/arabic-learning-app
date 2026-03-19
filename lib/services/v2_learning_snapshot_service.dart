@@ -43,6 +43,12 @@ class V2RecommendedAction {
   });
 }
 
+enum V2HomeEntryState {
+  reviewFirst,
+  continueMainline,
+  completedForToday,
+}
+
 class V2LearningSnapshot {
   final Map<String, V2CanonicalLessonStatus> lessonStatuses;
   final Map<String, V2PhaseStatus> phaseStatuses;
@@ -50,6 +56,7 @@ class V2LearningSnapshot {
   final Map<String, V2ObjectiveProgressRecord> objectiveProgress;
   final String? recommendedLessonId;
   final V2RecommendedAction recommendedAction;
+  final V2HomeEntryState homeEntryState;
   final String? currentPhaseId;
   final List<V2DueReviewItem> dueReviewItems;
 
@@ -60,6 +67,7 @@ class V2LearningSnapshot {
     required this.objectiveProgress,
     required this.recommendedLessonId,
     required this.recommendedAction,
+    required this.homeEntryState,
     required this.currentPhaseId,
     required this.dueReviewItems,
   });
@@ -172,6 +180,9 @@ class V2LearningSnapshotService {
       recommendedLessonId: recommendedLessonId,
       dueReviewItems: dueReviewItems,
     );
+    final homeEntryState = _resolveHomeEntryState(
+      recommendedAction: recommendedAction,
+    );
 
     return V2LearningSnapshot(
       lessonStatuses: lessonStatuses,
@@ -180,6 +191,7 @@ class V2LearningSnapshotService {
       objectiveProgress: objectiveProgress,
       recommendedLessonId: recommendedLessonId,
       recommendedAction: recommendedAction,
+      homeEntryState: homeEntryState,
       currentPhaseId: currentPhaseId,
       dueReviewItems: dueReviewItems,
     );
@@ -392,6 +404,22 @@ class V2LearningSnapshotService {
       actionType: V2RecommendedActionType.noAction,
       reason: 'no_action_available',
     );
+  }
+
+  static V2HomeEntryState _resolveHomeEntryState({
+    required V2RecommendedAction recommendedAction,
+  }) {
+    switch (recommendedAction.actionType) {
+      case V2RecommendedActionType.startReview:
+        return V2HomeEntryState.reviewFirst;
+      case V2RecommendedActionType.startLesson:
+      case V2RecommendedActionType.continueLesson:
+        return V2HomeEntryState.continueMainline;
+      case V2RecommendedActionType.startConsolidation:
+      case V2RecommendedActionType.startNextPhase:
+      case V2RecommendedActionType.noAction:
+        return V2HomeEntryState.completedForToday;
+    }
   }
 
   static V2LessonStatus _toProgressStatus(V2CanonicalLessonStatus value) {

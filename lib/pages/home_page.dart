@@ -36,7 +36,6 @@ const Color _homeApricot = Color(0xFFFFF0E3);
 const Color _homeMint = Color(0xFFE3F5ED);
 const Color _homeTerracotta = Color(0xFFB56D45);
 const Color _homeBlue = Color(0xFF5B7FA8);
-const Duration _homeLoadTimeout = Duration(seconds: 5);
 
 class HomeMainCardState {
   final String badgeText;
@@ -87,6 +86,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool _unlocked = false;
   bool _loading = true;
+  int _loadVersion = 0;
   List<Lesson> _lessons = const [];
   AlphabetLearningSnapshot _alphabetProgress = AlphabetLearningSnapshot.empty;
   ProgressSnapshot _progress = const ProgressSnapshot(
@@ -125,32 +125,44 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _handleReviewChange() {
-    _load();
+    _refreshHomeJourney();
+  }
+
+  Future<T> _loadOrFallback<T>(
+    Future<T> future,
+    T fallback,
+  ) async {
+    try {
+      return await future;
+    } catch (_) {
+      return fallback;
+    }
   }
 
   Future<void> _load() async {
+    final loadVersion = ++_loadVersion;
     try {
       final results = await Future.wait<dynamic>([
-        UnlockService.isUnlocked().timeout(
-          _homeLoadTimeout,
-          onTimeout: () => false,
+        _loadOrFallback<bool>(
+          UnlockService.isUnlocked(),
+          false,
         ),
-        LessonService().loadLessons().timeout(
-              _homeLoadTimeout,
-              onTimeout: () => <Lesson>[],
-            ),
-        ProgressService.getSnapshot().timeout(
-          _homeLoadTimeout,
-          onTimeout: () => const ProgressSnapshot(
+        _loadOrFallback<List<Lesson>>(
+          LessonService().loadLessons(),
+          <Lesson>[],
+        ),
+        _loadOrFallback<ProgressSnapshot>(
+          ProgressService.getSnapshot(),
+          const ProgressSnapshot(
             completedLessons: <String>{},
             startedLessons: <String>{},
             reviewCount: 0,
             streakDays: 0,
           ),
         ),
-        ReviewService.buildDashboard(widget.settings).timeout(
-          _homeLoadTimeout,
-          onTimeout: () => const ReviewDashboardData(
+        _loadOrFallback<ReviewDashboardData>(
+          ReviewService.buildDashboard(widget.settings),
+          const ReviewDashboardData(
             summary: ReviewSummary(
               todayPlan: DailyReviewPlan(
                 dateKey: '',
@@ -165,22 +177,22 @@ class _HomePageState extends State<HomePage> {
             recentTasks: <ReviewTask>[],
           ),
         ),
-        AlphabetProgressService.getSnapshot().timeout(
-          _homeLoadTimeout,
-          onTimeout: () => AlphabetLearningSnapshot.empty,
+        _loadOrFallback<AlphabetLearningSnapshot>(
+          AlphabetProgressService.getSnapshot(),
+          AlphabetLearningSnapshot.empty,
         ),
-        ReviewService.getEntrySnapshot(widget.settings).timeout(
-          _homeLoadTimeout,
-          onTimeout: () => const ReviewEntrySnapshot(
+        _loadOrFallback<ReviewEntrySnapshot>(
+          ReviewService.getEntrySnapshot(widget.settings),
+          const ReviewEntrySnapshot(
             formalTasks: <ReviewTask>[],
             lightTasks: <ReviewTask>[],
             overdueTasks: <ReviewTask>[],
             stageReinforcementTasks: <ReviewTask>[],
           ),
         ),
-        LearningStateService.getSummary().timeout(
-          _homeLoadTimeout,
-          onTimeout: () => const LearningStateSummary(
+        _loadOrFallback<LearningStateSummary>(
+          LearningStateService.getSummary(),
+          const LearningStateSummary(
             trackedObjectCount: 0,
             introducedCount: 0,
             practicingCount: 0,
@@ -191,36 +203,39 @@ class _HomePageState extends State<HomePage> {
             overdueCount: 0,
           ),
         ),
-        LearningStateService.getAllStates().timeout(
-          _homeLoadTimeout,
-          onTimeout: () => <String, LearningContentState>{},
+        _loadOrFallback<Map<String, LearningContentState>>(
+          LearningStateService.getAllStates(),
+          <String, LearningContentState>{},
         ),
       ]);
       final unlocked = results[0] as bool;
       final lessons = results[1] as List<Lesson>;
       final progress = results[2] as ProgressSnapshot;
       final learningStates = results[7] as Map<String, LearningContentState>;
+      final alphabetProgress = results[4] as AlphabetLearningSnapshot;
       final progressOverview = ProgressService.buildOverview(
         lessons: lessons,
         snapshot: progress,
         unlocked: unlocked,
         learningStates: learningStates,
       );
-      if (!mounted) return;
+      if (!mounted || loadVersion != _loadVersion) return;
       setState(() {
         _unlocked = unlocked;
         _lessons = lessons;
         _progress = progress;
         _reviewDashboard = results[3] as ReviewDashboardData;
-        _alphabetProgress = results[4] as AlphabetLearningSnapshot;
+        _alphabetProgress = alphabetProgress;
         _reviewEntry = results[5] as ReviewEntrySnapshot;
         _learningStateSummary = results[6] as LearningStateSummary;
         _learningStates = learningStates;
         _progressOverview = progressOverview;
         _loading = false;
       });
-    } catch (_) {
-      if (!mounted) return;
+    } catch (error, stackTrace) {
+      debugPrint('[HomePage._load] error: $error');
+      debugPrint('[HomePage._load] stack: $stackTrace');
+      if (!mounted || loadVersion != _loadVersion) return;
       setState(() {
         _unlocked = false;
         _lessons = const <Lesson>[];
@@ -247,6 +262,16 @@ class _HomePageState extends State<HomePage> {
         _learningStates = const <String, LearningContentState>{};
         _loading = false;
       });
+    }
+  }
+
+  Future<void> _refreshHomeJourney() async {
+    await _load();
+  }
+
+  Future<void> _handleReviewFlowResult(bool? completed) async {
+    if (completed == true) {
+      await _refreshHomeJourney();
     }
   }
 
@@ -383,7 +408,7 @@ class _HomePageState extends State<HomePage> {
       ),
     );
     if (result == true) {
-      await _load();
+      await _refreshHomeJourney();
     }
   }
 
@@ -414,9 +439,7 @@ class _HomePageState extends State<HomePage> {
         builder: (_) => ReviewSessionPage(session: session),
       ),
     );
-    if (result == true) {
-      await _load();
-    }
+    await _handleReviewFlowResult(result);
   }
 
   Future<void> _openStandaloneReviewFlow() async {
@@ -444,9 +467,7 @@ class _HomePageState extends State<HomePage> {
         builder: (_) => ReviewSessionPage(session: session),
       ),
     );
-    if (result == true) {
-      await _load();
-    }
+    await _handleReviewFlowResult(result);
   }
 
   Future<void> _openV2ReviewEntry(List<V2DueReviewItem> dueReviewItems) async {
@@ -464,9 +485,7 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
-    if (result == true) {
-      await _load();
-    }
+    await _handleReviewFlowResult(result);
   }
 
   HomeMainCardState _buildPrimaryCardState({
@@ -575,40 +594,8 @@ class _HomePageState extends State<HomePage> {
     final VoidCallback onPrimaryTap;
     final String title;
     final String description;
-    switch (snapshot.recommendedAction.actionType) {
-      case V2RecommendedActionType.startLesson:
-        title = recommendedLessonTitle;
-        description = localizedText(
-          context,
-          zh: '首页现在直接给出样板主线里的下一个真实动作。',
-          en: 'Home now sends you straight into the next real action in the pilot path.',
-        );
-        buttonText = localizedText(
-          context,
-          zh: '开始这节 V2 小课',
-          en: 'Start This V2 Lesson',
-        );
-        onPrimaryTap = recommendedLessonId == null
-            ? _openLessonsTab
-            : () => _openV2MicroLesson(recommendedLessonId);
-        break;
-      case V2RecommendedActionType.continueLesson:
-        title = recommendedLessonTitle;
-        description = localizedText(
-          context,
-          zh: '你还有一节进行中的样板课，先把它走完。',
-          en: 'You already have a pilot lesson in progress. Finish that first.',
-        );
-        buttonText = localizedText(
-          context,
-          zh: '继续这节 V2 小课',
-          en: 'Continue This V2 Lesson',
-        );
-        onPrimaryTap = recommendedLessonId == null
-            ? _openLessonsTab
-            : () => _openV2MicroLesson(recommendedLessonId);
-        break;
-      case V2RecommendedActionType.startReview:
+    switch (snapshot.homeEntryState) {
+      case V2HomeEntryState.reviewFirst:
         title = localizedText(
           context,
           zh: '先完成样板复习',
@@ -628,55 +615,97 @@ class _HomePageState extends State<HomePage> {
             ? _openStandaloneReviewFlow
             : () => _openV2ReviewEntry(snapshot.dueReviewItems);
         break;
-      case V2RecommendedActionType.startConsolidation:
+      case V2HomeEntryState.continueMainline:
+        switch (snapshot.recommendedAction.actionType) {
+          case V2RecommendedActionType.startLesson:
+            title = recommendedLessonTitle;
+            description = localizedText(
+              context,
+              zh: '首页现在直接给出样板主线里的下一个真实动作。',
+              en: 'Home now sends you straight into the next real action in the pilot path.',
+            );
+            buttonText = localizedText(
+              context,
+              zh: '开始这节 V2 小课',
+              en: 'Start This V2 Lesson',
+            );
+            onPrimaryTap = recommendedLessonId == null
+                ? _openLessonsTab
+                : () => _openV2MicroLesson(recommendedLessonId);
+            break;
+          case V2RecommendedActionType.continueLesson:
+            title = recommendedLessonTitle;
+            description = localizedText(
+              context,
+              zh: '你还有一节进行中的样板课，先把它走完。',
+              en: 'You already have a pilot lesson in progress. Finish that first.',
+            );
+            buttonText = localizedText(
+              context,
+              zh: '继续这节 V2 小课',
+              en: 'Continue This V2 Lesson',
+            );
+            onPrimaryTap = recommendedLessonId == null
+                ? _openLessonsTab
+                : () => _openV2MicroLesson(recommendedLessonId);
+            break;
+          case V2RecommendedActionType.startReview:
+          case V2RecommendedActionType.startConsolidation:
+          case V2RecommendedActionType.startNextPhase:
+          case V2RecommendedActionType.noAction:
+            title = recommendedLessonTitle;
+            description = localizedText(
+              context,
+              zh: '当前主线已刷新，可以继续查看下一步学习。',
+              en: 'The home journey has been refreshed. Continue with the next learning step.',
+            );
+            buttonText = localizedText(
+              context,
+              zh: '查看学习路径',
+              en: 'View Learning Path',
+            );
+            onPrimaryTap = _openLessonsTab;
+            break;
+        }
+        break;
+      case V2HomeEntryState.completedForToday:
         title = localizedText(
           context,
-          zh: '先做样板巩固',
-          en: 'Consolidate Before Advancing',
+          zh: '今天的 V2 主线已完成',
+          en: 'Today\'s V2 Mainline Is Clear',
         );
-        description = localizedText(
-          context,
-          zh: '当前阶段需要先做一轮简短巩固，再进入后续新课。',
-          en: 'This phase needs a short consolidation pass before moving on.',
-        );
-        buttonText = localizedText(
-          context,
-          zh: '先做巩固',
-          en: 'Start Consolidation',
-        );
-        onPrimaryTap = _openStandaloneReviewFlow;
-        break;
-      case V2RecommendedActionType.startNextPhase:
-        title = localizedText(
-          context,
-          zh: '进入下一阶段',
-          en: 'Advance to the Next Phase',
-        );
-        description = localizedText(
-          context,
-          zh: '当前样板阶段已经走通，可以进入下一段内容。',
-          en: 'The current pilot phase is complete. You can move into the next phase.',
-        );
-        buttonText = localizedText(
-          context,
-          zh: '进入下一阶段',
-          en: 'Start Next Phase',
-        );
-        onPrimaryTap = _openLessonsTab;
-        break;
-      case V2RecommendedActionType.noAction:
-        title = emptyTitle;
-        description = localizedText(
-          context,
-          zh: '当前没有新的主动作可执行，可以查看完整学习路径。',
-          en: 'There is no new primary action right now. You can inspect the full learning path.',
-        );
-        buttonText = localizedText(
-          context,
-          zh: '查看学习路径',
-          en: 'View Learning Path',
-        );
-        onPrimaryTap = _openLessonsTab;
+        switch (snapshot.recommendedAction.actionType) {
+          case V2RecommendedActionType.startConsolidation:
+            description = localizedText(
+              context,
+              zh: '主线已经清空。如果你还想继续，可以再做一轮简短巩固。',
+              en: 'The mainline is clear. If you want one more pass, a short consolidation review is available.',
+            );
+            buttonText = localizedText(
+              context,
+              zh: '先做巩固',
+              en: 'Start Consolidation',
+            );
+            onPrimaryTap = _openStandaloneReviewFlow;
+            break;
+          case V2RecommendedActionType.startLesson:
+          case V2RecommendedActionType.continueLesson:
+          case V2RecommendedActionType.startReview:
+          case V2RecommendedActionType.startNextPhase:
+          case V2RecommendedActionType.noAction:
+            description = localizedText(
+              context,
+              zh: '当前没有需要立刻开始的主线内容，今天可以先到这里。',
+              en: 'There is no immediate mainline step to start right now, so today can pause here.',
+            );
+            buttonText = localizedText(
+              context,
+              zh: '查看学习路径',
+              en: 'View Learning Path',
+            );
+            onPrimaryTap = _openLessonsTab;
+            break;
+        }
         break;
     }
 
@@ -710,8 +739,8 @@ class _HomePageState extends State<HomePage> {
         zh: '查看完整学习路径',
         en: 'See Full Learning Path',
       ),
-      actionType: snapshot.recommendedAction.actionType ==
-              V2RecommendedActionType.startReview
+      actionType: snapshot.homeEntryState ==
+              V2HomeEntryState.reviewFirst
           ? vm.HomePrimaryActionType.startReview
           : vm.HomePrimaryActionType.continueLesson,
       onPrimaryTap: onPrimaryTap,

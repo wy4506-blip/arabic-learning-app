@@ -413,4 +413,142 @@ void main() {
       expectNoVisibleChinese(tester);
     });
   });
+
+  group('Chinese page smoke tests', () {
+    testWidgets('opens the welcome flow in Chinese for first launch',
+        (tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        'app_language': 0,
+        'app_meaning_language': 0,
+      });
+
+      await tester.pumpWidget(const ArabicLearningApp());
+      await pumpTestFrames(tester, count: 8);
+
+      expect(find.text('\u5f00\u59cb\u5b66\u4e60'), findsOneWidget);
+      expect(find.text('Start Learning'), findsNothing);
+      expectNoVisibleMojibake(tester);
+    });
+
+    testWidgets('opens the main shell in Chinese after onboarding',
+        (tester) async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        'app_language': 0,
+        'app_meaning_language': 0,
+        'onboarding_has_seen_welcome': true,
+        'onboarding_has_completed_first_experience': true,
+        'onboarding_first_experience_step': 3,
+      });
+
+      await tester.pumpWidget(const ArabicLearningApp());
+      await pumpTestFrames(tester, count: 8);
+
+      expect(find.text('\u9996\u9875'), findsOneWidget);
+      expect(find.text('\u8bfe\u7a0b'), findsOneWidget);
+      expect(find.text('Home'), findsNothing);
+      expectNoVisibleMojibake(tester);
+    });
+
+    testWidgets('home page', (tester) async {
+      await pumpLocalizedTestPage(
+        tester,
+        HomePage(
+          settings: kChineseTestSettings,
+          onboardingState: completedOnboarding,
+          onOpenTab: (_) {},
+        ),
+        settings: kChineseTestSettings,
+      );
+
+      expect(find.text('\u4eca\u5929\u4ece\u8fd9\u91cc\u5f00\u59cb'),
+          findsOneWidget);
+      expect(find.text('Start Here Today'), findsNothing);
+      expectNoVisibleMojibake(tester);
+    });
+
+    testWidgets('grammar home page', (tester) async {
+      await pumpLocalizedTestPage(
+        tester,
+        const GrammarHomePage(settings: kChineseTestSettings),
+        settings: kChineseTestSettings,
+      );
+
+      expect(find.text('\u8bed\u6cd5\u901f\u67e5'), findsWidgets);
+      expect(find.text('Grammar Quick Reference'), findsNothing);
+      expectNoVisibleMojibake(tester);
+    });
+
+    testWidgets('review page', (tester) async {
+      await pumpLocalizedTestPage(
+        tester,
+        const ReviewPage(),
+        settings: kChineseTestSettings,
+        sharedPreferences: wordPrefs(),
+      );
+
+      expect(find.textContaining('\u590d\u4e60'), findsWidgets);
+      expect(find.text('Review'), findsNothing);
+      expectNoVisibleMojibake(tester);
+    });
+
+    testWidgets('feedback board page', (tester) async {
+      await pumpLocalizedTestPage(
+        tester,
+        FeedbackBoardPage(
+          onSubmit: (_, __) async {},
+        ),
+        settings: kChineseTestSettings,
+      );
+
+      expect(find.text('\u53cd\u9988'), findsOneWidget);
+      expect(find.text('Feedback'), findsNothing);
+      expectNoVisibleMojibake(tester);
+    });
+
+    testWidgets('wordbook page', (tester) async {
+      await pumpLocalizedTestPage(
+        tester,
+        const VocabBookPage(),
+        settings: kChineseTestSettings,
+        sharedPreferences: wordPrefs(),
+      );
+
+      expect(find.textContaining('\u5355\u8bcd\u672c'), findsWidgets);
+      expect(find.text('Wordbook'), findsNothing);
+      expectNoVisibleMojibake(tester);
+    });
+
+    testWidgets('alphabet letter home page', (tester) async {
+      await pumpLocalizedTestPage(
+        tester,
+        AlphabetLetterHomePage(
+          letter: sampleAlphabetGroups.first.letters.first,
+        ),
+        settings: kChineseTestSettings,
+      );
+
+      expect(find.text('\u5b57\u6bcd\u5b66\u4e60'), findsOneWidget);
+      expect(find.text('Letter Study'), findsNothing);
+      expect(find.textContaining('\u57fa\u7840\u53d1\u97f3'), findsWidgets);
+      expect(find.text('\u4e66\u5199'), findsOneWidget);
+      expectNoVisibleMojibake(tester);
+    });
+
+    testWidgets('profile page', (tester) async {
+      await pumpLocalizedTestPage(
+        tester,
+        ProfilePage(
+          settings: kChineseTestSettings,
+          onSettingsChanged: (_) {},
+        ),
+        settings: kChineseTestSettings,
+      );
+
+      expect(find.text('\u6211\u7684'), findsOneWidget);
+      expect(find.text('\u5b66\u4e60\u72b6\u6001'), findsOneWidget);
+      expect(find.text('\u5b66\u4e60\u504f\u597d'), findsOneWidget);
+      expect(find.text('Profile'), findsNothing);
+      expectNoVisibleMojibake(tester);
+    });
+  });
 }

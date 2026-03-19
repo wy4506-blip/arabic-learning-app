@@ -6,7 +6,14 @@ import '../data/sample_lessons.dart';
 import '../models/lesson.dart';
 
 class LessonService {
+  static List<Lesson>? _cachedLessons;
+
   Future<List<Lesson>> loadLessons() async {
+    final cached = _cachedLessons;
+    if (cached != null) {
+      return cached;
+    }
+
     try {
       final jsonString =
           await rootBundle.loadString('assets/data/lessons.json');
@@ -16,14 +23,16 @@ class LessonService {
           .toList();
       if (lessons.isNotEmpty) {
         lessons.sort((a, b) => a.sequence.compareTo(b.sequence));
-        return lessons;
+        _cachedLessons = List<Lesson>.from(lessons);
+        return _cachedLessons!;
       }
     } catch (_) {
       // Fall back to the built-in sample curriculum when local JSON is absent or invalid.
     }
 
-    return List<Lesson>.from(sampleLessons)
+    _cachedLessons = List<Lesson>.from(sampleLessons)
       ..sort((a, b) => a.sequence.compareTo(b.sequence));
+    return _cachedLessons!;
   }
 
   Future<Map<String, List<Lesson>>> loadLessonsGroupedByUnit() async {
@@ -36,5 +45,9 @@ class LessonService {
     }
 
     return grouped;
+  }
+
+  static void debugClearCache() {
+    _cachedLessons = null;
   }
 }

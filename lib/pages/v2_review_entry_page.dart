@@ -48,6 +48,7 @@ class _V2ReviewEntryPageState extends State<V2ReviewEntryPage> {
     }
     if (session == null) {
       setState(() => _launchFailed = true);
+      Navigator.of(context).pop(false);
       return;
     }
 

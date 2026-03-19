@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:arabic_learning_app/app_scope.dart';
+import 'package:arabic_learning_app/data/sample_alphabet_data.dart';
 import 'package:arabic_learning_app/models/app_settings.dart';
 import 'package:arabic_learning_app/services/alphabet_service.dart';
 
@@ -42,6 +43,33 @@ Future<void> pumpUntilLoaded(
   await pumpTestFrames(tester, count: 4, step: step);
 }
 
+Future<void> seedSharedPreferences(
+  Map<String, Object> values,
+) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.clear();
+
+  for (final entry in values.entries) {
+    final key = entry.key;
+    final value = entry.value;
+    if (value is String) {
+      await prefs.setString(key, value);
+    } else if (value is bool) {
+      await prefs.setBool(key, value);
+    } else if (value is int) {
+      await prefs.setInt(key, value);
+    } else if (value is double) {
+      await prefs.setDouble(key, value);
+    } else if (value is List<String>) {
+      await prefs.setStringList(key, value);
+    } else {
+      throw ArgumentError(
+        'Unsupported SharedPreferences mock type for $key: ${value.runtimeType}',
+      );
+    }
+  }
+}
+
 Future<void> pumpLocalizedTestPage(
   WidgetTester tester,
   Widget child, {
@@ -55,8 +83,7 @@ Future<void> pumpLocalizedTestPage(
     tester.view.resetDevicePixelRatio();
   });
 
-  SharedPreferences.setMockInitialValues(sharedPreferences);
-
+  await seedSharedPreferences(sharedPreferences);
   await tester.pumpWidget(
     AppSettingsScope(
       settings: settings,
@@ -73,21 +100,33 @@ Future<void> pumpLocalizedTestPage(
 }
 
 Future<List<String>> loadAllAlphabetLetters() async {
-  final groups = await AlphabetService.loadAlphabetGroups();
-  return groups
-      .expand((group) => group.letters)
-      .map((letter) => letter.arabic)
-      .toList(growable: false);
+  final runtimeGroups = await AlphabetService.loadAlphabetGroups();
+  final combinedLetters = <String>{
+    ...runtimeGroups
+        .expand((group) => group.letters)
+        .map((letter) => letter.arabic),
+    ...sampleAlphabetGroups
+        .expand((group) => group.letters)
+        .map((letter) => letter.arabic),
+  };
+
+  return combinedLetters.toList(growable: false);
 }
 
 Map<String, Object> completedAlphabetProgressPrefs(
   List<String> allLetters, {
   Map<String, Object> extra = const <String, Object>{},
 }) {
+  final normalizedLetters = allLetters
+      .map((letter) => letter.trim())
+      .where((letter) => letter.isNotEmpty)
+      .toSet()
+      .toList(growable: false);
+
   return <String, Object>{
-    'alphabet_progress_viewed_letters_v1': allLetters,
-    'alphabet_progress_listen_letters_v1': allLetters,
-    'alphabet_progress_write_letters_v1': allLetters,
+    'alphabet_progress_viewed_letters_v1': normalizedLetters,
+    'alphabet_progress_listen_letters_v1': normalizedLetters,
+    'alphabet_progress_write_letters_v1': normalizedLetters,
     ...extra,
   };
 }

@@ -1,13 +1,15 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:arabic_learning_app/data/v2_micro_lessons.dart';
 import 'package:arabic_learning_app/features/onboarding/models/onboarding_state.dart';
 import 'package:arabic_learning_app/models/app_settings.dart';
 import 'package:arabic_learning_app/models/learning_state_models.dart';
 import 'package:arabic_learning_app/pages/home_page.dart';
 import 'package:arabic_learning_app/services/learning_state_service.dart';
 import 'package:arabic_learning_app/services/lesson_progress_service.dart';
+import 'package:arabic_learning_app/services/review_sync_service.dart';
 
 import 'test_helpers.dart';
 
@@ -80,8 +82,20 @@ const v2CompletedOnboarding = OnboardingState(
   hasEnteredHomeAfterFirstExperience: true,
 );
 
+List<String>? _cachedAllAlphabetLetters;
+
+Future<List<String>> getCachedAllAlphabetLetters() async {
+  if (_cachedAllAlphabetLetters != null) {
+    return _cachedAllAlphabetLetters!;
+  }
+  _cachedAllAlphabetLetters = await loadAllAlphabetLetters();
+  return _cachedAllAlphabetLetters!;
+}
+
 Future<void> resetV2HomeFlowState() async {
   SharedPreferences.setMockInitialValues(<String, Object>{});
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.clear();
   await LessonProgressService.debugClearAll();
   await LearningStateService.saveAllStates(
     const <LearningContentState>[],
@@ -91,6 +105,9 @@ Future<void> resetV2HomeFlowState() async {
     const <LearningPracticeState>[],
     notify: false,
   );
+  ReviewSyncService.lastReason = ReviewSyncReason.manual;
+  ReviewSyncService.lastUpdatedAt = null;
+  ReviewSyncService.changes.value = 0;
 }
 
 Future<void> pumpV2Home(
@@ -98,7 +115,7 @@ Future<void> pumpV2Home(
   AppSettings settings = kEnglishTestSettings,
   Map<String, Object> sharedPreferences = const <String, Object>{},
 }) async {
-  final allLetters = await loadAllAlphabetLetters();
+  final allLetters = await getCachedAllAlphabetLetters();
   await pumpLocalizedTestPage(
     tester,
     HomePage(
@@ -109,7 +126,12 @@ Future<void> pumpV2Home(
     settings: settings,
     sharedPreferences: completedAlphabetProgressPrefs(
       allLetters,
-      extra: sharedPreferences,
+      extra: <String, Object>{
+        'v2_lesson_progress_records_v1': '[]',
+        'learning_content_states_v1': '[]',
+        'learning_practice_states_v1': '[]',
+        ...sharedPreferences,
+      },
     ),
   );
 }
@@ -119,7 +141,7 @@ Future<void> pumpV2HomeShell(
   AppSettings settings = kEnglishTestSettings,
   Map<String, Object> sharedPreferences = const <String, Object>{},
 }) async {
-  final allLetters = await loadAllAlphabetLetters();
+  final allLetters = await getCachedAllAlphabetLetters();
   await pumpLocalizedTestPage(
     tester,
     V2HomeTabShell(
@@ -129,7 +151,12 @@ Future<void> pumpV2HomeShell(
     settings: settings,
     sharedPreferences: completedAlphabetProgressPrefs(
       allLetters,
-      extra: sharedPreferences,
+      extra: <String, Object>{
+        'v2_lesson_progress_records_v1': '[]',
+        'learning_content_states_v1': '[]',
+        'learning_practice_states_v1': '[]',
+        ...sharedPreferences,
+      },
     ),
   );
 }
@@ -156,8 +183,15 @@ Future<void> completeAlphabetClosureLesson(
   WidgetTester tester, {
   required AppLanguage language,
 }) async {
+  final lesson = v2PilotMicroLessons.firstWhere(
+    (item) => item.lessonId == 'V2-ALPHA-CL-01',
+  );
   final continueLabel = language == AppLanguage.en ? 'Continue' : '继续';
-  final selfPassLabel = language == AppLanguage.en ? 'I Got It' : '我做到了';
+  final finalAnswer =
+      (lesson.practiceItems.last.expectedAnswer ??
+              lesson.practiceItems.last.arabicText ??
+              '')
+          .trim();
 
   await tester.tap(find.widgetWithText(OutlinedButton, 'ث'));
   await pumpForTransition(tester);
@@ -169,6 +203,10 @@ Future<void> completeAlphabetClosureLesson(
   await tester.tap(find.widgetWithText(FilledButton, continueLabel));
   await pumpForTransition(tester);
 
-  await tester.tap(find.widgetWithText(FilledButton, selfPassLabel));
+  await tester.enterText(find.byType(TextField), finalAnswer);
+  await pumpForTransition(tester);
+  await tester.tap(find.byType(FilledButton).first);
+  await pumpForTransition(tester);
+  await tester.tap(find.widgetWithText(FilledButton, continueLabel));
   await pumpForTransition(tester);
 }

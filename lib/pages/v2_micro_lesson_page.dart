@@ -8,6 +8,7 @@ import '../models/v2_micro_lesson.dart';
 import '../services/audio_service.dart';
 import '../services/v2_micro_lesson_completion_orchestrator.dart';
 import '../widgets/arabic_text_with_audio.dart';
+import '../widgets/app_widgets.dart';
 import 'v2_micro_lesson_completion_page.dart';
 
 class V2MicroLessonPage extends StatefulWidget {
@@ -28,10 +29,13 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
   late final V2MicroLesson _lesson;
   final Map<String, V2MicroPracticeOutcome> _outcomes =
       <String, V2MicroPracticeOutcome>{};
+  final TextEditingController _typedAnswerController = TextEditingController();
   int _currentPracticeIndex = 0;
   bool _submitting = false;
   String? _selectedChoice;
   bool? _autoPracticePassed;
+  bool? _guidedPracticePassed;
+  List<String> _arrangedResponseTokens = <String>[];
 
   @override
   void initState() {
@@ -39,6 +43,12 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
     _lesson = v2PilotMicroLessons.firstWhere(
       (lesson) => lesson.lessonId == widget.lessonId,
     );
+  }
+
+  @override
+  void dispose() {
+    _typedAnswerController.dispose();
+    super.dispose();
   }
 
   V2MicroPracticeItem get _currentPractice =>
@@ -70,21 +80,25 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
       _currentPractice.type == V2MicroPracticeType.listenTap ||
       _currentPractice.type == V2MicroPracticeType.comprehensionCheck;
 
+  bool get _isCurrentPracticeTypedResponse =>
+      _currentPractice.type == V2MicroPracticeType.speakResponse ||
+      _currentPractice.type == V2MicroPracticeType.recallPrompt;
+
   String get _continueLabel => localizedText(
         context,
-        zh: '继续',
+        zh: '\u7ee7\u7eed',
         en: 'Continue',
       );
 
   String get _retryLabel => localizedText(
         context,
-        zh: '再试一次',
+        zh: '\u518d\u8bd5\u4e00\u6b21',
         en: 'Try Again',
       );
 
   String get _continueWithReviewLabel => localizedText(
         context,
-        zh: '标记回看并继续',
+        zh: '\u6807\u8bb0\u56de\u770b\u5e76\u7ee7\u7eed',
         en: 'Continue With Review',
       );
 
@@ -106,8 +120,7 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
     if (_currentPracticeIndex < _lesson.practiceItems.length - 1) {
       setState(() {
         _currentPracticeIndex += 1;
-        _selectedChoice = null;
-        _autoPracticePassed = null;
+        _resetPracticeState();
       });
       return;
     }
@@ -122,7 +135,7 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
     if (!mounted) {
       return;
     }
-    await Navigator.pushReplacement<bool, bool>(
+    await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (_) => V2MicroLessonCompletionPage(
@@ -131,6 +144,10 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
         ),
       ),
     );
+    if (!mounted) {
+      return;
+    }
+    Navigator.pop(context, true);
   }
 
   void _evaluateAutoPractice(String choice) {
@@ -148,6 +165,129 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
       _selectedChoice = null;
       _autoPracticePassed = null;
     });
+  }
+
+  void _resetPracticeState() {
+    _selectedChoice = null;
+    _autoPracticePassed = null;
+    _guidedPracticePassed = null;
+    _arrangedResponseTokens = <String>[];
+    _typedAnswerController.clear();
+  }
+
+  String _expectedPracticeAnswer(V2MicroPracticeItem practice) {
+    final explicitAnswer = (practice.expectedAnswer ?? practice.arabicText ?? '')
+        .trim();
+    if (explicitAnswer.isNotEmpty) {
+      return explicitAnswer;
+    }
+
+    bool sharesObjectiveIds(Iterable<String> candidateObjectiveIds) {
+      return practice.objectiveIds.any(candidateObjectiveIds.contains);
+    }
+
+    final practiceIndex = _lesson.practiceItems.indexOf(practice);
+    if (practiceIndex > 0) {
+      for (final candidate in _lesson.practiceItems
+          .take(practiceIndex)
+          .toList(growable: false)
+          .reversed) {
+        final candidateAnswer =
+            (candidate.expectedAnswer ?? candidate.arabicText ?? '').trim();
+        if (candidateAnswer.isNotEmpty &&
+            sharesObjectiveIds(candidate.objectiveIds)) {
+          return candidateAnswer;
+        }
+      }
+    }
+
+    for (final item in _lesson.contentItems.reversed) {
+      final candidateAnswer = (item.arabicText ?? '').trim();
+      if (candidateAnswer.isNotEmpty &&
+          sharesObjectiveIds(item.objectiveIds)) {
+        return candidateAnswer;
+      }
+    }
+
+    return '';
+  }
+
+  String _normalizePracticeAnswer(String value) {
+    return removeArabicDiacritics(value)
+        .replaceAll(RegExp(r'[.,!?;:貙責貨]'), ' ')
+        .replaceAll('賭', '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim()
+        .toLowerCase();
+  }
+
+  bool _matchesExpectedAnswer(
+    V2MicroPracticeItem practice,
+    String candidate,
+  ) {
+    final normalizedCandidate = _normalizePracticeAnswer(candidate);
+    final normalizedExpected = _normalizePracticeAnswer(
+      _expectedPracticeAnswer(practice),
+    );
+    return normalizedCandidate.isNotEmpty &&
+        normalizedExpected.isNotEmpty &&
+        normalizedCandidate == normalizedExpected;
+  }
+
+  List<String> _arrangeResponseOptions(V2MicroPracticeItem practice) {
+    final expectedAnswer = _expectedPracticeAnswer(practice);
+    if (expectedAnswer.isEmpty) {
+      return <String>[];
+    }
+    final tokens = expectedAnswer
+        .split(RegExp(r'\s+'))
+        .map((item) => item.trim())
+        .where((item) => item.isNotEmpty)
+        .toList(growable: false);
+    if (tokens.length <= 1) {
+      return tokens;
+    }
+    return tokens.reversed.toList(growable: false);
+  }
+
+  void _submitTypedPractice(V2MicroPracticeItem practice) {
+    final passed = _matchesExpectedAnswer(
+      practice,
+      _typedAnswerController.text,
+    );
+    setState(() => _guidedPracticePassed = passed);
+  }
+
+  void _submitArrangePractice(V2MicroPracticeItem practice) {
+    final candidate = _arrangedResponseTokens.join(' ');
+    final passed = _matchesExpectedAnswer(practice, candidate);
+    setState(() => _guidedPracticePassed = passed);
+  }
+
+  void _addArrangeToken(String token) {
+    if (_guidedPracticePassed != null) {
+      return;
+    }
+    setState(() => _arrangedResponseTokens = <String>[
+          ..._arrangedResponseTokens,
+          token,
+        ]);
+  }
+
+  void _removeArrangeTokenAt(int index) {
+    if (_guidedPracticePassed != null) {
+      return;
+    }
+    setState(() {
+      _arrangedResponseTokens = <String>[
+        ..._arrangedResponseTokens.take(index),
+        ..._arrangedResponseTokens.skip(index + 1),
+      ];
+    });
+  }
+
+  void _resetGuidedAttempt() {
+    setState(_resetPracticeState);
   }
 
   List<String> _buildChoiceOptions(V2MicroPracticeItem practice) {
@@ -276,12 +416,12 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
     return passed
         ? localizedText(
             context,
-            zh: '判断正确',
+            zh: '\u5224\u65ad\u6b63\u786e',
             en: 'Correct',
           )
         : localizedText(
             context,
-            zh: '这题先回看',
+            zh: '\u8fd9\u9898\u5148\u56de\u770b',
             en: 'Mark This For Review',
           );
   }
@@ -294,13 +434,13 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
       if (meaning.isNotEmpty) {
         return localizedText(
           context,
-          zh: '你选中了正确句子：$answer。它对应的是“$meaning”。',
+          zh: '\u4f60\u9009\u4e2d\u4e86\u6b63\u786e\u53e5\u5b50\uff1a$answer\u3002\u5b83\u5bf9\u5e94\u7684\u662f\u201c$meaning\u201d\u3002',
           en: 'You picked the correct line: $answer. It means "$meaning".',
         );
       }
       return localizedText(
         context,
-        zh: '你选中了正确句子：$answer。继续下一步。',
+        zh: '\u4f60\u9009\u4e2d\u4e86\u6b63\u786e\u53e5\u5b50\uff1a$answer\u3002\u7ee7\u7eed\u4e0b\u4e00\u6b65\u3002',
         en: 'You picked the correct line: $answer. Continue to the next step.',
       );
     }
@@ -308,14 +448,70 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
     if (meaning.isNotEmpty) {
       return localizedText(
         context,
-        zh: '正确句子是 $answer，对应“$meaning”。这一题会记入回看。',
+        zh: '\u6b63\u786e\u53e5\u5b50\u662f $answer\uff0c\u5bf9\u5e94\u201c$meaning\u201d\u3002\u8fd9\u4e00\u9898\u4f1a\u8bb0\u5165\u56de\u770b\u3002',
         en: 'The correct line is $answer, which means "$meaning". This item will be marked for review.',
       );
     }
     return localizedText(
       context,
-      zh: '正确句子是 $answer。这一题会记入回看。',
+      zh: '\u6b63\u786e\u53e5\u5b50\u662f $answer\u3002\u8fd9\u4e00\u9898\u4f1a\u8bb0\u5165\u56de\u770b\u3002',
       en: 'The correct line is $answer. This item will be marked for review.',
+    );
+  }
+
+  String _guidedFeedbackTitle(bool passed) {
+    return passed
+        ? localizedText(
+            context,
+            zh: '\u56de\u7b54\u5339\u914d',
+            en: 'Answer Matches',
+          )
+        : localizedText(
+            context,
+            zh: '\u5148\u8bb0\u5165\u56de\u770b',
+            en: 'Mark This For Review',
+          );
+  }
+
+  String _guidedFeedbackBody(V2MicroPracticeItem practice, bool passed) {
+    final expectedAnswer = _expectedPracticeAnswer(practice);
+    final practiceMeaning = _practiceMeaning(practice);
+
+    if (passed) {
+      if (practiceMeaning.isNotEmpty) {
+        return localizedText(
+          context,
+          zh: '\u8fd9\u4e00\u6b65\u7684\u7b54\u6848\u5df2\u5339\u914d\u3002\u610f\u601d\u662f\u201c$practiceMeaning\u201d\u3002',
+          en: 'This step matched the expected answer. It means "$practiceMeaning".',
+        );
+      }
+      return localizedText(
+        context,
+        zh: '\u8fd9\u4e00\u6b65\u7684\u7b54\u6848\u5df2\u5339\u914d\uff0c\u53ef\u4ee5\u7ee7\u7eed\u3002',
+        en: 'This step matched the expected answer. Continue to the next step.',
+      );
+    }
+
+    if (expectedAnswer.isEmpty) {
+      return localizedText(
+        context,
+        zh: '\u8fd9\u4e00\u6b65\u4f1a\u8bb0\u5165\u56de\u770b\uff0c\u7136\u540e\u7ee7\u7eed\u4e0b\u4e00\u6b65\u3002',
+        en: 'This step will be marked for review before you continue.',
+      );
+    }
+
+    if (practiceMeaning.isNotEmpty) {
+      return localizedText(
+        context,
+        zh: '\u6b63\u786e\u7b54\u6848\u662f\uff1a$expectedAnswer\u3002\u5b83\u7684\u610f\u601d\u662f\u201c$practiceMeaning\u201d\u3002\u8fd9\u4e00\u6b65\u4f1a\u8bb0\u5165\u56de\u770b\u3002',
+        en: 'The expected answer is $expectedAnswer. It means "$practiceMeaning". This step will be marked for review.',
+      );
+    }
+
+    return localizedText(
+      context,
+      zh: '\u6b63\u786e\u7b54\u6848\u662f\uff1a$expectedAnswer\u3002\u8fd9\u4e00\u6b65\u4f1a\u8bb0\u5165\u56de\u770b\u3002',
+      en: 'The expected answer is $expectedAnswer. This step will be marked for review.',
     );
   }
 
@@ -343,7 +539,7 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
           Text(
             localizedText(
               context,
-              zh: '本课目标',
+              zh: '\u672c\u8bfe\u76ee\u6807',
               en: 'Lesson Goal',
             ),
             style: theme.textTheme.titleMedium,
@@ -366,7 +562,7 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
                 label: Text(
                   localizedText(
                     context,
-                    zh: '${_lesson.estimatedMinutes} 分钟样板课',
+                    zh: '${_lesson.estimatedMinutes} \u5206\u949f\u6837\u677f\u8bfe',
                     en: '${_lesson.estimatedMinutes}-minute pilot lesson',
                   ),
                 ),
@@ -446,7 +642,7 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
         Text(
           localizedText(
             context,
-            zh: '开始练这一小步',
+            zh: '\u5f00\u59cb\u7ec3\u8fd9\u4e00\u5c0f\u6b65',
             en: 'Practice This Step',
           ),
           style: theme.textTheme.titleMedium,
@@ -458,7 +654,7 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
           localizedText(
             context,
             zh:
-                '第 ${_currentPracticeIndex + 1} / ${_lesson.practiceItems.length} 步',
+                '\u7b2c ${_currentPracticeIndex + 1} / ${_lesson.practiceItems.length} \u6b65',
             en:
                 'Step ${_currentPracticeIndex + 1} of ${_lesson.practiceItems.length}',
           ),
@@ -492,10 +688,288 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
           const SizedBox(height: 14),
           if (_isCurrentPracticeAutoGraded)
             _buildAutoPracticeSection(context, theme, practice, practiceMeaning)
+          else if (_isCurrentPracticeTypedResponse)
+            _buildTypedResponseSection(context, theme, practice, practiceMeaning)
+          else if (practice.type == V2MicroPracticeType.arrangeResponse)
+            _buildArrangeResponseSection(context, theme, practice, practiceMeaning)
           else
             _buildGuidedPracticeSection(context, theme, practice, practiceMeaning),
         ],
       ),
+    );
+  }
+
+  Widget _buildGuidedFeedback(
+    BuildContext context,
+    ThemeData theme,
+    V2MicroPracticeItem practice,
+  ) {
+    if (_guidedPracticePassed == null) {
+      return const SizedBox.shrink();
+    }
+
+    final passed = _guidedPracticePassed!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 14),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: passed ? const Color(0xFFEAF7EF) : const Color(0xFFFDF0E7),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _guidedFeedbackTitle(passed),
+                style: theme.textTheme.titleMedium,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                _guidedFeedbackBody(practice, passed),
+                style: theme.textTheme.bodyMedium,
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        if (passed)
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: () => _recordOutcome(true),
+              child: Text(_continueLabel),
+            ),
+          )
+        else ...[
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: () => _recordOutcome(false),
+              child: Text(_continueWithReviewLabel),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: _resetGuidedAttempt,
+              child: Text(_retryLabel),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildTypedResponseSection(
+    BuildContext context,
+    ThemeData theme,
+    V2MicroPracticeItem practice,
+    String practiceMeaning,
+  ) {
+    final arabicText = practice.type == V2MicroPracticeType.recallPrompt
+        ? ''
+        : (practice.arabicText?.trim() ?? '');
+    final expectedAnswer = _expectedPracticeAnswer(practice);
+    final showTransliteration =
+        widget.settings.showTransliteration &&
+        practice.type != V2MicroPracticeType.recallPrompt &&
+        (practice.transliteration?.trim().isNotEmpty ?? false);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (arabicText.isNotEmpty) ...[
+          Text(
+            arabicText,
+            style: theme.textTheme.displaySmall,
+            textAlign: TextAlign.right,
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (practiceMeaning.isNotEmpty) ...[
+          Text(practiceMeaning, style: theme.textTheme.bodyLarge),
+          const SizedBox(height: 8),
+        ],
+        if (showTransliteration) ...[
+          Text(practice.transliteration!, style: theme.textTheme.bodyMedium),
+          const SizedBox(height: 12),
+        ],
+        TextField(
+          controller: _typedAnswerController,
+          enabled: _guidedPracticePassed == null,
+          decoration: InputDecoration(
+            labelText: localizedText(
+              context,
+              zh: '\u8f93\u5165\u7b54\u6848',
+              en: 'Type Your Answer',
+            ),
+            hintText: expectedAnswer.isEmpty
+                ? null
+                : localizedText(
+                    context,
+                    zh: '\u7528\u963f\u62c9\u4f2f\u8bed\u8f93\u5165',
+                    en: 'Answer in Arabic',
+                  ),
+            border: const OutlineInputBorder(),
+          ),
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) {
+            if (_guidedPracticePassed == null) {
+              _submitTypedPractice(practice);
+            }
+          },
+        ),
+        const SizedBox(height: 14),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton(
+            onPressed: _guidedPracticePassed == null
+                ? () => _submitTypedPractice(practice)
+                : null,
+            child: Text(
+              localizedText(
+                context,
+                zh: '\u68c0\u67e5\u7b54\u6848',
+                en: 'Check Answer',
+              ),
+            ),
+          ),
+        ),
+        _buildGuidedFeedback(context, theme, practice),
+      ],
+    );
+  }
+
+  Widget _buildArrangeResponseSection(
+    BuildContext context,
+    ThemeData theme,
+    V2MicroPracticeItem practice,
+    String practiceMeaning,
+  ) {
+    final options = _arrangeResponseOptions(practice);
+    final selectedCounts = <String, int>{};
+    for (final token in _arrangedResponseTokens) {
+      selectedCounts[token] = (selectedCounts[token] ?? 0) + 1;
+    }
+    final availableTokens = <String>[];
+    final usedCounts = <String, int>{};
+    for (final token in options) {
+      final count = usedCounts[token] ?? 0;
+      final selectedCount = selectedCounts[token] ?? 0;
+      if (count < selectedCount) {
+        usedCounts[token] = count + 1;
+        continue;
+      }
+      availableTokens.add(token);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (practiceMeaning.isNotEmpty) ...[
+          Text(practiceMeaning, style: theme.textTheme.bodyLarge),
+          const SizedBox(height: 12),
+        ],
+        Text(
+          localizedText(
+            context,
+            zh: '\u6309\u987a\u5e8f\u70b9\u8bcd\uff0c\u62fc\u6210\u5b8c\u6574\u56de\u7b54\u3002',
+            en: 'Tap the words in order to build the full response.',
+          ),
+          style: theme.textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 12),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFD6CCB9)),
+          ),
+          child: _arrangedResponseTokens.isEmpty
+              ? Text(
+                  localizedText(
+                    context,
+                    zh: '\u4f60\u7684\u7b54\u6848\u4f1a\u663e\u793a\u5728\u8fd9\u91cc',
+                    en: 'Your answer will appear here',
+                  ),
+                  style: theme.textTheme.bodyMedium,
+                )
+              : Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: List<Widget>.generate(
+                    _arrangedResponseTokens.length,
+                    (index) {
+                      final token = _arrangedResponseTokens[index];
+                      return InputChip(
+                        label: Text(token),
+                        onPressed: _guidedPracticePassed == null
+                            ? () => _removeArrangeTokenAt(index)
+                            : null,
+                      );
+                    },
+                  ),
+                ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: availableTokens
+              .map(
+                (token) => ActionChip(
+                  label: Text(token),
+                  onPressed: _guidedPracticePassed == null
+                      ? () => _addArrangeToken(token)
+                      : null,
+                ),
+              )
+              .toList(growable: false),
+        ),
+        const SizedBox(height: 14),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton(
+            onPressed: _guidedPracticePassed == null &&
+                    _arrangedResponseTokens.isNotEmpty
+                ? () => _submitArrangePractice(practice)
+                : null,
+            child: Text(
+              localizedText(
+                context,
+                zh: '\u68c0\u67e5\u7b54\u6848',
+                en: 'Check Answer',
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
+            onPressed: _guidedPracticePassed == null &&
+                    _arrangedResponseTokens.isNotEmpty
+                ? () => setState(() => _arrangedResponseTokens = <String>[])
+                : null,
+            child: Text(
+              localizedText(
+                context,
+                zh: '\u6e05\u7a7a\u987a\u5e8f',
+                en: 'Reset Order',
+              ),
+            ),
+          ),
+        ),
+        _buildGuidedFeedback(context, theme, practice),
+      ],
     );
   }
 
@@ -517,7 +991,7 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
               Text(
                 localizedText(
                   context,
-                  zh: '先听，再选',
+                  zh: '\u5148\u542c\uff0c\u518d\u9009',
                   en: 'Listen first, then choose',
                 ),
                 style: theme.textTheme.bodyMedium,
@@ -530,7 +1004,7 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
                 ),
                 tooltip: localizedText(
                   context,
-                  zh: '播放这一题音频',
+                  zh: '\u64ad\u653e\u8fd9\u4e00\u9898\u97f3\u9891',
                   en: 'Play this prompt audio',
                 ),
               ),
@@ -599,7 +1073,7 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
                   Text(
                     localizedText(
                       context,
-                      zh: '回到上方再听一次会更稳。',
+                      zh: '\u56de\u5230\u4e0a\u65b9\u518d\u542c\u4e00\u6b21\u4f1a\u66f4\u7a33\u3002',
                       en: 'One more listen above will make this more stable.',
                     ),
                     style: theme.textTheme.bodySmall,
@@ -670,7 +1144,7 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
         Text(
           localizedText(
             context,
-            zh: '这一题先保留轻量自评：做到了就继续，不稳就记入回看。',
+            zh: '\u8fd9\u4e00\u9898\u5148\u4fdd\u7559\u8f7b\u91cf\u81ea\u8bc4\uff1a\u505a\u5230\u4e86\u5c31\u7ee7\u7eed\uff0c\u4e0d\u7a33\u5c31\u8bb0\u5165\u56de\u770b\u3002',
             en: 'This step stays as lightweight self-check for now: continue if stable, or mark it for review if not.',
           ),
           style: theme.textTheme.bodyMedium,
@@ -683,7 +1157,7 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
             child: Text(
               localizedText(
                 context,
-                zh: '我做到了',
+                zh: '\u6211\u505a\u5230\u4e86',
                 en: 'I Got It',
               ),
             ),
@@ -697,7 +1171,7 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
             child: Text(
               localizedText(
                 context,
-                zh: '这里还不稳',
+                zh: '\u8fd9\u91cc\u8fd8\u4e0d\u7a33',
                 en: 'Need Review',
               ),
             ),

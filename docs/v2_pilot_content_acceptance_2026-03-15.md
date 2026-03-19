@@ -71,3 +71,13 @@ This pass reviews the current V2 pilot micro-lessons as a migration template, no
 ## Overall Conclusion
 
 The current V2 pilot segment is acceptable as a migration template after these micro-adjustments. The lesson targets are now narrower, the learner-facing promises are clearer, and the completion screen better reflects what just happened. The pilot still intentionally carries a small review load and does not attempt full curriculum depth in this phase.
+## 2026-03-19 Runtime Alignment Note
+
+- The content-level acceptance in this document still stands: the current 7-lesson pilot segment remains a valid migration template.
+- What changed is the operational picture around it: Home entry, lesson handoff, completion return, review-first routing, and surface stability are now verified as a stable V2 loop.
+- Because of that, the next highest-priority work is no longer Home routing polish. It is improving the credibility of the micro-lesson evidence loop for the remaining lightly graded practice types.
+## 2026-03-19 Test Coverage Note
+
+- The content acceptance in this document is unchanged.
+- What improved is confidence in runtime delivery: the current acceptance suite now covers direct micro-lesson page structure, typed-response completion, arrange-response completion, and return-to-home recommendation refresh in one stable path.
+- Because of that, the remaining priority is still lesson evidence quality, not Home routing polish.

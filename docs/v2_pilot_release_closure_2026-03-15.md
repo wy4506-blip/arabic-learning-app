@@ -218,3 +218,39 @@
 - V2 lesson runtime 仍停留在技术样板阶段，还差最小真实学习交互、音频接线和可用证据采集。
 
 因此，离首个可上线版本还差的核心不是更多路由修补，而是把 V2 微课页补成真正的课。
+## 2026-03-19 Update
+
+### Home acceptance no longer blocks the V2 pilot loop
+
+- Home V2 entry/completion/refresh loop is now stable across the current acceptance suite.
+- The following tests passed together on 2026-03-19:
+  - `test/home_v2_entry_completion_test.dart`
+  - `test/home_v2_surface_stability_test.dart`
+  - `test/home_v2_review_flow_test.dart`
+  - `test/home_today_learning_flow_test.dart`
+  - `test/home_due_review_priority_test.dart`
+  - `test/home_skip_review_flow_test.dart`
+- This means the current blocker has shifted away from Home routing and recommendation refresh stability.
+
+### Runtime judgment needs to be updated
+
+- The earlier wording that described the V2 micro-lesson page as a mostly placeholder runtime is no longer accurate.
+- The current runtime already renders content items, exposes audio entry on supported nodes, and contains at least partial auto-grading for `listenTap` and `comprehensionCheck`.
+- The more accurate remaining gap is evidence quality: some practice types still rely on lightweight self-report or do not yet provide equally strong verification.
+
+### Current highest-priority remaining work
+
+- Strengthen the minimum credible evidence loop for the remaining practice types, especially `speakResponse`, `recallPrompt`, and `arrangeResponse`.
+- After that, close the release-prep gates: clean worktree, rerun broader regression, and finish audio/copy targeted checks.
+## 2026-03-19 Test Coverage Alignment Note
+
+### What changed after the Home/review fix
+
+- The Home/review completed loop is now stable enough to treat as a closed acceptance blocker.
+- The Home/mainline completion loop is also stable for typed-response and arrange-response lessons.
+- A direct micro-lesson page smoke assertion now runs inside the stable Home/V2 acceptance suite, which gives us page-level structure coverage without relying on the old flaky standalone page test file.
+
+### Current release reading
+
+- Home routing is no longer the reason to hold the V2 pilot loop.
+- The current product gap remains evidence quality and release-prep cleanup, not Home refresh semantics.
