@@ -1,4 +1,4 @@
-# Release Candidate Notes 2026-03-19
+﻿# Release Candidate Notes 2026-03-19
 
 ## Scope
 
@@ -73,3 +73,26 @@ This candidate bundles the V2 Home/review/mainline loop stabilization work, the 
 - Create a candidate commit.
 - Create a rollback point or tag from that candidate.
 - Re-check the release checklist after the worktree is clean.
+
+## 2026-03-20 Candidate Freeze Update
+
+### Frozen baseline
+
+- Candidate commit: f0274f7
+- Candidate commit message: Refine V2 review-first boundaries and completion surfaces
+- Rollback tags:
+  - acceptance-candidate-2026-03-19
+  - acceptance-candidate-2026-03-19-r2
+
+### What changed after the first candidate
+
+- Tighten the V2 review-first boundary so Home only blocks on V2-relevant due review.
+- Keep pilot review focused on the due items that actually block the V2 mainline, with fallback tasks for missing today-plan coverage.
+- Align the formal review completion surface so Pilot Review does not present itself as Today's Review.
+- Clean up the V2 micro-lesson completion surface and keep the completion summary/next-step messaging in one stable implementation.
+
+### Current release reading
+
+- The worktree is now clean.
+- The candidate is now frozen and tagged.
+- The remaining release-prep work is manual acceptance and release coordination, not candidate assembly.
