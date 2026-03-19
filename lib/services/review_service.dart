@@ -118,13 +118,18 @@ class ReviewService {
       return plan;
     }
 
+    final relocalizedStoredPlan = storedPlan.copyWith(
+      tasks: ReviewPlanner.relocalizeTasks(context, storedPlan.tasks),
+    );
+
     if (storedPlan.hasStarted || storedPlan.isCompleted) {
-      return storedPlan;
+      await _saveTodayPlan(relocalizedStoredPlan, notify: false);
+      return relocalizedStoredPlan;
     }
 
-    final plan = storedPlan.copyWith(
+    final plan = relocalizedStoredPlan.copyWith(
       tasks: freshTasks,
-      completedTaskIds: storedPlan.completedTaskIds
+      completedTaskIds: relocalizedStoredPlan.completedTaskIds
           .where(
             (id) => freshTasks.any((task) => task.contentId == id),
           )

@@ -54,7 +54,7 @@ class _VocabBookPageState extends State<VocabBookPage> {
   String _meaningText(BuildContext context, String value) {
     return LessonContentLocalizer.meaning(
       value,
-      context.appSettings.meaningLanguage,
+      context.surfaceMeaningLanguage,
     );
   }
 

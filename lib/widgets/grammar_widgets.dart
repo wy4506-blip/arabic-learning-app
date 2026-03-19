@@ -128,7 +128,7 @@ class GrammarQuickLinkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final meaningLanguage = context.appSettings.meaningLanguage;
+    final meaningLanguage = context.surfaceMeaningLanguage;
 
     return AppSurface(
       onTap: onTap,
@@ -181,7 +181,7 @@ class GrammarTableCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final meaningLanguage = context.appSettings.meaningLanguage;
+    final meaningLanguage = context.surfaceMeaningLanguage;
     final rows = isExpandable && !expanded && table.rows.length > 5
         ? table.rows.take(5).toList()
         : table.rows;
@@ -251,7 +251,7 @@ class _GrammarTableRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    final meaningLanguage = context.appSettings.meaningLanguage;
+    final meaningLanguage = context.surfaceMeaningLanguage;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 6),
@@ -323,7 +323,7 @@ class GrammarRuleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final meaningLanguage = context.appSettings.meaningLanguage;
+    final meaningLanguage = context.surfaceMeaningLanguage;
 
     return AppSurface(
       child: Column(
@@ -383,7 +383,7 @@ class GrammarCompareCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final meaningLanguage = context.appSettings.meaningLanguage;
+    final meaningLanguage = context.surfaceMeaningLanguage;
 
     return AppSurface(
       child: Column(
@@ -475,7 +475,7 @@ class GrammarExampleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final meaningLanguage = context.appSettings.meaningLanguage;
+    final meaningLanguage = context.surfaceMeaningLanguage;
 
     return Container(
       width: double.infinity,
@@ -565,7 +565,7 @@ class GrammarRelatedLessonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final meaningLanguage = context.appSettings.meaningLanguage;
+    final meaningLanguage = context.surfaceMeaningLanguage;
 
     return AppSurface(
       onTap: onTap,

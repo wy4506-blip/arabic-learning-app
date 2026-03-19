@@ -144,7 +144,7 @@ class _GrammarCategoryPageState extends State<GrammarCategoryPage> {
     }
 
     final appLanguage = context.appSettings.appLanguage;
-    final meaningLanguage = context.appSettings.meaningLanguage;
+    final meaningLanguage = context.surfaceMeaningLanguage;
 
     return Scaffold(
       appBar: AppBar(
@@ -250,7 +250,7 @@ class _GrammarCategoryPageState extends State<GrammarCategoryPage> {
                   ),
                   subtitle: LessonLocalizer.grammarTitle(
                     lesson,
-                    context.appSettings.meaningLanguage,
+                    context.surfaceMeaningLanguage,
                   ),
                   onTap: () => _openLesson(lesson),
                 ),

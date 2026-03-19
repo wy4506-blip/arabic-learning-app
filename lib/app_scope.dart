@@ -36,6 +36,14 @@ extension AppScopeContext on BuildContext {
     return AppSettingsScope.of(this).settings;
   }
 
+  ContentLanguage get surfaceMeaningLanguage {
+    final settings = appSettings;
+    if (settings.appLanguage == AppLanguage.en) {
+      return ContentLanguage.en;
+    }
+    return settings.meaningLanguage;
+  }
+
   AppStrings get strings {
     final scope = AppSettingsScope.maybeOf(this);
     return AppStrings(scope?.settings.appLanguage ?? AppLanguage.zh);

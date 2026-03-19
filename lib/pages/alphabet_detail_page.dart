@@ -45,7 +45,7 @@ class AlphabetDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    final meaningLanguage = context.appSettings.meaningLanguage;
+    final meaningLanguage = context.surfaceMeaningLanguage;
     final appLanguage = context.appSettings.appLanguage;
 
     return Scaffold(
@@ -569,7 +569,7 @@ class _PronunciationDetailSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final appLanguage = context.appSettings.appLanguage;
-    final meaningLanguage = context.appSettings.meaningLanguage;
+    final meaningLanguage = context.surfaceMeaningLanguage;
 
     return Container(
       decoration: const BoxDecoration(

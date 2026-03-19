@@ -253,7 +253,7 @@ class _AlphabetLetterHomePageState extends State<AlphabetLetterHomePage> {
                   Text(
                     AlphabetContentLocalizer.hint(
                       letter,
-                      context.appSettings.meaningLanguage,
+                      context.surfaceMeaningLanguage,
                     ),
                     style: text.bodyMedium,
                     textAlign: TextAlign.center,
@@ -334,7 +334,7 @@ class _AlphabetLetterHomePageState extends State<AlphabetLetterHomePage> {
                     ),
                     body: AlphabetContentLocalizer.soundHint(
                       letter,
-                      context.appSettings.meaningLanguage,
+                      context.surfaceMeaningLanguage,
                     ),
                   ),
                 ],
@@ -514,7 +514,7 @@ class _AlphabetLetterHomePageState extends State<AlphabetLetterHomePage> {
                                     Text(
                                       AlphabetContentLocalizer.exampleMeaning(
                                         letter.example,
-                                        context.appSettings.meaningLanguage,
+                                        context.surfaceMeaningLanguage,
                                       ),
                                       style: text.bodyMedium,
                                     ),

@@ -120,6 +120,7 @@ const Map<String, String> _exact = <String, String>{
   '再见': 'Goodbye',
   '老师': 'Teacher',
   '我很好，谢谢。': 'I am fine, thank you.',
+  '你好，你好吗？': 'Hello, how are you?',
   '你好吗？': 'How are you?',
   '你叫什么名字？': 'What is your name?',
   '你来自哪里？': 'Where are you from?',

@@ -72,7 +72,7 @@ class _LessonQuizPageState extends State<LessonQuizPage> {
   String _lessonText(String value) {
     return LessonContentLocalizer.meaning(
       value,
-      context.appSettings.meaningLanguage,
+      context.surfaceMeaningLanguage,
     );
   }
 

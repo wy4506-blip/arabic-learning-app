@@ -1,3 +1,4 @@
+import '../l10n/alphabet_content_localizer.dart';
 import '../l10n/grammar_text.dart';
 import '../l10n/lesson_content_localizer.dart';
 import '../l10n/lesson_localizer.dart';
@@ -42,6 +43,13 @@ class ReviewPlannerContext {
     required this.alphabetLetters,
     required this.learningStates,
   });
+
+  ContentLanguage get surfaceMeaningLanguage {
+    if (settings.appLanguage == AppLanguage.en) {
+      return ContentLanguage.en;
+    }
+    return settings.meaningLanguage;
+  }
 }
 
 class ReviewSignalSnapshot {
@@ -325,6 +333,28 @@ class ReviewPlanner {
     return tasks.take(limit).toList(growable: false);
   }
 
+  static List<ReviewTask> relocalizeTasks(
+    ReviewPlannerContext context,
+    Iterable<ReviewTask> tasks,
+  ) {
+    final localizedById = <String, ReviewTask>{
+      for (final task in _sortedCandidates(context)) task.contentId: task,
+    };
+
+    return tasks.map((task) {
+      final localized = localizedById[task.contentId];
+      if (localized == null) {
+        return task;
+      }
+
+      return localized.copyWith(
+        origin: task.origin,
+        estimatedSeconds: task.estimatedSeconds,
+        priority: task.priority,
+      );
+    }).toList(growable: false);
+  }
+
   static List<ReviewTask> _sortedCandidates(ReviewPlannerContext context) {
     final merged = <String, ReviewTask>{};
 
@@ -409,7 +439,7 @@ class ReviewPlanner {
           ),
           title: LessonContentLocalizer.meaning(
             word.meaning,
-            context.settings.meaningLanguage,
+            context.surfaceMeaningLanguage,
           ),
           subtitle: _localizedLabel(
             context.settings,
@@ -423,7 +453,7 @@ class ReviewPlanner {
               ? null
               : LessonContentLocalizer.meaning(
                   word.metadata.patternNote!,
-                  context.settings.meaningLanguage,
+                  context.surfaceMeaningLanguage,
                 ),
           lessonId: state?.lessonId,
           sourceId: word.text.plain,
@@ -672,7 +702,7 @@ class ReviewPlanner {
       origin: origin,
       title: LessonContentLocalizer.meaning(
         word.meaning.zh,
-        context.settings.meaningLanguage,
+        context.surfaceMeaningLanguage,
       ),
       subtitle: _localizedLabel(
         context.settings,
@@ -686,7 +716,7 @@ class ReviewPlanner {
           ? null
           : LessonContentLocalizer.meaning(
               word.metadata.patternNote!,
-              context.settings.meaningLanguage,
+              context.surfaceMeaningLanguage,
             ),
       lessonId: lesson.id,
       sourceId: word.text.plain,
@@ -710,7 +740,7 @@ class ReviewPlanner {
       origin: origin,
       title: LessonContentLocalizer.meaning(
         pattern.meaning.zh,
-        context.settings.meaningLanguage,
+        context.surfaceMeaningLanguage,
       ),
       subtitle: _localizedLabel(
         context.settings,
@@ -744,7 +774,7 @@ class ReviewPlanner {
       title: grammarUiText(page.title, context.settings.appLanguage),
       subtitle: grammarContentText(
         page.subtitle.isNotEmpty ? page.subtitle : page.summary,
-        context.settings.meaningLanguage,
+        context.surfaceMeaningLanguage,
       ),
       helperText: lessonId == null
           ? null
@@ -778,15 +808,15 @@ class ReviewPlanner {
       actionType: ReviewActionType.listen,
       origin: origin,
       title: title,
-      subtitle: LessonContentLocalizer.meaning(
-        letter.soundHint,
-        context.settings.meaningLanguage,
+      subtitle: AlphabetContentLocalizer.soundHint(
+        letter,
+        context.surfaceMeaningLanguage,
       ),
       arabicText: letter.arabic,
       transliteration: letter.pronunciation,
-      helperText: LessonContentLocalizer.meaning(
-        letter.hint,
-        context.settings.meaningLanguage,
+      helperText: AlphabetContentLocalizer.hint(
+        letter,
+        context.surfaceMeaningLanguage,
       ),
       lessonId: lessonId,
       sourceId: letter.arabic,
@@ -816,9 +846,9 @@ class ReviewPlanner {
           : '${letter.arabicName} · ${letter.latinName}',
       arabicText: letter.arabic,
       transliteration: letter.pronunciation,
-      helperText: LessonContentLocalizer.meaning(
-        letter.hint,
-        context.settings.meaningLanguage,
+      helperText: AlphabetContentLocalizer.hint(
+        letter,
+        context.surfaceMeaningLanguage,
       ),
       lessonId: lessonId,
       sourceId: letter.arabic,
@@ -872,13 +902,28 @@ class ReviewPlanner {
       objectType: ReviewObjectType.symbolReading,
       actionType: ReviewActionType.read,
       origin: origin,
-      title: pronunciation.fullTitle,
+      title: AlphabetContentLocalizer.pronunciationFullTitle(
+        pronunciation,
+        context.settings.appLanguage,
+      ),
       subtitle: pronunciation.shortSubtitle.isEmpty
-          ? pronunciation.detailDescription
-          : pronunciation.shortSubtitle,
+          ? AlphabetContentLocalizer.pronunciationDetailDescription(
+              pronunciation,
+              context.surfaceMeaningLanguage,
+            )
+          : AlphabetContentLocalizer.pronunciationShortSubtitle(
+              pronunciation,
+              context.surfaceMeaningLanguage,
+            ),
       arabicText: pronunciation.arabicSymbol,
-      transliteration: pronunciation.transliteration,
-      helperText: pronunciation.detailDescription,
+      transliteration: AlphabetContentLocalizer.pronunciationValue(
+        pronunciation,
+        context.settings.appLanguage,
+      ),
+      helperText: AlphabetContentLocalizer.pronunciationDetailDescription(
+        pronunciation,
+        context.surfaceMeaningLanguage,
+      ),
       lessonId: lessonId,
       sourceId: letter.arabic,
       variantKey: pronunciation.key,
@@ -911,7 +956,7 @@ class ReviewPlanner {
       arabicText: '${left.arabic}  ${right.arabic}',
       transliteration: '${left.pronunciation} / ${right.pronunciation}',
       helperText: context.settings.appLanguage == AppLanguage.en
-          ? '${left.soundHint}; ${right.soundHint}'
+          ? '${AlphabetContentLocalizer.soundHint(left, context.surfaceMeaningLanguage)}; ${AlphabetContentLocalizer.soundHint(right, context.surfaceMeaningLanguage)}'
           : '${left.soundHint}；${right.soundHint}',
       lessonId: lessonId,
       sourceId: '${left.arabic}|${right.arabic}',

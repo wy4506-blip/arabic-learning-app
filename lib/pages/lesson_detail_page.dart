@@ -35,6 +35,14 @@ import 'lesson_quiz_page.dart';
 import 'review_session_page.dart';
 import 'unlock_page.dart';
 
+ContentLanguage lessonSurfaceMeaningLanguage(BuildContext context) {
+  final settings = context.appSettings;
+  if (settings.appLanguage == AppLanguage.en) {
+    return ContentLanguage.en;
+  }
+  return settings.meaningLanguage;
+}
+
 class LessonDetailPage extends StatefulWidget {
   final Lesson lesson;
   final AppSettings settings;
@@ -213,7 +221,7 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
   String _meaningText(String value) {
     return LessonContentLocalizer.meaning(
       value,
-      context.appSettings.meaningLanguage,
+      lessonSurfaceMeaningLanguage(context),
     );
   }
 
@@ -1083,7 +1091,7 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
                     Text(
                       LessonLocalizer.grammarTitle(
                         lesson,
-                        context.appSettings.meaningLanguage,
+                        lessonSurfaceMeaningLanguage(context),
                       ),
                       style: text.titleMedium,
                     ),
@@ -1091,7 +1099,7 @@ class _LessonDetailPageState extends State<LessonDetailPage> {
                     Text(
                       LessonLocalizer.grammarExplanation(
                         lesson,
-                        context.appSettings.meaningLanguage,
+                        lessonSurfaceMeaningLanguage(context),
                       ),
                       style: text.bodyMedium,
                     ),
@@ -1303,7 +1311,7 @@ class _LessonSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    final meaningLanguage = context.appSettings.meaningLanguage;
+    final meaningLanguage = lessonSurfaceMeaningLanguage(context);
 
     return AppSurface(
       child: Column(
@@ -1428,7 +1436,7 @@ class _WordDetailPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    final meaningLanguage = context.appSettings.meaningLanguage;
+    final meaningLanguage = lessonSurfaceMeaningLanguage(context);
     final appLanguage = context.appSettings.appLanguage;
     final tags = <String>[
       if (partOfSpeech != null && partOfSpeech!.isNotEmpty)
@@ -2008,7 +2016,7 @@ class _WordFocusSupplement extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    final meaningLanguage = context.appSettings.meaningLanguage;
+    final meaningLanguage = lessonSurfaceMeaningLanguage(context);
     final appLanguage = context.appSettings.appLanguage;
     final tags = <String>[
       if (partOfSpeech != null && partOfSpeech!.isNotEmpty)

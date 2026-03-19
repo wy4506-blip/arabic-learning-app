@@ -249,7 +249,7 @@ class _AlphabetGroupDetailPageState extends State<AlphabetGroupDetailPage> {
                       Text(
                         AlphabetContentLocalizer.groupSubtitle(
                           group,
-                          context.appSettings.meaningLanguage,
+                          context.surfaceMeaningLanguage,
                         ),
                         style: text.bodySmall,
                       ),
@@ -703,7 +703,7 @@ class _AlphabetGroupDetailPageState extends State<AlphabetGroupDetailPage> {
                       Text(
                         AlphabetContentLocalizer.hint(
                           letter,
-                          context.appSettings.meaningLanguage,
+                          context.surfaceMeaningLanguage,
                         ),
                         style: text.bodySmall,
                       ),

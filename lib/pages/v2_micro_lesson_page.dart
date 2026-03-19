@@ -340,10 +340,17 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
     );
   }
 
+  ContentLanguage get _surfaceMeaningLanguage {
+    if (widget.settings.appLanguage == AppLanguage.en) {
+      return ContentLanguage.en;
+    }
+    return widget.settings.meaningLanguage;
+  }
+
   String _practiceMeaning(V2MicroPracticeItem practice) {
     return V2MicroLessonLocalizer.practiceMeaning(
           practice.itemId,
-          widget.settings.meaningLanguage,
+          _surfaceMeaningLanguage,
           fallback: practice.meaning,
         ) ??
         '';
@@ -352,7 +359,7 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
   String _contentMeaning(V2MicroContentItem item) {
     return V2MicroLessonLocalizer.practiceMeaning(
           item.itemId,
-          widget.settings.meaningLanguage,
+          _surfaceMeaningLanguage,
           fallback: item.meaning,
         ) ??
         '';

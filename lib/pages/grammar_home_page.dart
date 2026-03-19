@@ -451,7 +451,7 @@ class _GrammarHomePageState extends State<GrammarHomePage> {
   }
 
   String _pageSummary(GrammarPageContent page) {
-    final meaningLanguage = context.appSettings.meaningLanguage;
+    final meaningLanguage = context.surfaceMeaningLanguage;
     final value = page.subtitle.isNotEmpty ? page.subtitle : page.summary;
     return grammarContentText(value, meaningLanguage);
   }

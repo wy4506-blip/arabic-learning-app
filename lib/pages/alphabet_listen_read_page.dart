@@ -222,7 +222,7 @@ class _AlphabetListenReadPageState extends State<AlphabetListenReadPage> {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final appLanguage = context.appSettings.appLanguage;
-    final meaningLanguage = context.appSettings.meaningLanguage;
+    final meaningLanguage = context.surfaceMeaningLanguage;
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -697,7 +697,7 @@ class _PronunciationDetailSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final appLanguage = context.appSettings.appLanguage;
-    final meaningLanguage = context.appSettings.meaningLanguage;
+    final meaningLanguage = context.surfaceMeaningLanguage;
 
     return Container(
       decoration: const BoxDecoration(

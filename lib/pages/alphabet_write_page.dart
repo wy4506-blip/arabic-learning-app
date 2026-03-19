@@ -211,7 +211,7 @@ class _AlphabetWritePageState extends State<AlphabetWritePage> {
                   Text(
                     AlphabetContentLocalizer.hint(
                       widget.letter,
-                      context.appSettings.meaningLanguage,
+                      context.surfaceMeaningLanguage,
                     ),
                     style: text.bodySmall,
                     textAlign: TextAlign.center,
@@ -541,7 +541,7 @@ class _AlphabetWritePageState extends State<AlphabetWritePage> {
                       child: Text(
                         AlphabetContentLocalizer.tip(
                           widget.letter,
-                          context.appSettings.meaningLanguage,
+                          context.surfaceMeaningLanguage,
                         ),
                         style: text.bodyMedium,
                       ),

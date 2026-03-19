@@ -193,7 +193,7 @@ class _GrammarDetailPageState extends State<GrammarDetailPage> {
 
   List<Widget> _buildSectionWidgets(GrammarPageContent page) {
     final widgets = <Widget>[];
-    final meaningLanguage = context.appSettings.meaningLanguage;
+    final meaningLanguage = context.surfaceMeaningLanguage;
 
     for (final section in page.sections) {
       if (section.type != 'table_card') {
@@ -353,7 +353,7 @@ class _GrammarDetailPageState extends State<GrammarDetailPage> {
     }
 
     final appLanguage = context.appSettings.appLanguage;
-    final meaningLanguage = context.appSettings.meaningLanguage;
+    final meaningLanguage = context.surfaceMeaningLanguage;
 
     return Scaffold(
       appBar: AppBar(
@@ -431,7 +431,7 @@ class _GrammarDetailPageState extends State<GrammarDetailPage> {
                   ),
                   subtitle: LessonLocalizer.grammarTitle(
                     lesson,
-                    context.appSettings.meaningLanguage,
+                    context.surfaceMeaningLanguage,
                   ),
                   onTap: () => _openLesson(lesson),
                 ),
