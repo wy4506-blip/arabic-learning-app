@@ -1,4 +1,4 @@
-import '../data/v2_micro_lessons.dart';
+﻿import '../data/v2_micro_lessons.dart';
 import '../models/app_settings.dart';
 import '../models/learning_state_models.dart';
 import '../models/review_models.dart';
@@ -80,7 +80,9 @@ class V2LearningSnapshot {
 class V2LearningSnapshotService {
   const V2LearningSnapshotService._();
 
-  static Future<V2LearningSnapshot> getSnapshot() async {
+  static Future<V2LearningSnapshot> getSnapshot({
+    List<V2MicroLesson> lessons = v2PilotMicroLessons,
+  }) async {
     final records = await LessonProgressService.getAllRecords();
     final learningStates = await LearningStateService.getAllStates();
     final reviewEntry = await ReviewService.getEntrySnapshot(
@@ -91,7 +93,7 @@ class V2LearningSnapshotService {
       ),
     );
     return buildSnapshot(
-      lessons: v2PilotMicroLessons,
+      lessons: lessons,
       lessonRecords: records,
       learningStates: learningStates,
       reviewEntry: reviewEntry,
@@ -472,3 +474,4 @@ class V2LearningSnapshotService {
     }
   }
 }
+

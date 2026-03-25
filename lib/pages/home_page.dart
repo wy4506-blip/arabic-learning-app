@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../app_scope.dart';
+import '../data/v2_micro_lesson_catalog.dart';
 import '../data/v2_micro_lessons.dart';
 import '../features/onboarding/models/onboarding_state.dart';
 import '../l10n/localized_text.dart';
@@ -29,8 +31,10 @@ import 'alphabet_page.dart';
 import 'lesson_detail_page.dart';
 import 'review_session_page.dart';
 import 'unlock_page.dart';
+import 'v2_foundation_pilot_page.dart';
 import 'v2_micro_lesson_page.dart';
 import 'v2_review_entry_page.dart';
+import 'v2_stage_a_preview_page.dart';
 
 const Color _homeApricot = Color(0xFFFFF0E3);
 const Color _homeMint = Color(0xFFE3F5ED);
@@ -406,6 +410,43 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  bool get _homeUsesFoundationPilot => widget.settings.homeUsesFoundationPilot;
+
+  List<V2MicroLesson> get _homeV2Lessons {
+    return _homeUsesFoundationPilot
+        ? foundationPilotMicroLessons
+        : v2PilotMicroLessons;
+  }
+
+  Future<void> _openFoundationPilotPath() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => V2FoundationPilotPage(settings: widget.settings),
+      ),
+    );
+    await _load();
+  }
+
+  Future<void> _openStageAPreview() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => V2StageAPreviewPage(
+          settings: widget.settings,
+        ),
+      ),
+    );
+  }
+
+  void _openHomeV2Path() {
+    if (_homeUsesFoundationPilot) {
+      _openFoundationPilotPath();
+      return;
+    }
+    _openLessonsTab();
+  }
+
   void _openLessonsTab() => widget.onOpenTab(1);
 
   void _openReviewTab() => widget.onOpenTab(2);
@@ -480,6 +521,19 @@ class _HomePageState extends State<HomePage> {
       ),
     );
     await _handleReviewFlowResult(result);
+  }
+
+  String _homeV2TrackText({
+    required String liveZh,
+    required String liveEn,
+    required String foundationEn,
+    String? foundationZh,
+  }) {
+    return localizedText(
+      context,
+      zh: _homeUsesFoundationPilot ? (foundationZh ?? foundationEn) : liveZh,
+      en: _homeUsesFoundationPilot ? foundationEn : liveEn,
+    );
   }
 
   HomeMainCardState _buildPrimaryCardState({
@@ -742,6 +796,139 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  HomeMainCardState _buildFoundationV2PrimaryCardState({
+    required V2LearningSnapshot snapshot,
+  }) {
+    final recommendedLessonId = snapshot.recommendedLessonId;
+    final emptyTitle = _homeV2TrackText(
+      liveZh: 'No Foundation lesson is queued right now',
+      liveEn: 'No Foundation lesson is queued right now',
+      foundationEn: 'No Foundation lesson is queued right now',
+    );
+    String recommendedLessonTitle = emptyTitle;
+    if (recommendedLessonId != null) {
+      for (final lesson in foundationPilotMicroLessons) {
+        if (lesson.lessonId == recommendedLessonId) {
+          recommendedLessonTitle = V2MicroLessonLocalizer.lessonTitle(
+            lesson,
+            widget.settings.appLanguage,
+          );
+          break;
+        }
+      }
+      if (recommendedLessonTitle == emptyTitle) {
+        recommendedLessonTitle = recommendedLessonId;
+      }
+    }
+
+    final completedCount = snapshot.lessonStatuses.values
+        .where((status) => status.isCompletedLike)
+        .length;
+    final totalCount = snapshot.lessonStatuses.length;
+
+    final String buttonText;
+    final VoidCallback onPrimaryTap;
+    final String title;
+    final String description;
+    switch (snapshot.homeEntryState) {
+      case V2HomeEntryState.reviewFirst:
+        title = 'Clear Foundation Review First';
+        description =
+            'The Foundation pilot has due or weak review items. Clear them first, then continue the Foundation mainline.';
+        buttonText = 'Start Foundation Review';
+        onPrimaryTap = snapshot.dueReviewItems.isEmpty
+            ? _openStandaloneReviewFlow
+            : () => _openV2ReviewEntry(snapshot.dueReviewItems);
+        break;
+      case V2HomeEntryState.continueMainline:
+        switch (snapshot.recommendedAction.actionType) {
+          case V2RecommendedActionType.startLesson:
+            title = recommendedLessonTitle;
+            description =
+                'Home now sends you straight into the next real action in the Foundation pilot path.';
+            buttonText = 'Start This Foundation Lesson';
+            onPrimaryTap = recommendedLessonId == null
+                ? _openHomeV2Path
+                : () => _openV2MicroLesson(recommendedLessonId);
+            break;
+          case V2RecommendedActionType.continueLesson:
+            title = recommendedLessonTitle;
+            description =
+                'You already have a Foundation lesson in progress. Finish that first.';
+            buttonText = 'Continue This Foundation Lesson';
+            onPrimaryTap = recommendedLessonId == null
+                ? _openHomeV2Path
+                : () => _openV2MicroLesson(recommendedLessonId);
+            break;
+          case V2RecommendedActionType.startReview:
+          case V2RecommendedActionType.startConsolidation:
+          case V2RecommendedActionType.startNextPhase:
+          case V2RecommendedActionType.noAction:
+            title = recommendedLessonTitle;
+            description =
+                'The Foundation journey has been refreshed. Continue with the next learning step.';
+            buttonText = 'Open Foundation Pilot';
+            onPrimaryTap = _openHomeV2Path;
+            break;
+        }
+        break;
+      case V2HomeEntryState.completedForToday:
+        title = 'Today\'s Foundation Mainline Is Clear';
+        switch (snapshot.recommendedAction.actionType) {
+          case V2RecommendedActionType.startConsolidation:
+            description =
+                'The Foundation mainline is clear. If you want one more pass, a short consolidation review is available.';
+            buttonText = 'Start Consolidation';
+            onPrimaryTap = _openStandaloneReviewFlow;
+            break;
+          case V2RecommendedActionType.startLesson:
+          case V2RecommendedActionType.continueLesson:
+          case V2RecommendedActionType.startReview:
+          case V2RecommendedActionType.startNextPhase:
+          case V2RecommendedActionType.noAction:
+            description =
+                'There is no immediate Foundation step to start right now, so today can pause here.';
+            buttonText = 'Open Foundation Pilot';
+            onPrimaryTap = _openHomeV2Path;
+            break;
+        }
+        break;
+    }
+
+    return HomeMainCardState(
+      badgeText: _homeV2TrackText(
+        liveZh: 'Foundation Pilot',
+        liveEn: 'Foundation Pilot',
+        foundationEn: 'Foundation Pilot',
+      ),
+      title: title,
+      arabicPreview: null,
+      nextStepDescription: description,
+      progressText: _homeV2TrackText(
+        liveZh: 'Foundation progress $completedCount/$totalCount',
+        liveEn: 'Foundation progress $completedCount/$totalCount',
+        foundationEn: 'Foundation progress $completedCount/$totalCount',
+      ),
+      reviewText: snapshot.dueReviewItems.isEmpty
+          ? null
+          : snapshot.dueReviewItems.length == 1
+              ? '1 Foundation item due'
+              : '${snapshot.dueReviewItems.length} Foundation items due',
+      progressValue: totalCount == 0 ? null : completedCount / totalCount,
+      primaryButtonText: buttonText,
+      secondaryText: _homeV2TrackText(
+        liveZh: 'Open Foundation Pilot',
+        liveEn: 'Open Foundation Pilot',
+        foundationEn: 'Open Foundation Pilot',
+      ),
+      actionType: snapshot.homeEntryState == V2HomeEntryState.reviewFirst
+          ? vm.HomePrimaryActionType.startReview
+          : vm.HomePrimaryActionType.continueLesson,
+      onPrimaryTap: onPrimaryTap,
+      onSecondaryTap: _openHomeV2Path,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_loading) {
@@ -758,14 +945,16 @@ class _HomePageState extends State<HomePage> {
     );
 
     final v2Snapshot = V2LearningSnapshotService.buildSnapshot(
-      lessons: v2PilotMicroLessons,
+      lessons: _homeV2Lessons,
       lessonRecords: _progress.lessonProgressRecords,
       learningStates: _learningStates,
       reviewEntry: _reviewEntry,
     );
 
     final mainCardState = _shouldUseV2PrimaryEntry
-        ? _buildV2PrimaryCardState(snapshot: v2Snapshot)
+        ? (_homeUsesFoundationPilot
+            ? _buildFoundationV2PrimaryCardState(snapshot: v2Snapshot)
+            : _buildV2PrimaryCardState(snapshot: v2Snapshot))
         : _buildPrimaryCardState(
             snapshot: snapshot,
             reviewPlan: _reviewDashboard?.summary.todayPlan,
@@ -792,6 +981,12 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 20),
               _HomeMainLearningCard(state: mainCardState),
+              if (kDebugMode) ...[
+                const SizedBox(height: 16),
+                _HomePreviewDebugCard(
+                  onOpenPreview: _openStageAPreview,
+                ),
+              ],
               const SizedBox(height: 24),
             ],
           ),
@@ -921,6 +1116,71 @@ class _HomeMainLearningCard extends StatelessWidget {
             onPrimaryTap: state.onPrimaryTap,
             secondaryText: state.secondaryText,
             onSecondaryTap: state.onSecondaryTap,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HomePreviewDebugCard extends StatelessWidget {
+  final VoidCallback onOpenPreview;
+
+  const _HomePreviewDebugCard({
+    required this.onOpenPreview,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+
+    return AppSurface(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Pill(
+            label: localizedText(
+              context,
+              zh: 'DEV ONLY',
+              en: 'DEV ONLY',
+            ),
+            backgroundColor: AppTheme.softAccent,
+            foregroundColor: AppTheme.accentMintDark,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            localizedText(
+              context,
+              zh: 'Preview Stage A Chapter',
+              en: 'Preview Stage A Chapter',
+            ),
+            style: text.titleLarge,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            localizedText(
+              context,
+              zh:
+                  'Development-only shortcut. Open the first four beginner preview lessons directly from Home without changing the live learning flow.',
+              en:
+                  'Development-only shortcut. Open the first four beginner preview lessons directly from Home without changing the live learning flow.',
+            ),
+            style: text.bodyMedium,
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              key: const ValueKey<String>('home_open_stage_a_preview'),
+              onPressed: onOpenPreview,
+              child: Text(
+                localizedText(
+                  context,
+                  zh: 'Open Stage A Preview',
+                  en: 'Open Stage A Preview',
+                ),
+              ),
+            ),
           ),
         ],
       ),

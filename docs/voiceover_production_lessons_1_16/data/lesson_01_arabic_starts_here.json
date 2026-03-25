@@ -1,0 +1,431 @@
+{
+  "lesson_number": 1,
+  "stage": "Stage A",
+  "lesson_id": "V2-A1-01-PREVIEW",
+  "title": "Arabic Starts Here",
+  "status": "final_script_normalized",
+  "generated_at_utc": "2026-03-21T12:48:18.960405Z",
+  "batch": "Batch A",
+  "source_paths": [
+    "lib/data/generated_stage_a_preview_lessons.dart",
+    "docs/generated_lessons/v2_a1_01_arabic_starts_here.md",
+    "test/stage_a_preview_page_test.dart"
+  ],
+  "completeness_basis": "Runtime lesson object plus generated markdown plus Stage A integration coverage.",
+  "ordered_lines": [
+    {
+      "line_id": "L01_ORD_001",
+      "asset_stem": "l01_ord_001",
+      "role": "lesson_title",
+      "language": "en",
+      "source_ref": "lesson.title",
+      "text": "Arabic Starts Here"
+    },
+    {
+      "line_id": "L01_ORD_002",
+      "asset_stem": "l01_ord_002",
+      "role": "lesson_outcome",
+      "language": "mixed",
+      "source_ref": "lesson.outcomeSummary",
+      "text": "You can find where Arabic starts on كتاب and keep one real meaning anchor attached: book."
+    },
+    {
+      "line_id": "L01_ORD_003",
+      "asset_stem": "l01_ord_003",
+      "role": "objective_summary",
+      "language": "en",
+      "source_ref": "objective:orient_to_real_word_anchor",
+      "text": "Enter Arabic through one supported real word by following it from right to left and linking it to one meaning anchor."
+    },
+    {
+      "line_id": "L01_ORD_004",
+      "asset_stem": "l01_ord_004",
+      "role": "content_title",
+      "language": "en",
+      "source_ref": "content:goal_entry_word.title",
+      "text": "Lesson Goal"
+    },
+    {
+      "line_id": "L01_ORD_005",
+      "asset_stem": "l01_ord_005",
+      "role": "content_body",
+      "language": "en",
+      "source_ref": "content:goal_entry_word.body",
+      "text": "Enter Arabic through one real word. You only need to notice where Arabic starts and keep one meaning anchor attached."
+    },
+    {
+      "line_id": "L01_ORD_006",
+      "asset_stem": "l01_ord_006",
+      "role": "content_title",
+      "language": "en",
+      "source_ref": "content:input_kitab_anchor.title",
+      "text": "First Arabic Anchor"
+    },
+    {
+      "line_id": "L01_ORD_007",
+      "asset_stem": "l01_ord_007",
+      "role": "content_body",
+      "language": "en",
+      "source_ref": "content:input_kitab_anchor.body",
+      "text": "Use one real Arabic word to enter the script. You do not need every letter yet. Just follow the whole word from the right and connect it to book."
+    },
+    {
+      "line_id": "L01_ORD_008",
+      "asset_stem": "l01_ord_008",
+      "role": "content_title",
+      "language": "en",
+      "source_ref": "content:support_rule_real_word.title",
+      "text": "Beginner Support Is Allowed"
+    },
+    {
+      "line_id": "L01_ORD_009",
+      "asset_stem": "l01_ord_009",
+      "role": "content_body",
+      "language": "en",
+      "source_ref": "content:support_rule_real_word.body",
+      "text": "You do not need to decode every letter yet. The whole word, audio, and meaning cue are all allowed supports for your first Arabic step."
+    },
+    {
+      "line_id": "L01_ORD_010",
+      "asset_stem": "l01_ord_010",
+      "role": "content_title",
+      "language": "en",
+      "source_ref": "content:entry_word_contrast.title",
+      "text": "Watch The Entry Move"
+    },
+    {
+      "line_id": "L01_ORD_011",
+      "asset_stem": "l01_ord_011",
+      "role": "content_body",
+      "language": "en",
+      "source_ref": "content:entry_word_contrast.body",
+      "text": "For this first step, keep two things together: start on the right, and let the whole word already mean book."
+    },
+    {
+      "line_id": "L01_ORD_012",
+      "asset_stem": "l01_ord_012",
+      "role": "practice_prompt",
+      "language": "mixed",
+      "source_ref": "practice:hear_kitab_anchor.prompt",
+      "text": "Hear the word, then tap كتاب."
+    },
+    {
+      "line_id": "L01_ORD_013",
+      "asset_stem": "l01_ord_013",
+      "role": "practice_prompt",
+      "language": "mixed",
+      "source_ref": "practice:recognize_start_side_kitab.prompt",
+      "text": "On كتاب, where does reading begin?"
+    },
+    {
+      "line_id": "L01_ORD_014",
+      "asset_stem": "l01_ord_014",
+      "role": "practice_prompt",
+      "language": "mixed",
+      "source_ref": "practice:recognize_kitab_meaning.prompt",
+      "text": "In this chapter entry, كتاب means..."
+    },
+    {
+      "line_id": "L01_ORD_015",
+      "asset_stem": "l01_ord_015",
+      "role": "practice_prompt",
+      "language": "mixed",
+      "source_ref": "practice:recall_start_side_kitab.prompt",
+      "text": "Without the guide, type the side where reading begins on كتاب."
+    },
+    {
+      "line_id": "L01_ORD_016",
+      "asset_stem": "l01_ord_016",
+      "role": "practice_prompt",
+      "language": "mixed",
+      "source_ref": "practice:recall_kitab_meaning.prompt",
+      "text": "The English hint is gone. Type the meaning anchor for كتاب."
+    },
+    {
+      "line_id": "L01_ORD_017",
+      "asset_stem": "l01_ord_017",
+      "role": "practice_prompt",
+      "language": "en",
+      "source_ref": "practice:build_kitab_pair.prompt",
+      "text": "Build the pair you will carry into the next lesson."
+    }
+  ],
+  "arabic_model_bank": [
+    {
+      "bank_id": "L01_AR_001",
+      "asset_stem": "l01_ar_001",
+      "source_ref": "content:input_kitab_anchor",
+      "spoken_text": "كتاب",
+      "display_text": "كتاب",
+      "transliteration": "kitab",
+      "meaning": "book",
+      "notes": ""
+    }
+  ],
+  "normalized_segments": [
+    {
+      "segment_id": "L01_SEG_001",
+      "source_line_id": "L01_ORD_001",
+      "asset_stem": "l01_ord_001",
+      "segment_name": "OPEN_TITLE",
+      "segment_type": "opening",
+      "duration_target": "00:02-00:03",
+      "delivery_notes": "Short open. Calm lift on the first words, then a clean stop.",
+      "repeatable": "no",
+      "native_review": "no",
+      "export_state": "ready",
+      "source_ref": "lesson.title",
+      "text": "Arabic Starts Here"
+    },
+    {
+      "segment_id": "L01_SEG_002",
+      "source_line_id": "L01_ORD_002",
+      "asset_stem": "l01_ord_002",
+      "segment_name": "OPEN_OUTCOME",
+      "segment_type": "opening",
+      "duration_target": "00:04-00:09",
+      "delivery_notes": "Steady overview line. Keep the English flowing and slow slightly around Arabic inserts.",
+      "repeatable": "no",
+      "native_review": "no",
+      "export_state": "ready",
+      "source_ref": "lesson.outcomeSummary",
+      "text": "You can find where Arabic starts on كتاب and keep one real meaning anchor attached: book."
+    },
+    {
+      "segment_id": "L01_SEG_003",
+      "source_line_id": "L01_ORD_003",
+      "asset_stem": "l01_ord_003",
+      "segment_name": "OPEN_OBJECTIVE_01",
+      "segment_type": "opening",
+      "duration_target": "00:04-00:10",
+      "delivery_notes": "Steady overview line. Keep it calm, clear, and lightly encouraging.",
+      "repeatable": "no",
+      "native_review": "no",
+      "export_state": "ready",
+      "source_ref": "objective:orient_to_real_word_anchor",
+      "text": "Enter Arabic through one supported real word by following it from right to left and linking it to one meaning anchor."
+    },
+    {
+      "segment_id": "L01_SEG_004",
+      "source_line_id": "L01_ORD_004",
+      "asset_stem": "l01_ord_004",
+      "segment_name": "TEACH_HEADER_01",
+      "segment_type": "section_header",
+      "duration_target": "00:02-00:03",
+      "delivery_notes": "Short open. Calm lift on the first words, then a clean stop.",
+      "repeatable": "no",
+      "native_review": "no",
+      "export_state": "ready",
+      "source_ref": "content:goal_entry_word.title",
+      "text": "Lesson Goal"
+    },
+    {
+      "segment_id": "L01_SEG_005",
+      "source_line_id": "L01_ORD_005",
+      "asset_stem": "l01_ord_005",
+      "segment_name": "TEACH_BODY_01",
+      "segment_type": "teaching_narration",
+      "duration_target": "00:03-00:08",
+      "delivery_notes": "Teaching line. Warm, calm, and conversational with one clear sentence boundary.",
+      "repeatable": "no",
+      "native_review": "no",
+      "export_state": "ready",
+      "source_ref": "content:goal_entry_word.body",
+      "text": "Enter Arabic through one real word. You only need to notice where Arabic starts and keep one meaning anchor attached."
+    },
+    {
+      "segment_id": "L01_SEG_006",
+      "source_line_id": "L01_ORD_006",
+      "asset_stem": "l01_ord_006",
+      "segment_name": "TEACH_HEADER_02",
+      "segment_type": "section_header",
+      "duration_target": "00:02-00:03",
+      "delivery_notes": "Short open. Calm lift on the first words, then a clean stop.",
+      "repeatable": "no",
+      "native_review": "no",
+      "export_state": "ready",
+      "source_ref": "content:input_kitab_anchor.title",
+      "text": "First Arabic Anchor"
+    },
+    {
+      "segment_id": "L01_SEG_007",
+      "source_line_id": "L01_ORD_007",
+      "asset_stem": "l01_ord_007",
+      "segment_name": "TEACH_BODY_02",
+      "segment_type": "teaching_narration",
+      "duration_target": "00:03-00:11",
+      "delivery_notes": "Teaching line. Warm, calm, and conversational with one clear sentence boundary.",
+      "repeatable": "no",
+      "native_review": "no",
+      "export_state": "ready",
+      "source_ref": "content:input_kitab_anchor.body",
+      "text": "Use one real Arabic word to enter the script. You do not need every letter yet. Just follow the whole word from the right and connect it to book."
+    },
+    {
+      "segment_id": "L01_SEG_008",
+      "source_line_id": "L01_ORD_008",
+      "asset_stem": "l01_ord_008",
+      "segment_name": "TEACH_HEADER_03",
+      "segment_type": "section_header",
+      "duration_target": "00:02-00:03",
+      "delivery_notes": "Short open. Calm lift on the first words, then a clean stop.",
+      "repeatable": "no",
+      "native_review": "no",
+      "export_state": "ready",
+      "source_ref": "content:support_rule_real_word.title",
+      "text": "Beginner Support Is Allowed"
+    },
+    {
+      "segment_id": "L01_SEG_009",
+      "source_line_id": "L01_ORD_009",
+      "asset_stem": "l01_ord_009",
+      "segment_name": "TEACH_BODY_03",
+      "segment_type": "teaching_narration",
+      "duration_target": "00:03-00:10",
+      "delivery_notes": "Teaching line. Warm, calm, and conversational with one clear sentence boundary.",
+      "repeatable": "no",
+      "native_review": "no",
+      "export_state": "ready",
+      "source_ref": "content:support_rule_real_word.body",
+      "text": "You do not need to decode every letter yet. The whole word, audio, and meaning cue are all allowed supports for your first Arabic step."
+    },
+    {
+      "segment_id": "L01_SEG_010",
+      "source_line_id": "L01_ORD_010",
+      "asset_stem": "l01_ord_010",
+      "segment_name": "TEACH_HEADER_04",
+      "segment_type": "section_header",
+      "duration_target": "00:02-00:03",
+      "delivery_notes": "Short open. Calm lift on the first words, then a clean stop.",
+      "repeatable": "no",
+      "native_review": "no",
+      "export_state": "ready",
+      "source_ref": "content:entry_word_contrast.title",
+      "text": "Watch The Entry Move"
+    },
+    {
+      "segment_id": "L01_SEG_011",
+      "source_line_id": "L01_ORD_011",
+      "asset_stem": "l01_ord_011",
+      "segment_name": "TEACH_BODY_04",
+      "segment_type": "teaching_narration",
+      "duration_target": "00:03-00:08",
+      "delivery_notes": "Teaching line. Warm, calm, and conversational with one clear sentence boundary.",
+      "repeatable": "no",
+      "native_review": "no",
+      "export_state": "ready",
+      "source_ref": "content:entry_word_contrast.body",
+      "text": "For this first step, keep two things together: start on the right, and let the whole word already mean book."
+    },
+    {
+      "segment_id": "L01_SEG_012",
+      "source_line_id": "L01_ORD_012",
+      "asset_stem": "l01_ord_012",
+      "segment_name": "PROMPT_01",
+      "segment_type": "instruction_prompt",
+      "duration_target": "00:03-00:07",
+      "delivery_notes": "Instructional prompt. Keep the action verb crisp, leave one clean beat before the Arabic, and allow answer space at the end.",
+      "repeatable": "yes",
+      "native_review": "no",
+      "export_state": "ready",
+      "source_ref": "practice:hear_kitab_anchor.prompt",
+      "text": "Hear the word, then tap كتاب."
+    },
+    {
+      "segment_id": "L01_SEG_013",
+      "source_line_id": "L01_ORD_013",
+      "asset_stem": "l01_ord_013",
+      "segment_name": "PROMPT_02",
+      "segment_type": "instruction_prompt",
+      "duration_target": "00:03-00:07",
+      "delivery_notes": "Instructional prompt. Keep the action verb crisp, leave one clean beat before the Arabic, and allow answer space at the end.",
+      "repeatable": "yes",
+      "native_review": "no",
+      "export_state": "ready",
+      "source_ref": "practice:recognize_start_side_kitab.prompt",
+      "text": "On كتاب, where does reading begin?"
+    },
+    {
+      "segment_id": "L01_SEG_014",
+      "source_line_id": "L01_ORD_014",
+      "asset_stem": "l01_ord_014",
+      "segment_name": "PROMPT_03",
+      "segment_type": "instruction_prompt",
+      "duration_target": "00:03-00:07",
+      "delivery_notes": "Instructional prompt. Keep the action verb crisp, leave one clean beat before the Arabic, and allow answer space at the end.",
+      "repeatable": "yes",
+      "native_review": "no",
+      "export_state": "ready",
+      "source_ref": "practice:recognize_kitab_meaning.prompt",
+      "text": "In this chapter entry, كتاب means..."
+    },
+    {
+      "segment_id": "L01_SEG_015",
+      "source_line_id": "L01_ORD_015",
+      "asset_stem": "l01_ord_015",
+      "segment_name": "PROMPT_04",
+      "segment_type": "instruction_prompt",
+      "duration_target": "00:03-00:08",
+      "delivery_notes": "Instructional prompt. Keep the action verb crisp, leave one clean beat before the Arabic, and allow answer space at the end.",
+      "repeatable": "yes",
+      "native_review": "no",
+      "export_state": "ready",
+      "source_ref": "practice:recall_start_side_kitab.prompt",
+      "text": "Without the guide, type the side where reading begins on كتاب."
+    },
+    {
+      "segment_id": "L01_SEG_016",
+      "source_line_id": "L01_ORD_016",
+      "asset_stem": "l01_ord_016",
+      "segment_name": "PROMPT_05",
+      "segment_type": "instruction_prompt",
+      "duration_target": "00:03-00:08",
+      "delivery_notes": "Instructional prompt. Keep the action verb crisp, leave one clean beat before the Arabic, and allow answer space at the end.",
+      "repeatable": "yes",
+      "native_review": "no",
+      "export_state": "ready",
+      "source_ref": "practice:recall_kitab_meaning.prompt",
+      "text": "The English hint is gone. Type the meaning anchor for كتاب."
+    },
+    {
+      "segment_id": "L01_SEG_017",
+      "source_line_id": "L01_ORD_017",
+      "asset_stem": "l01_ord_017",
+      "segment_name": "PROMPT_06",
+      "segment_type": "instruction_prompt",
+      "duration_target": "00:03-00:07",
+      "delivery_notes": "Instructional prompt. Keep the action verb crisp and allow a short answer pause at the end.",
+      "repeatable": "yes",
+      "native_review": "no",
+      "export_state": "ready",
+      "source_ref": "practice:build_kitab_pair.prompt",
+      "text": "Build the pair you will carry into the next lesson."
+    }
+  ],
+  "normalized_arabic_assets": [
+    {
+      "bank_id": "L01_AR_001",
+      "asset_stem": "l01_ar_001",
+      "asset_name": "AR_WORD_01",
+      "asset_type": "word",
+      "duration_target": "00:02-00:03",
+      "delivery_notes": "Single Arabic word. Neutral model, one clean pronunciation, no extra sentence melody.",
+      "repeatable": "yes",
+      "native_review": "no",
+      "export_state": "ready",
+      "source_ref": "content:input_kitab_anchor",
+      "spoken_text": "كتاب",
+      "display_text": "كتاب",
+      "transliteration": "kitab",
+      "meaning": "book",
+      "notes": ""
+    }
+  ],
+  "review_status": "pass",
+  "review_summary": "Single-word entry anchor is natural, beginner-safe, and ready after normalization.",
+  "review_focus": "Keep the orientation language calm and do not over-dramatize the first Arabic word.",
+  "flagged_items": [],
+  "estimated_segment_runtime": "01:27",
+  "estimated_arabic_asset_runtime": "00:03",
+  "caveat": ""
+}

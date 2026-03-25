@@ -1,5 +1,7 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 
+import 'package:arabic_learning_app/data/generated_stage_a_preview_lessons.dart';
+import 'package:arabic_learning_app/data/v2_micro_lesson_catalog.dart';
 import 'package:arabic_learning_app/data/v2_micro_lessons.dart';
 
 void main() {
@@ -33,5 +35,29 @@ void main() {
         reason: lesson.lessonId,
       );
     }
+  });
+
+  test('catalog resolves both live pilot and foundation pilot lessons', () {
+    expect(containsV2MicroLesson('V2-ALPHA-CL-01'), isTrue);
+    expect(containsV2MicroLesson('V2-A1-01-PREVIEW'), isTrue);
+
+    expect(v2MicroLessonById('V2-ALPHA-CL-01').lessonId, 'V2-ALPHA-CL-01');
+    expect(v2MicroLessonById('V2-A1-01-PREVIEW').lessonId, 'V2-A1-01-PREVIEW');
+  });
+
+  test('catalog returns the correct track for a foundation lesson id', () {
+    final track = v2MicroLessonTrackForLessonId('V2-A1-01-PREVIEW');
+
+    expect(track, same(foundationPilotMicroLessons));
+    expect(track.first.lessonId, stageAFoundationPreviewLessons.first.lessonId);
+    expect(track.first.lessonId, 'V2-A1-01-PREVIEW');
+    expect(track.last.lessonId, 'lesson_12_you_can_read_a_tiny_arabic_card');
+  });
+
+  test('catalog keeps the existing live pilot track unchanged', () {
+    final track = v2MicroLessonTrackForLessonId('V2-ALPHA-CL-01');
+
+    expect(track, same(v2PilotMicroLessons));
+    expect(track.first.lessonId, 'V2-ALPHA-CL-01');
   });
 }

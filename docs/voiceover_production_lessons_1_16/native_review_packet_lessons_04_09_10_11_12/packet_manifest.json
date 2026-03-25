@@ -1,0 +1,201 @@
+{
+  "packet_type": "NATIVE_REVIEW",
+  "packet_title": "Native Review Packet For Lessons 04, 09, 10, 11, 12",
+  "source_generated_at": "2026-03-21T12:48:18.960405Z",
+  "generated_from": {
+    "review_status": "docs/voiceover_production_lessons_1_16/review_status_lessons_01_12.md",
+    "review_queue": "docs/voiceover_production_lessons_1_16/review_queue_lessons_01_12.csv",
+    "summary": "docs/voiceover_production_lessons_1_16/recording_export_summary_lessons_01_12.md"
+  },
+  "included_lessons": [
+    4,
+    9,
+    10,
+    11,
+    12
+  ],
+  "lesson_count": 5,
+  "flagged_item_count": 18,
+  "decision_options": [
+    "NATIVE_APPROVED",
+    "NATIVE_APPROVED_WITH_NOTE",
+    "NATIVE_REWRITE_REQUIRED",
+    "HOLD_OUT_OF_EXPORT",
+    "NEEDS_PRODUCT_DECISION"
+  ],
+  "review_sheet_columns": [
+    "packet_type",
+    "lesson_number",
+    "lesson_id",
+    "lesson_title",
+    "batch_id",
+    "review_status",
+    "review_focus",
+    "segment_id",
+    "row_kind",
+    "segment_type",
+    "asset_stem",
+    "source_ref",
+    "export_state",
+    "native_review_flag",
+    "planned_audio_filename",
+    "planned_audio_asset_path",
+    "target_duration_sec",
+    "repeatability",
+    "current_line_text",
+    "script_text_ar",
+    "script_text_support",
+    "delivery_note",
+    "risk_reason",
+    "reviewer_comment",
+    "suggested_revision",
+    "decision",
+    "final_resolution"
+  ],
+  "packet_checklist": "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/packet_reviewer_checklist.csv",
+  "lessons": [
+    {
+      "lesson_number": 4,
+      "lesson_id": "V2-A1-04-PREVIEW",
+      "lesson_title": "Reading Support For Real Words",
+      "batch_id": "BATCH_A",
+      "review_status": "needs_native_review",
+      "review_summary": "The lesson is structurally sound, but the vowelled support items should be checked by a native speaker before export.",
+      "review_focus": "Confirm first-pass pronunciation and spoken-versus-display handling for the supported forms.",
+      "flagged_item_count": 3,
+      "source_data_path": "docs/voiceover_production_lessons_1_16/data/lesson_04_reading_support_for_real_words.json",
+      "source_script_path": "docs/voiceover_production_lessons_1_16/scripts/final/lesson_04_reading_support_for_real_words.md",
+      "canonical_sources": [
+        "lib/data/generated_stage_a_preview_lessons.dart",
+        "docs/generated_lessons/v2_a1_04_short_vowels_make_reading_possible.md",
+        "test/stage_a_preview_page_test.dart"
+      ],
+      "output_folder": "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_04_reading_support_for_real_words",
+      "output_files": [
+        "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_04_reading_support_for_real_words/lesson_04_current_script.md",
+        "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_04_reading_support_for_real_words/lesson_04_flagged_segments.md",
+        "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_04_reading_support_for_real_words/lesson_04_review_sheet.csv"
+      ],
+      "flagged_segment_ids": [
+        "L04_AR_001",
+        "L04_AR_002",
+        "L04_AR_004"
+      ]
+    },
+    {
+      "lesson_number": 9,
+      "lesson_id": "lesson_09_bayt_make_it_stick",
+      "lesson_title": "بيت Means House",
+      "batch_id": "BATCH_C",
+      "review_status": "needs_native_review",
+      "review_summary": "The lesson is ready at the script level, but the supported-display version of بيت should be checked before export.",
+      "review_focus": "Confirm whether the first-pass support on بَيْت should influence recording or stay display-only.",
+      "flagged_item_count": 1,
+      "source_data_path": "docs/voiceover_production_lessons_1_16/data/lesson_09_means_house.json",
+      "source_script_path": "docs/voiceover_production_lessons_1_16/scripts/final/lesson_09_means_house.md",
+      "canonical_sources": [
+        "lib/data/generated_stage_c_preview_lessons.dart",
+        "docs/generated_lessons/v2_c1_09_bayt_make_it_stick.md",
+        "docs/generated_lessons/v2_c1_09_bayt_word_has_four_parts.md",
+        "test/lesson_09_bayt_make_it_stick_test.dart"
+      ],
+      "output_folder": "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_09_means_house",
+      "output_files": [
+        "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_09_means_house/lesson_09_current_script.md",
+        "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_09_means_house/lesson_09_flagged_segments.md",
+        "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_09_means_house/lesson_09_review_sheet.csv"
+      ],
+      "flagged_segment_ids": [
+        "L09_AR_001"
+      ]
+    },
+    {
+      "lesson_number": 10,
+      "lesson_id": "lesson_10_arabic_gives_you_a_clue_ta_marbuta",
+      "lesson_title": "Arabic Gives You a Clue: ة",
+      "batch_id": "BATCH_C",
+      "review_status": "needs_native_review",
+      "review_summary": "The lesson concept is clear, but isolated ة references and clue-building artifacts should not be blindly exported.",
+      "review_focus": "Decide how isolated ة should be spoken, if at all, before any human or TTS batch export.",
+      "flagged_item_count": 9,
+      "source_data_path": "docs/voiceover_production_lessons_1_16/data/lesson_10_arabic_gives_you_a_clue.json",
+      "source_script_path": "docs/voiceover_production_lessons_1_16/scripts/final/lesson_10_arabic_gives_you_a_clue.md",
+      "canonical_sources": [
+        "lib/data/generated_stage_c_preview_lessons.dart",
+        "docs/generated_lessons/v2_c1_10_arabic_gives_you_a_clue_ta_marbuta.md",
+        "test/lesson_10_arabic_gives_you_a_clue_ta_marbuta_test.dart"
+      ],
+      "output_folder": "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_10_arabic_gives_you_a_clue",
+      "output_files": [
+        "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_10_arabic_gives_you_a_clue/lesson_10_current_script.md",
+        "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_10_arabic_gives_you_a_clue/lesson_10_flagged_segments.md",
+        "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_10_arabic_gives_you_a_clue/lesson_10_review_sheet.csv"
+      ],
+      "flagged_segment_ids": [
+        "L10_SEG_001",
+        "L10_SEG_002",
+        "L10_SEG_003",
+        "L10_SEG_005",
+        "L10_SEG_009",
+        "L10_SEG_014",
+        "L10_SEG_019",
+        "L10_AR_004",
+        "L10_AR_005"
+      ]
+    },
+    {
+      "lesson_number": 11,
+      "lesson_id": "lesson_11_one_or_more_another_arabic_clue",
+      "lesson_title": "One Or More? A Tiny Arabic Clue",
+      "batch_id": "BATCH_C",
+      "review_status": "needs_native_review",
+      "review_summary": "The one-versus-more lesson is beginner-safe, but the سيارة / سيارات contrast should be checked for export clarity.",
+      "review_focus": "Make sure the plural ending remains clearly audible and not blurred in pair recordings.",
+      "flagged_item_count": 2,
+      "source_data_path": "docs/voiceover_production_lessons_1_16/data/lesson_11_one_or_more_a_tiny_arabic_clue.json",
+      "source_script_path": "docs/voiceover_production_lessons_1_16/scripts/final/lesson_11_one_or_more_a_tiny_arabic_clue.md",
+      "canonical_sources": [
+        "lib/data/generated_stage_c_preview_lessons.dart",
+        "docs/generated_lessons/v2_c1_11_one_or_more_another_clue.md",
+        "test/lesson_11_one_or_more_another_arabic_clue_test.dart"
+      ],
+      "output_folder": "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_11_one_or_more_a_tiny_arabic_clue",
+      "output_files": [
+        "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_11_one_or_more_a_tiny_arabic_clue/lesson_11_current_script.md",
+        "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_11_one_or_more_a_tiny_arabic_clue/lesson_11_flagged_segments.md",
+        "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_11_one_or_more_a_tiny_arabic_clue/lesson_11_review_sheet.csv"
+      ],
+      "flagged_segment_ids": [
+        "L11_AR_001",
+        "L11_AR_002"
+      ]
+    },
+    {
+      "lesson_number": 12,
+      "lesson_id": "lesson_12_you_can_read_a_tiny_arabic_card",
+      "lesson_title": "You Can Read a Tiny Arabic Card",
+      "batch_id": "BATCH_C",
+      "review_status": "needs_native_review",
+      "review_summary": "The Stage C payoff lesson is structurally ready, but clue-sensitive lines and the tiny-card list should be checked before export.",
+      "review_focus": "Keep the tiny card readable as a paced list and do not let clue lines rely on unreviewed isolated glyph handling.",
+      "flagged_item_count": 3,
+      "source_data_path": "docs/voiceover_production_lessons_1_16/data/lesson_12_you_can_read_a_tiny_arabic_card.json",
+      "source_script_path": "docs/voiceover_production_lessons_1_16/scripts/final/lesson_12_you_can_read_a_tiny_arabic_card.md",
+      "canonical_sources": [
+        "lib/data/generated_stage_c_preview_lessons.dart",
+        "test/lesson_12_you_can_read_a_tiny_arabic_card_test.dart"
+      ],
+      "output_folder": "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_12_you_can_read_a_tiny_arabic_card",
+      "output_files": [
+        "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_12_you_can_read_a_tiny_arabic_card/lesson_12_current_script.md",
+        "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_12_you_can_read_a_tiny_arabic_card/lesson_12_flagged_segments.md",
+        "docs/voiceover_production_lessons_1_16/native_review_packet_lessons_04_09_10_11_12/lesson_12_you_can_read_a_tiny_arabic_card/lesson_12_review_sheet.csv"
+      ],
+      "flagged_segment_ids": [
+        "L12_SEG_014",
+        "L12_AR_001",
+        "L12_AR_005"
+      ]
+    }
+  ]
+}

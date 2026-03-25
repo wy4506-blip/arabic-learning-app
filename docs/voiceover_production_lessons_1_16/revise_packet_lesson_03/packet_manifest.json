@@ -1,0 +1,81 @@
+{
+  "packet_type": "REVISE",
+  "packet_title": "Revise Packet For Lesson 03",
+  "source_generated_at": "2026-03-21T12:48:18.960405Z",
+  "generated_from": {
+    "review_status": "docs/voiceover_production_lessons_1_16/review_status_lessons_01_12.md",
+    "review_queue": "docs/voiceover_production_lessons_1_16/review_queue_lessons_01_12.csv",
+    "summary": "docs/voiceover_production_lessons_1_16/recording_export_summary_lessons_01_12.md"
+  },
+  "included_lessons": [
+    3
+  ],
+  "lesson_count": 1,
+  "flagged_item_count": 2,
+  "decision_options": [
+    "KEEP_CURRENT",
+    "REWRITE_REQUIRED",
+    "REMOVE_FROM_EXPORT",
+    "NEEDS_PRODUCT_DECISION",
+    "CLEARED_AFTER_REVISION"
+  ],
+  "review_sheet_columns": [
+    "packet_type",
+    "lesson_number",
+    "lesson_id",
+    "lesson_title",
+    "batch_id",
+    "review_status",
+    "review_focus",
+    "segment_id",
+    "row_kind",
+    "segment_type",
+    "asset_stem",
+    "source_ref",
+    "export_state",
+    "native_review_flag",
+    "planned_audio_filename",
+    "planned_audio_asset_path",
+    "target_duration_sec",
+    "repeatability",
+    "current_line_text",
+    "script_text_ar",
+    "script_text_support",
+    "delivery_note",
+    "risk_reason",
+    "reviewer_comment",
+    "suggested_revision",
+    "decision",
+    "final_resolution"
+  ],
+  "packet_checklist": "docs/voiceover_production_lessons_1_16/revise_packet_lesson_03/packet_reviewer_checklist.csv",
+  "lessons": [
+    {
+      "lesson_number": 3,
+      "lesson_id": "V2-A1-03-PREVIEW",
+      "lesson_title": "One Word, Connected Shape",
+      "batch_id": "BATCH_A",
+      "review_status": "revise",
+      "review_summary": "The lesson word itself is fine, but connection-path build artifacts should not be sent into blind TTS export as normal speech.",
+      "review_focus": "Record the core word content normally, but keep connection-path artifacts out of the first export pass.",
+      "flagged_item_count": 2,
+      "source_data_path": "docs/voiceover_production_lessons_1_16/data/lesson_03_one_word_connected_shape.json",
+      "source_script_path": "docs/voiceover_production_lessons_1_16/scripts/final/lesson_03_one_word_connected_shape.md",
+      "canonical_sources": [
+        "lib/data/generated_stage_a_preview_lessons.dart",
+        "docs/generated_lessons/v2_a1_03_same_letter_new_shape.md",
+        "test/stage_a_preview_page_test.dart"
+      ],
+      "output_folder": "docs/voiceover_production_lessons_1_16/revise_packet_lesson_03/lesson_03_one_word_connected_shape",
+      "output_files": [
+        "docs/voiceover_production_lessons_1_16/revise_packet_lesson_03/lesson_03_one_word_connected_shape/lesson_03_current_script.md",
+        "docs/voiceover_production_lessons_1_16/revise_packet_lesson_03/lesson_03_one_word_connected_shape/lesson_03_flagged_segments.md",
+        "docs/voiceover_production_lessons_1_16/revise_packet_lesson_03/lesson_03_one_word_connected_shape/lesson_03_review_sheet.csv"
+      ],
+      "flagged_segment_ids": [
+        "L03_AR_003",
+        "L03_AR_004"
+      ]
+    }
+  ]
+}

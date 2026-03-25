@@ -1,0 +1,16 @@
+{
+  "lesson_number": 13,
+  "stage": "Stage D",
+  "title": "Study A New Word By Yourself",
+  "core_objective": "Independently study one new Arabic word with a repeatable guided process.",
+  "status": "placeholder_only",
+  "available_planning_sources": [
+    "docs/curriculum/v2_16_lesson_foundation_plan.md"
+  ],
+  "missing_artifacts": [
+    "No runtime V2MicroLesson object under lib/data/",
+    "No generated lesson spec under docs/generated_lessons/",
+    "No lesson-specific test under test/",
+    "No final prompt/content line source for voiceover extraction"
+  ]
+}

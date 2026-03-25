@@ -1,6 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
-import '../data/v2_micro_lessons.dart';
+import '../data/generated_stage_a_preview_lessons.dart';
+import '../data/generated_stage_b_preview_lessons.dart';
+import '../data/generated_stage_c_preview_lessons.dart';
+import '../data/v2_micro_lesson_catalog.dart';
 import '../l10n/localized_text.dart';
 import '../l10n/v2_micro_lesson_localizer.dart';
 import '../models/app_settings.dart';
@@ -12,35 +15,38 @@ import '../services/v2_micro_lesson_completion_orchestrator.dart';
 class V2MicroLessonCompletionPage extends StatelessWidget {
   final AppSettings settings;
   final V2MicroLessonCompletionResult result;
+  final V2MicroLesson? lessonOverride;
+  final bool previewMode;
 
   const V2MicroLessonCompletionPage({
     super.key,
     required this.settings,
     required this.result,
+    this.lessonOverride,
+    this.previewMode = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    final lesson = v2PilotMicroLessons.firstWhere(
-      (item) => item.lessonId == result.lessonId,
-      orElse: () => const V2MicroLesson(
-        lessonId: 'fallback',
-        phaseId: 'fallback',
-        groupId: 'fallback',
-        title: '',
-        outcomeSummary: '',
-        estimatedMinutes: 0,
-        lessonType: V2MicroLessonType.consolidation,
-        objectives: <V2MicroLessonObjective>[],
-        entryCondition: V2MicroLessonEntryCondition(),
-        contentItems: <V2MicroContentItem>[],
-        practiceItems: <V2MicroPracticeItem>[],
-        completionRule: V2MicroCompletionRule(),
-        reviewSeedRules: <V2MicroReviewSeedRule>[],
-        nextActionHints: <V2NextActionHint>[],
-      ),
-    );
+    final lesson = lessonOverride ??
+        maybeV2MicroLessonById(result.lessonId) ??
+        const V2MicroLesson(
+          lessonId: 'fallback',
+          phaseId: 'fallback',
+          groupId: 'fallback',
+          title: '',
+          outcomeSummary: '',
+          estimatedMinutes: 0,
+          lessonType: V2MicroLessonType.consolidation,
+          objectives: <V2MicroLessonObjective>[],
+          entryCondition: V2MicroLessonEntryCondition(),
+          contentItems: <V2MicroContentItem>[],
+          practiceItems: <V2MicroPracticeItem>[],
+          completionRule: V2MicroCompletionRule(),
+          reviewSeedRules: <V2MicroReviewSeedRule>[],
+          nextActionHints: <V2NextActionHint>[],
+        );
     final language = settings.appLanguage;
     final objectiveResultsById = {
       for (final item in result.updatedObjectives) item.objectiveId: item,
@@ -76,6 +82,15 @@ class V2MicroLessonCompletionPage extends StatelessWidget {
     final learnedOutcome = lesson.lessonId == 'fallback'
         ? result.completionSummary.learnedOutcome
         : V2MicroLessonLocalizer.outcomeSummary(lesson, language);
+    final stageAPreviewDescriptor = stageAPreviewDescriptorForLessonId(
+      lesson.lessonId,
+    );
+    final stageBPreviewDescriptor = stageBPreviewDescriptorForLessonId(
+      lesson.lessonId,
+    );
+    final stageCPreviewDescriptor = stageCPreviewDescriptorForLessonId(
+      lesson.lessonId,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -112,6 +127,74 @@ class V2MicroLessonCompletionPage extends StatelessWidget {
                 ),
                 style: text.bodyMedium,
               ),
+              if (previewMode) ...[
+                const SizedBox(height: 10),
+                Text(
+                  localizedText(
+                    context,
+                    zh: 'This was a local preview run. The result was not written into the live home recommendation or learning progress.',
+                    en: 'This was a local preview run. The result was not written into the live home recommendation or learning progress.',
+                  ),
+                  style: text.bodySmall,
+                ),
+              ],
+              if (stageAPreviewDescriptor != null) ...[
+                const SizedBox(height: 16),
+                Text(
+                  localizedText(
+                    context,
+                    zh: 'Stage A progress',
+                    en: 'Stage A progress',
+                  ),
+                  style: text.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _stageAProgressSummary(
+                    lessonId: lesson.lessonId,
+                    language: language,
+                  ),
+                  style: text.bodyMedium,
+                ),
+              ],
+              if (stageBPreviewDescriptor != null) ...[
+                const SizedBox(height: 16),
+                Text(
+                  localizedText(
+                    context,
+                    zh: 'Stage B progress',
+                    en: 'Stage B progress',
+                  ),
+                  style: text.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _stageBProgressSummary(
+                    lessonId: lesson.lessonId,
+                    language: language,
+                  ),
+                  style: text.bodyMedium,
+                ),
+              ],
+              if (stageCPreviewDescriptor != null) ...[
+                const SizedBox(height: 16),
+                Text(
+                  localizedText(
+                    context,
+                    zh: 'Stage C progress',
+                    en: 'Stage C progress',
+                  ),
+                  style: text.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _stageCProgressSummary(
+                    lessonId: lesson.lessonId,
+                    language: language,
+                  ),
+                  style: text.bodyMedium,
+                ),
+              ],
               const SizedBox(height: 20),
               if (achieved.isNotEmpty) ...[
                 Text(
@@ -196,8 +279,8 @@ class V2MicroLessonCompletionPage extends StatelessWidget {
                   child: Text(
                     localizedText(
                       context,
-                      zh: '回到首页',
-                      en: 'Back Home',
+                      zh: previewMode ? 'Back to Chapter' : '回到首页',
+                      en: previewMode ? 'Back to Chapter' : 'Back Home',
                     ),
                   ),
                 ),
@@ -285,6 +368,60 @@ class V2MicroLessonCompletionPage extends StatelessWidget {
     return 'This pass set up the main line of the lesson. Revisit the weak point once more before moving on.';
   }
 
+  String _stageAProgressSummary({
+    required String lessonId,
+    required AppLanguage language,
+  }) {
+    switch (lessonId) {
+      case 'V2-A1-01-PREVIEW':
+        return 'You have entered Stage A through one real Arabic word and carried the book anchor forward.';
+      case 'V2-A1-02-PREVIEW':
+        return 'You now genuinely own your first Arabic word: كتاب = book.';
+      case 'V2-A1-03-PREVIEW':
+        return 'You now have two real Arabic words, كتاب and باب, plus a first glimpse of how connection works inside a meaningful word.';
+      case 'V2-A1-04-PREVIEW':
+        return 'You now leave Stage A with two real Arabic words, supported reading confidence, and a tiny usage glimpse: هذا كتاب / هذا باب.';
+      default:
+        return '';
+    }
+  }
+
+  String _stageBProgressSummary({
+    required String lessonId,
+    required AppLanguage language,
+  }) {
+    switch (lessonId) {
+      case 'lesson_05_qalam_first_real_word_extension':
+        return 'You have now added قلم = pen to your Arabic pack, so Stage B starts with one more real-word win.';
+      case 'lesson_06_hadha_first_fixed_expression':
+        return 'You can now read, build, and say your first tiny Arabic line: هذا كتاب / هذا قلم.';
+      case 'lesson_07_audio_first_known_content_recognition':
+        return 'Stage B has now pushed known content toward the ear: familiar Arabic is starting to sound catchable, not only readable.';
+      case 'lesson_08_first_usable_arabic_pack':
+        return 'You now leave Stage B with a genuinely usable Arabic pack: كتاب, باب, قلم, هذا كتاب, and هذا قلم.';
+      default:
+        return '';
+    }
+  }
+
+  String _stageCProgressSummary({
+    required String lessonId,
+    required AppLanguage language,
+  }) {
+    switch (lessonId) {
+      case 'lesson_09_bayt_make_it_stick':
+        return 'You have now added بيت = house to your Arabic pack, so Stage C starts with a real new-word win.';
+      case 'lesson_10_arabic_gives_you_a_clue_ta_marbuta':
+        return 'Stage C now gives you a first page clue: you can spot ة in سيارة and confirm it once more in كلمة.';
+      case 'lesson_11_one_or_more_another_arabic_clue':
+        return 'You can now see one versus more than one inside one tiny pair: سيارة / سيارات.';
+      case 'lesson_12_you_can_read_a_tiny_arabic_card':
+        return 'You now leave Stage C with a real handling win: one more owned word, two small clues, and a tiny Arabic card you can actually get through.';
+      default:
+        return '';
+    }
+  }
+
   String _localizedReviewSummary(
     List<V2ReviewSeedRecord> seeds,
     AppLanguage language,
@@ -351,3 +488,6 @@ class V2MicroLessonCompletionPage extends StatelessWidget {
     }
   }
 }
+
+
+

@@ -46,6 +46,7 @@ Future<void> pumpUntilLoaded(
 Future<void> seedSharedPreferences(
   Map<String, Object> values,
 ) async {
+  SharedPreferences.setMockInitialValues(<String, Object>{});
   final prefs = await SharedPreferences.getInstance();
   await prefs.clear();
 

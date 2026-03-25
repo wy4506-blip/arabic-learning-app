@@ -1,4 +1,4 @@
-import '../data/v2_micro_lessons.dart';
+﻿import '../data/v2_micro_lesson_catalog.dart';
 import '../models/learning_state_models.dart';
 import '../models/review_models.dart';
 import '../models/v2_lesson_progress_models.dart';
@@ -59,6 +59,98 @@ class V2MicroLessonCompletionResult {
   });
 }
 
+class V2MicroLessonEvidenceEvaluation {
+  final bool targetReached;
+  final int attemptedPracticeCount;
+  final double? averageScore;
+  final bool meetsMinimumPracticeCount;
+  final bool meetsPassThreshold;
+  final List<String> unmetRequiredPracticeItemIds;
+  final List<String> unmetRequiredObjectiveIds;
+
+  const V2MicroLessonEvidenceEvaluation({
+    required this.targetReached,
+    required this.attemptedPracticeCount,
+    required this.averageScore,
+    required this.meetsMinimumPracticeCount,
+    required this.meetsPassThreshold,
+    required this.unmetRequiredPracticeItemIds,
+    required this.unmetRequiredObjectiveIds,
+  });
+}
+
+class V2MicroLessonEvidenceEvaluator {
+  const V2MicroLessonEvidenceEvaluator._();
+
+  static V2MicroLessonEvidenceEvaluation evaluate({
+    required V2MicroLesson lesson,
+    required List<V2MicroPracticeOutcome> practiceOutcomes,
+    required List<V2ObjectiveProgressRecord> objectiveResults,
+    required bool confirmationPassed,
+  }) {
+    final completionRule = lesson.completionRule;
+    final resolvedRequiredPracticeItemIds =
+        completionRule.requiredPracticeItemIds.isEmpty
+            ? lesson.practiceItems
+                .map((item) => item.itemId)
+                .toList(growable: false)
+            : completionRule.requiredPracticeItemIds;
+    final resolvedRequiredObjectiveIds =
+        completionRule.requiredObjectiveIds.isEmpty
+            ? lesson.objectives
+                .map((objective) => objective.objectiveId)
+                .toList(growable: false)
+            : completionRule.requiredObjectiveIds;
+    final passedPracticeIds = practiceOutcomes
+        .where((outcome) => outcome.passed)
+        .map((outcome) => outcome.itemId)
+        .toSet();
+    final objectiveResultsById = <String, V2ObjectiveProgressRecord>{
+      for (final result in objectiveResults) result.objectiveId: result,
+    };
+    final unmetRequiredPracticeItemIds = resolvedRequiredPracticeItemIds
+        .where((itemId) => !passedPracticeIds.contains(itemId))
+        .toList(growable: false);
+    final unmetRequiredObjectiveIds = resolvedRequiredObjectiveIds
+        .where(
+          (objectiveId) =>
+              objectiveResultsById[objectiveId]?.reachedThreshold != true,
+        )
+        .toList(growable: false);
+    final attemptedPracticeCount = practiceOutcomes.length;
+    final averageScore = _averageScore(practiceOutcomes);
+    final meetsMinimumPracticeCount =
+        attemptedPracticeCount >= completionRule.minimumPracticeCount;
+    final meetsPassThreshold = averageScore != null &&
+        averageScore >= completionRule.passThreshold;
+
+    return V2MicroLessonEvidenceEvaluation(
+      targetReached: confirmationPassed &&
+          meetsMinimumPracticeCount &&
+          meetsPassThreshold &&
+          unmetRequiredPracticeItemIds.isEmpty &&
+          unmetRequiredObjectiveIds.isEmpty,
+      attemptedPracticeCount: attemptedPracticeCount,
+      averageScore: averageScore,
+      meetsMinimumPracticeCount: meetsMinimumPracticeCount,
+      meetsPassThreshold: meetsPassThreshold,
+      unmetRequiredPracticeItemIds: unmetRequiredPracticeItemIds,
+      unmetRequiredObjectiveIds: unmetRequiredObjectiveIds,
+    );
+  }
+
+  static double? _averageScore(List<V2MicroPracticeOutcome> practiceOutcomes) {
+    if (practiceOutcomes.isEmpty) {
+      return null;
+    }
+    final total = practiceOutcomes.fold<double>(
+      0,
+      (sum, outcome) => sum + outcome.score,
+    );
+    return total / practiceOutcomes.length;
+  }
+}
+
 class V2MicroLessonCompletionOrchestrator {
   const V2MicroLessonCompletionOrchestrator._();
 
@@ -70,10 +162,11 @@ class V2MicroLessonCompletionOrchestrator {
   }) async {
     final moment = now ?? DateTime.now();
     final lesson = _lessonById(lessonId);
+    final lessonTrack = _lessonTrackFor(lessonId);
     final previousRecords = await LessonProgressService.getAllRecords();
     final previousStates = await LearningStateService.getAllStates();
     final previousSnapshot = V2LearningSnapshotService.buildSnapshot(
-      lessons: v2PilotMicroLessons,
+      lessons: lessonTrack,
       lessonRecords: previousRecords,
       learningStates: previousStates,
     );
@@ -96,6 +189,12 @@ class V2MicroLessonCompletionOrchestrator {
       confirmationPassed: confirmationPassed,
       evaluatedAt: moment,
     );
+    final evidenceEvaluation = V2MicroLessonEvidenceEvaluator.evaluate(
+      lesson: lesson,
+      practiceOutcomes: practiceOutcomes,
+      objectiveResults: objectiveResults,
+      confirmationPassed: confirmationPassed,
+    );
     final nextSuggestedLessonId = _firstNextLessonIdHint(lesson);
 
     await LessonProgressService.applyEvaluation(
@@ -104,8 +203,9 @@ class V2MicroLessonCompletionOrchestrator {
         completedBlockIds: practiceOutcomes
             .map((outcome) => outcome.itemId)
             .toList(growable: false),
-        currentScore: _averageScore(practiceOutcomes),
+        currentScore: evidenceEvaluation.averageScore,
         confirmationPassed: confirmationPassed,
+        targetReached: evidenceEvaluation.targetReached,
         nextRecommendedLessonId: nextSuggestedLessonId,
         objectiveResults: objectiveResults,
       ),
@@ -151,7 +251,7 @@ class V2MicroLessonCompletionOrchestrator {
     final currentRecords = await LessonProgressService.getAllRecords();
     final currentStates = await LearningStateService.getAllStates();
     final currentSnapshot = V2LearningSnapshotService.buildSnapshot(
-      lessons: v2PilotMicroLessons,
+      lessons: lessonTrack,
       lessonRecords: currentRecords,
       learningStates: currentStates,
     );
@@ -178,13 +278,65 @@ class V2MicroLessonCompletionOrchestrator {
     );
   }
 
+  static Future<V2MicroLessonCompletionResult> completePreviewLesson({
+    required V2MicroLesson lesson,
+    required List<V2MicroPracticeOutcome> practiceOutcomes,
+    bool confirmationPassed = true,
+    DateTime? now,
+  }) async {
+    final moment = now ?? DateTime.now();
+    final objectiveResults = _buildObjectiveResults(
+      lesson: lesson,
+      practiceOutcomes: practiceOutcomes,
+      confirmationPassed: confirmationPassed,
+      evaluatedAt: moment,
+    );
+    final evidenceEvaluation = V2MicroLessonEvidenceEvaluator.evaluate(
+      lesson: lesson,
+      practiceOutcomes: practiceOutcomes,
+      objectiveResults: objectiveResults,
+      confirmationPassed: confirmationPassed,
+    );
+    final generatedSeeds = _buildGeneratedSeeds(
+      lesson: lesson,
+      objectiveResults: objectiveResults,
+      practiceOutcomes: practiceOutcomes,
+      now: moment,
+    );
+    final recommendedAction = _previewRecommendedAction(
+      lesson: lesson,
+      evidenceEvaluation: evidenceEvaluation,
+    );
+    final createdReviewSeeds = generatedSeeds
+        .map((generatedSeed) => generatedSeed.record)
+        .toList(growable: false);
+
+    return V2MicroLessonCompletionResult(
+      lessonId: lesson.lessonId,
+      previousStatus: V2CanonicalLessonStatus.notStarted,
+      currentStatus: _previewStatusFor(evidenceEvaluation),
+      updatedObjectives: objectiveResults,
+      createdReviewSeeds: createdReviewSeeds,
+      dueReviewCount: createdReviewSeeds
+          .where((seed) => !seed.dueAt.isAfter(moment))
+          .length,
+      recommendedAction: recommendedAction,
+      recommendedLessonId: recommendedAction.targetLessonId,
+      completionSummary: _buildCompletionSummary(
+        lesson: lesson,
+        objectiveResults: objectiveResults,
+        createdReviewSeeds: createdReviewSeeds,
+        recommendedAction: recommendedAction,
+      ),
+    );
+  }
+
   static V2MicroLesson _lessonById(String lessonId) {
-    for (final lesson in v2PilotMicroLessons) {
-      if (lesson.lessonId == lessonId) {
-        return lesson;
-      }
-    }
-    throw StateError('Unknown V2 micro lesson: $lessonId');
+    return v2MicroLessonById(lessonId);
+  }
+
+  static List<V2MicroLesson> _lessonTrackFor(String lessonId) {
+    return v2MicroLessonTrackForLessonId(lessonId);
   }
 
   static List<V2ObjectiveProgressRecord> _buildObjectiveResults({
@@ -336,15 +488,50 @@ class V2MicroLessonCompletionOrchestrator {
     return null;
   }
 
-  static double? _averageScore(List<V2MicroPracticeOutcome> practiceOutcomes) {
-    if (practiceOutcomes.isEmpty) {
-      return null;
+  static V2CanonicalLessonStatus _previewStatusFor(
+    V2MicroLessonEvidenceEvaluation evidenceEvaluation,
+  ) {
+    if (evidenceEvaluation.targetReached) {
+      return V2CanonicalLessonStatus.completed;
     }
-    final total = practiceOutcomes.fold<double>(
-      0,
-      (sum, outcome) => sum + outcome.score,
+    if (evidenceEvaluation.meetsMinimumPracticeCount) {
+      return V2CanonicalLessonStatus.coreCompleted;
+    }
+    return V2CanonicalLessonStatus.inProgress;
+  }
+
+  static V2RecommendedAction _previewRecommendedAction({
+    required V2MicroLesson lesson,
+    required V2MicroLessonEvidenceEvaluation evidenceEvaluation,
+  }) {
+    if (evidenceEvaluation.targetReached) {
+      final successfulHint = lesson.nextActionHints.isNotEmpty
+          ? lesson.nextActionHints.first
+          : null;
+      if (successfulHint != null) {
+        return V2RecommendedAction(
+          actionType: successfulHint.actionType,
+          reason: successfulHint.reason,
+          targetLessonId: successfulHint.targetLessonId,
+        );
+      }
+      return const V2RecommendedAction(
+        actionType: V2RecommendedActionType.noAction,
+        reason: 'Preview completed without a live next lesson target.',
+      );
+    }
+
+    if (evidenceEvaluation.meetsMinimumPracticeCount) {
+      return const V2RecommendedAction(
+        actionType: V2RecommendedActionType.startReview,
+        reason: 'Preview result suggests reviewing the weak point before moving on.',
+      );
+    }
+
+    return const V2RecommendedAction(
+      actionType: V2RecommendedActionType.continueLesson,
+      reason: 'Preview result suggests continuing the lesson until the recall-bearing step is stable.',
     );
-    return total / practiceOutcomes.length;
   }
 
   static V2MicroLessonCompletionSummary _buildCompletionSummary({
@@ -374,8 +561,8 @@ class V2MicroLessonCompletionOrchestrator {
         .map((objective) => objective.summary)
         .toList(growable: false);
     final reviewSummary = createdReviewSeeds.isEmpty
-        ? '本课暂未生成新的复习项。'
-        : '本课已生成 ${createdReviewSeeds.length} 个复习种子。';
+        ? 'No new review items were created from this lesson.'
+        : 'This lesson created ${createdReviewSeeds.length} review seeds.';
 
     return V2MicroLessonCompletionSummary(
       learnedOutcome: lesson.outcomeSummary,
@@ -389,17 +576,17 @@ class V2MicroLessonCompletionOrchestrator {
   static String _nextStepSummary(V2RecommendedAction action) {
     switch (action.actionType) {
       case V2RecommendedActionType.startLesson:
-        return '下一步建议继续进入新课。';
+        return 'Next, continue into the next lesson.';
       case V2RecommendedActionType.continueLesson:
-        return '下一步建议先继续当前进行中的课程。';
+        return 'Next, continue the lesson already in progress.';
       case V2RecommendedActionType.startReview:
-        return '下一步建议先处理到期或薄弱复习。';
+        return 'Next, clear the due or weak review item first.';
       case V2RecommendedActionType.startConsolidation:
-        return '下一步建议先做阶段巩固。';
+        return 'Next, move into a short consolidation step.';
       case V2RecommendedActionType.startNextPhase:
-        return '下一步建议进入下一阶段。';
+        return 'Next, move into the next phase.';
       case V2RecommendedActionType.noAction:
-        return '当前没有新的主动作可执行。';
+        return 'There is no new action to take right now.';
     }
   }
 
@@ -479,3 +666,7 @@ class _GeneratedReviewSeed {
     required this.record,
   });
 }
+
+
+
+

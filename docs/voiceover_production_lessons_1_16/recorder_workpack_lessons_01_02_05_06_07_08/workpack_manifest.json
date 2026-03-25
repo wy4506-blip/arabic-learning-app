@@ -1,0 +1,109 @@
+{
+  "generated_from": {
+    "task_sheet": "docs/voiceover_production_lessons_1_16/recording_task_sheet_lessons_01_12.csv",
+    "summary": "docs/voiceover_production_lessons_1_16/recording_export_summary_lessons_01_12.md"
+  },
+  "output_root": "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08",
+  "workflow_statuses": [
+    "TO_RECORD",
+    "RECORDED",
+    "RETAKE",
+    "QC_PASS"
+  ],
+  "included_lessons": [
+    1,
+    2,
+    5,
+    6,
+    7,
+    8
+  ],
+  "lesson_count": 6,
+  "row_count": 119,
+  "lessons": [
+    {
+      "batch_id": "BATCH_A",
+      "lesson_number": 1,
+      "lesson_id": "V2-A1-01-PREVIEW",
+      "lesson_title": "Arabic Starts Here",
+      "row_count": 18,
+      "folder": "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_A/lesson_01_arabic_starts_here",
+      "files": [
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_A/lesson_01_arabic_starts_here/lesson_01_script_sheet.md",
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_A/lesson_01_arabic_starts_here/lesson_01_segment_checklist.csv",
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_A/lesson_01_arabic_starts_here/lesson_01_filename_list.csv",
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_A/lesson_01_arabic_starts_here/lesson_01_delivery_notes.md"
+      ]
+    },
+    {
+      "batch_id": "BATCH_A",
+      "lesson_number": 2,
+      "lesson_id": "V2-A1-02-PREVIEW",
+      "lesson_title": "First Real Word Success",
+      "row_count": 19,
+      "folder": "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_A/lesson_02_first_real_word_success",
+      "files": [
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_A/lesson_02_first_real_word_success/lesson_02_script_sheet.md",
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_A/lesson_02_first_real_word_success/lesson_02_segment_checklist.csv",
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_A/lesson_02_first_real_word_success/lesson_02_filename_list.csv",
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_A/lesson_02_first_real_word_success/lesson_02_delivery_notes.md"
+      ]
+    },
+    {
+      "batch_id": "BATCH_B",
+      "lesson_number": 5,
+      "lesson_id": "lesson_05_qalam_first_real_word_extension",
+      "lesson_title": "One More Real Word: قلم",
+      "row_count": 18,
+      "folder": "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_05_one_more_real_word",
+      "files": [
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_05_one_more_real_word/lesson_05_script_sheet.md",
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_05_one_more_real_word/lesson_05_segment_checklist.csv",
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_05_one_more_real_word/lesson_05_filename_list.csv",
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_05_one_more_real_word/lesson_05_delivery_notes.md"
+      ]
+    },
+    {
+      "batch_id": "BATCH_B",
+      "lesson_number": 6,
+      "lesson_id": "lesson_06_hadha_first_fixed_expression",
+      "lesson_title": "This Is... Your First Fixed Expression",
+      "row_count": 20,
+      "folder": "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_06_this_is_your_first_fixed_expression",
+      "files": [
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_06_this_is_your_first_fixed_expression/lesson_06_script_sheet.md",
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_06_this_is_your_first_fixed_expression/lesson_06_segment_checklist.csv",
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_06_this_is_your_first_fixed_expression/lesson_06_filename_list.csv",
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_06_this_is_your_first_fixed_expression/lesson_06_delivery_notes.md"
+      ]
+    },
+    {
+      "batch_id": "BATCH_B",
+      "lesson_number": 7,
+      "lesson_id": "lesson_07_audio_first_known_content_recognition",
+      "lesson_title": "Hear What You Already Know",
+      "row_count": 22,
+      "folder": "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_07_hear_what_you_already_know",
+      "files": [
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_07_hear_what_you_already_know/lesson_07_script_sheet.md",
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_07_hear_what_you_already_know/lesson_07_segment_checklist.csv",
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_07_hear_what_you_already_know/lesson_07_filename_list.csv",
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_07_hear_what_you_already_know/lesson_07_delivery_notes.md"
+      ]
+    },
+    {
+      "batch_id": "BATCH_B",
+      "lesson_number": 8,
+      "lesson_id": "lesson_08_first_usable_arabic_pack",
+      "lesson_title": "Your First Usable Arabic Pack",
+      "row_count": 22,
+      "folder": "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_08_your_first_usable_arabic_pack",
+      "files": [
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_08_your_first_usable_arabic_pack/lesson_08_script_sheet.md",
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_08_your_first_usable_arabic_pack/lesson_08_segment_checklist.csv",
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_08_your_first_usable_arabic_pack/lesson_08_filename_list.csv",
+        "docs/voiceover_production_lessons_1_16/recorder_workpack_lessons_01_02_05_06_07_08/BATCH_B/lesson_08_your_first_usable_arabic_pack/lesson_08_delivery_notes.md"
+      ]
+    }
+  ]
+}

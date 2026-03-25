@@ -7,6 +7,8 @@ class SettingsService {
   static const _themeKey = 'app_theme_pref';
   static const _languageKey = 'app_language';
   static const _meaningLanguageKey = 'app_meaning_language';
+  static const _homeUsesFoundationPilotKey =
+      'app_home_uses_foundation_pilot';
   static const _showTransliterationKey = 'app_show_transliteration';
   static const _arabicFontScaleKey = 'app_arabic_font_scale';
   static const _reminderEnabledKey = 'app_reminder_enabled';
@@ -28,6 +30,8 @@ class SettingsService {
       meaningLanguage: ContentLanguage.values[
           (prefs.getInt(_meaningLanguageKey) ?? ContentLanguage.zh.index)
               .clamp(0, ContentLanguage.values.length - 1)],
+      homeUsesFoundationPilot:
+          prefs.getBool(_homeUsesFoundationPilotKey) ?? false,
       showTransliteration: prefs.getBool(_showTransliterationKey) ?? true,
       arabicFontScale: ArabicFontScale.values[
           (prefs.getInt(_arabicFontScaleKey) ?? ArabicFontScale.standard.index)
@@ -46,6 +50,10 @@ class SettingsService {
     await prefs.setInt(_themeKey, settings.themePreference.index);
     await prefs.setInt(_languageKey, settings.appLanguage.index);
     await prefs.setInt(_meaningLanguageKey, settings.meaningLanguage.index);
+    await prefs.setBool(
+      _homeUsesFoundationPilotKey,
+      settings.homeUsesFoundationPilot,
+    );
     await prefs.setBool(
       _showTransliterationKey,
       settings.showTransliteration,

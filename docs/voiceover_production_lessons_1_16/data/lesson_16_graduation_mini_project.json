@@ -1,0 +1,16 @@
+{
+  "lesson_number": 16,
+  "stage": "Stage D",
+  "title": "Graduation Mini-Project",
+  "core_objective": "Apply the course beginner study process to a tiny new guided Arabic learning task.",
+  "status": "placeholder_only",
+  "available_planning_sources": [
+    "docs/curriculum/v2_16_lesson_foundation_plan.md"
+  ],
+  "missing_artifacts": [
+    "No runtime V2MicroLesson object under lib/data/",
+    "No generated lesson spec under docs/generated_lessons/",
+    "No lesson-specific test under test/",
+    "No final prompt/content line source for voiceover extraction"
+  ]
+}

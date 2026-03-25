@@ -1,4 +1,4 @@
-import '../data/v2_micro_lessons.dart';
+import '../data/v2_micro_lesson_catalog.dart';
 import '../models/app_settings.dart';
 import '../models/v2_micro_lesson.dart';
 
@@ -93,9 +93,10 @@ class V2MicroLessonLocalizer {
   }
 
   static String lessonTitleById(String lessonId, AppLanguage language) {
-    final lesson = v2PilotMicroLessons.firstWhere(
-      (item) => item.lessonId == lessonId,
-    );
+    final lesson = maybeV2MicroLessonById(lessonId);
+    if (lesson == null) {
+      return lessonId;
+    }
     return lessonTitle(lesson, language);
   }
 

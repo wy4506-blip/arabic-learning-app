@@ -73,6 +73,35 @@ void main() {
     expect(snapshot.completedLessons.contains('V2-U1-05'), isTrue);
   });
 
+  test('applyEvaluation respects an explicit targetReached override', () async {
+    await LessonProgressService.markLessonStarted(lessonId: 'V2-U1-06');
+
+    final updated = await LessonProgressService.applyEvaluation(
+      lessonId: 'V2-U1-06',
+      evaluation: LessonCompletionEvaluation(
+        completedBlockIds: const <String>['intro', 'practice'],
+        currentScore: 0.5,
+        targetReached: false,
+        objectiveResults: const <V2ObjectiveProgressRecord>[
+          V2ObjectiveProgressRecord(
+            lessonId: 'V2-U1-06',
+            objectiveId: 'g1_required_action',
+            status: V2ObjectiveStatus.reached,
+            accuracy: 1.0,
+            evidenceCount: 1,
+            threshold: 0.8,
+          ),
+        ],
+      ),
+    );
+
+    expect(updated.status, V2LessonStatus.coreCompleted);
+    expect(updated.targetReached, isFalse);
+
+    final snapshot = await ProgressService.getSnapshot();
+    expect(snapshot.completedLessons.contains('V2-U1-06'), isFalse);
+  });
+
   test('seedRecordsForLesson builds stable ids from lesson content', () {
     final lesson = sampleLessons.first;
     final seeds = LessonReviewSeeder.seedRecordsForLesson(

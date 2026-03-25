@@ -1,0 +1,360 @@
+{
+  "generated_at_utc": "2026-03-21T12:48:18.960405Z",
+  "framework_name": "lesson_voiceover_production_framework_1_16",
+  "source_policy": [
+    "Completed lessons use runtime V2MicroLesson objects as canonical content.",
+    "Generated lesson markdown is referenced only when it already exists in the repository.",
+    "Unfinished lessons stay placeholder-only until final runtime content exists.",
+    "Lessons 1-12 now include normalized review-ready segment metadata before any TTS export work."
+  ],
+  "review_status_path": "docs/voiceover_production_lessons_1_16/review_status_lessons_01_12.md",
+  "recording_batch_plan_path": "docs/voiceover_production_lessons_1_16/recording_batch_plan_lessons_01_12.md",
+  "filename_convention_path": "docs/voiceover_production_lessons_1_16/audio_filename_convention_spec.md",
+  "template_path": "docs/voiceover_production_lessons_1_16/templates/lesson_voiceover_script_template.md",
+  "lessons": [
+    {
+      "lesson_number": 1,
+      "stage": "Stage A",
+      "title": "Arabic Starts Here",
+      "lesson_id": "V2-A1-01-PREVIEW",
+      "status": "final_script_normalized",
+      "review_status": "pass",
+      "batch": "Batch A",
+      "script_path": "docs/voiceover_production_lessons_1_16/scripts/final/lesson_01_arabic_starts_here.md",
+      "data_path": "docs/voiceover_production_lessons_1_16/data/lesson_01_arabic_starts_here.json",
+      "source_paths": [
+        "lib/data/generated_stage_a_preview_lessons.dart",
+        "docs/generated_lessons/v2_a1_01_arabic_starts_here.md",
+        "test/stage_a_preview_page_test.dart"
+      ],
+      "completeness_basis": "Runtime lesson object plus generated markdown plus Stage A integration coverage.",
+      "segment_count": 17,
+      "arabic_asset_count": 1,
+      "flag_count": 0,
+      "estimated_segment_runtime": "01:27",
+      "estimated_arabic_asset_runtime": "00:03",
+      "caveat": ""
+    },
+    {
+      "lesson_number": 2,
+      "stage": "Stage A",
+      "title": "First Real Word Success",
+      "lesson_id": "V2-A1-02-PREVIEW",
+      "status": "final_script_normalized",
+      "review_status": "pass",
+      "batch": "Batch A",
+      "script_path": "docs/voiceover_production_lessons_1_16/scripts/final/lesson_02_first_real_word_success.md",
+      "data_path": "docs/voiceover_production_lessons_1_16/data/lesson_02_first_real_word_success.json",
+      "source_paths": [
+        "lib/data/generated_stage_a_preview_lessons.dart",
+        "docs/generated_lessons/v2_a1_02_first_script_success.md",
+        "test/stage_a_preview_page_test.dart"
+      ],
+      "completeness_basis": "Runtime lesson object plus generated markdown plus Stage A integration coverage.",
+      "segment_count": 17,
+      "arabic_asset_count": 2,
+      "flag_count": 0,
+      "estimated_segment_runtime": "01:23",
+      "estimated_arabic_asset_runtime": "00:08",
+      "caveat": ""
+    },
+    {
+      "lesson_number": 3,
+      "stage": "Stage A",
+      "title": "One Word, Connected Shape",
+      "lesson_id": "V2-A1-03-PREVIEW",
+      "status": "final_script_normalized",
+      "review_status": "revise",
+      "batch": "Batch A",
+      "script_path": "docs/voiceover_production_lessons_1_16/scripts/final/lesson_03_one_word_connected_shape.md",
+      "data_path": "docs/voiceover_production_lessons_1_16/data/lesson_03_one_word_connected_shape.json",
+      "source_paths": [
+        "lib/data/generated_stage_a_preview_lessons.dart",
+        "docs/generated_lessons/v2_a1_03_same_letter_new_shape.md",
+        "test/stage_a_preview_page_test.dart"
+      ],
+      "completeness_basis": "Runtime lesson object plus generated markdown plus Stage A integration coverage.",
+      "segment_count": 17,
+      "arabic_asset_count": 4,
+      "flag_count": 2,
+      "estimated_segment_runtime": "01:32",
+      "estimated_arabic_asset_runtime": "00:13",
+      "caveat": ""
+    },
+    {
+      "lesson_number": 4,
+      "stage": "Stage A",
+      "title": "Reading Support For Real Words",
+      "lesson_id": "V2-A1-04-PREVIEW",
+      "status": "final_script_normalized",
+      "review_status": "needs_native_review",
+      "batch": "Batch A",
+      "script_path": "docs/voiceover_production_lessons_1_16/scripts/final/lesson_04_reading_support_for_real_words.md",
+      "data_path": "docs/voiceover_production_lessons_1_16/data/lesson_04_reading_support_for_real_words.json",
+      "source_paths": [
+        "lib/data/generated_stage_a_preview_lessons.dart",
+        "docs/generated_lessons/v2_a1_04_short_vowels_make_reading_possible.md",
+        "test/stage_a_preview_page_test.dart"
+      ],
+      "completeness_basis": "Runtime lesson object plus generated markdown plus Stage A integration coverage.",
+      "segment_count": 22,
+      "arabic_asset_count": 4,
+      "flag_count": 3,
+      "estimated_segment_runtime": "01:44",
+      "estimated_arabic_asset_runtime": "00:13",
+      "caveat": ""
+    },
+    {
+      "lesson_number": 5,
+      "stage": "Stage B",
+      "title": "One More Real Word: قلم",
+      "lesson_id": "lesson_05_qalam_first_real_word_extension",
+      "status": "final_script_normalized",
+      "review_status": "pass",
+      "batch": "Batch B",
+      "script_path": "docs/voiceover_production_lessons_1_16/scripts/final/lesson_05_one_more_real_word.md",
+      "data_path": "docs/voiceover_production_lessons_1_16/data/lesson_05_one_more_real_word.json",
+      "source_paths": [
+        "lib/data/generated_stage_b_preview_lessons.dart",
+        "docs/generated_lessons/v2_b1_05_qalam_first_real_word_extension.md",
+        "test/stage_b_preview_page_test.dart"
+      ],
+      "completeness_basis": "Runtime lesson object plus generated markdown plus Stage B integration coverage.",
+      "segment_count": 16,
+      "arabic_asset_count": 2,
+      "flag_count": 0,
+      "estimated_segment_runtime": "01:20",
+      "estimated_arabic_asset_runtime": "00:08",
+      "caveat": ""
+    },
+    {
+      "lesson_number": 6,
+      "stage": "Stage B",
+      "title": "This Is... Your First Fixed Expression",
+      "lesson_id": "lesson_06_hadha_first_fixed_expression",
+      "status": "final_script_normalized",
+      "review_status": "pass",
+      "batch": "Batch B",
+      "script_path": "docs/voiceover_production_lessons_1_16/scripts/final/lesson_06_this_is_your_first_fixed_expression.md",
+      "data_path": "docs/voiceover_production_lessons_1_16/data/lesson_06_this_is_your_first_fixed_expression.json",
+      "source_paths": [
+        "lib/data/generated_stage_b_preview_lessons.dart",
+        "docs/generated_lessons/v2_b1_06_hadha_first_fixed_expression.md",
+        "test/stage_b_preview_page_test.dart"
+      ],
+      "completeness_basis": "Runtime lesson object plus generated markdown plus Stage B integration coverage.",
+      "segment_count": 17,
+      "arabic_asset_count": 3,
+      "flag_count": 0,
+      "estimated_segment_runtime": "01:19",
+      "estimated_arabic_asset_runtime": "00:12",
+      "caveat": ""
+    },
+    {
+      "lesson_number": 7,
+      "stage": "Stage B",
+      "title": "Hear What You Already Know",
+      "lesson_id": "lesson_07_audio_first_known_content_recognition",
+      "status": "final_script_normalized",
+      "review_status": "pass",
+      "batch": "Batch B",
+      "script_path": "docs/voiceover_production_lessons_1_16/scripts/final/lesson_07_hear_what_you_already_know.md",
+      "data_path": "docs/voiceover_production_lessons_1_16/data/lesson_07_hear_what_you_already_know.json",
+      "source_paths": [
+        "lib/data/generated_stage_b_preview_lessons.dart",
+        "docs/generated_lessons/v2_b1_07_audio_first_known_content_recognition.md",
+        "test/stage_b_preview_page_test.dart"
+      ],
+      "completeness_basis": "Runtime lesson object plus generated markdown plus Stage B integration coverage.",
+      "segment_count": 17,
+      "arabic_asset_count": 5,
+      "flag_count": 0,
+      "estimated_segment_runtime": "01:20",
+      "estimated_arabic_asset_runtime": "00:20",
+      "caveat": ""
+    },
+    {
+      "lesson_number": 8,
+      "stage": "Stage B",
+      "title": "Your First Usable Arabic Pack",
+      "lesson_id": "lesson_08_first_usable_arabic_pack",
+      "status": "final_script_normalized",
+      "review_status": "pass",
+      "batch": "Batch B",
+      "script_path": "docs/voiceover_production_lessons_1_16/scripts/final/lesson_08_your_first_usable_arabic_pack.md",
+      "data_path": "docs/voiceover_production_lessons_1_16/data/lesson_08_your_first_usable_arabic_pack.json",
+      "source_paths": [
+        "lib/data/generated_stage_b_preview_lessons.dart",
+        "docs/generated_lessons/v2_b1_08_first_usable_arabic_pack.md",
+        "test/stage_b_preview_page_test.dart"
+      ],
+      "completeness_basis": "Runtime lesson object plus generated markdown plus Stage B integration coverage.",
+      "segment_count": 17,
+      "arabic_asset_count": 5,
+      "flag_count": 0,
+      "estimated_segment_runtime": "01:21",
+      "estimated_arabic_asset_runtime": "00:20",
+      "caveat": ""
+    },
+    {
+      "lesson_number": 9,
+      "stage": "Stage C",
+      "title": "بيت Means House",
+      "lesson_id": "lesson_09_bayt_make_it_stick",
+      "status": "final_script_normalized",
+      "review_status": "needs_native_review",
+      "batch": "Batch C",
+      "script_path": "docs/voiceover_production_lessons_1_16/scripts/final/lesson_09_means_house.md",
+      "data_path": "docs/voiceover_production_lessons_1_16/data/lesson_09_means_house.json",
+      "source_paths": [
+        "lib/data/generated_stage_c_preview_lessons.dart",
+        "docs/generated_lessons/v2_c1_09_bayt_make_it_stick.md",
+        "docs/generated_lessons/v2_c1_09_bayt_word_has_four_parts.md",
+        "test/lesson_09_bayt_make_it_stick_test.dart"
+      ],
+      "completeness_basis": "Runtime lesson object plus dedicated test plus two markdown variants; runtime object is canonical.",
+      "segment_count": 17,
+      "arabic_asset_count": 3,
+      "flag_count": 1,
+      "estimated_segment_runtime": "01:22",
+      "estimated_arabic_asset_runtime": "00:11",
+      "caveat": "Lesson 9 has two generated markdown variants in the repository. This framework follows the runtime lesson object only."
+    },
+    {
+      "lesson_number": 10,
+      "stage": "Stage C",
+      "title": "Arabic Gives You a Clue: ة",
+      "lesson_id": "lesson_10_arabic_gives_you_a_clue_ta_marbuta",
+      "status": "final_script_normalized",
+      "review_status": "needs_native_review",
+      "batch": "Batch C",
+      "script_path": "docs/voiceover_production_lessons_1_16/scripts/final/lesson_10_arabic_gives_you_a_clue.md",
+      "data_path": "docs/voiceover_production_lessons_1_16/data/lesson_10_arabic_gives_you_a_clue.json",
+      "source_paths": [
+        "lib/data/generated_stage_c_preview_lessons.dart",
+        "docs/generated_lessons/v2_c1_10_arabic_gives_you_a_clue_ta_marbuta.md",
+        "test/lesson_10_arabic_gives_you_a_clue_ta_marbuta_test.dart"
+      ],
+      "completeness_basis": "Runtime lesson object plus generated markdown plus dedicated test.",
+      "segment_count": 19,
+      "arabic_asset_count": 5,
+      "flag_count": 9,
+      "estimated_segment_runtime": "01:37",
+      "estimated_arabic_asset_runtime": "00:16",
+      "caveat": ""
+    },
+    {
+      "lesson_number": 11,
+      "stage": "Stage C",
+      "title": "One Or More? A Tiny Arabic Clue",
+      "lesson_id": "lesson_11_one_or_more_another_arabic_clue",
+      "status": "final_script_normalized",
+      "review_status": "needs_native_review",
+      "batch": "Batch C",
+      "script_path": "docs/voiceover_production_lessons_1_16/scripts/final/lesson_11_one_or_more_a_tiny_arabic_clue.md",
+      "data_path": "docs/voiceover_production_lessons_1_16/data/lesson_11_one_or_more_a_tiny_arabic_clue.json",
+      "source_paths": [
+        "lib/data/generated_stage_c_preview_lessons.dart",
+        "docs/generated_lessons/v2_c1_11_one_or_more_another_clue.md",
+        "test/lesson_11_one_or_more_another_arabic_clue_test.dart"
+      ],
+      "completeness_basis": "Runtime lesson object plus generated markdown plus dedicated test.",
+      "segment_count": 18,
+      "arabic_asset_count": 5,
+      "flag_count": 2,
+      "estimated_segment_runtime": "01:26",
+      "estimated_arabic_asset_runtime": "00:17",
+      "caveat": ""
+    },
+    {
+      "lesson_number": 12,
+      "stage": "Stage C",
+      "title": "You Can Read a Tiny Arabic Card",
+      "lesson_id": "lesson_12_you_can_read_a_tiny_arabic_card",
+      "status": "final_script_normalized",
+      "review_status": "needs_native_review",
+      "batch": "Batch C",
+      "script_path": "docs/voiceover_production_lessons_1_16/scripts/final/lesson_12_you_can_read_a_tiny_arabic_card.md",
+      "data_path": "docs/voiceover_production_lessons_1_16/data/lesson_12_you_can_read_a_tiny_arabic_card.json",
+      "source_paths": [
+        "lib/data/generated_stage_c_preview_lessons.dart",
+        "test/lesson_12_you_can_read_a_tiny_arabic_card_test.dart"
+      ],
+      "completeness_basis": "Runtime lesson object plus dedicated test; runtime object is canonical because generated markdown is missing.",
+      "segment_count": 17,
+      "arabic_asset_count": 5,
+      "flag_count": 3,
+      "estimated_segment_runtime": "01:23",
+      "estimated_arabic_asset_runtime": "00:18",
+      "caveat": "Lesson 12 has no generated markdown spec in docs/generated_lessons. This framework follows the runtime lesson object and dedicated test only."
+    },
+    {
+      "lesson_number": 13,
+      "stage": "Stage D",
+      "title": "Study A New Word By Yourself",
+      "status": "placeholder_only",
+      "script_path": "docs/voiceover_production_lessons_1_16/scripts/placeholders/lesson_13_study_a_new_word_by_yourself.md",
+      "data_path": "docs/voiceover_production_lessons_1_16/data/lesson_13_study_a_new_word_by_yourself.json",
+      "available_planning_sources": [
+        "docs/curriculum/v2_16_lesson_foundation_plan.md"
+      ],
+      "missing_artifacts": [
+        "No runtime V2MicroLesson object under lib/data/",
+        "No generated lesson spec under docs/generated_lessons/",
+        "No lesson-specific test under test/",
+        "No final prompt/content line source for voiceover extraction"
+      ]
+    },
+    {
+      "lesson_number": 14,
+      "stage": "Stage D",
+      "title": "Study A New Phrase By Yourself",
+      "status": "placeholder_only",
+      "script_path": "docs/voiceover_production_lessons_1_16/scripts/placeholders/lesson_14_study_a_new_phrase_by_yourself.md",
+      "data_path": "docs/voiceover_production_lessons_1_16/data/lesson_14_study_a_new_phrase_by_yourself.json",
+      "available_planning_sources": [
+        "docs/curriculum/v2_16_lesson_foundation_plan.md"
+      ],
+      "missing_artifacts": [
+        "No runtime V2MicroLesson object under lib/data/",
+        "No generated lesson spec under docs/generated_lessons/",
+        "No lesson-specific test under test/",
+        "No final prompt/content line source for voiceover extraction"
+      ]
+    },
+    {
+      "lesson_number": 15,
+      "stage": "Stage D",
+      "title": "Use Review To Keep It",
+      "status": "placeholder_only",
+      "script_path": "docs/voiceover_production_lessons_1_16/scripts/placeholders/lesson_15_use_review_to_keep_it.md",
+      "data_path": "docs/voiceover_production_lessons_1_16/data/lesson_15_use_review_to_keep_it.json",
+      "available_planning_sources": [
+        "docs/curriculum/v2_16_lesson_foundation_plan.md"
+      ],
+      "missing_artifacts": [
+        "No runtime V2MicroLesson object under lib/data/",
+        "No generated lesson spec under docs/generated_lessons/",
+        "No lesson-specific test under test/",
+        "No final prompt/content line source for voiceover extraction"
+      ]
+    },
+    {
+      "lesson_number": 16,
+      "stage": "Stage D",
+      "title": "Graduation Mini-Project",
+      "status": "placeholder_only",
+      "script_path": "docs/voiceover_production_lessons_1_16/scripts/placeholders/lesson_16_graduation_mini_project.md",
+      "data_path": "docs/voiceover_production_lessons_1_16/data/lesson_16_graduation_mini_project.json",
+      "available_planning_sources": [
+        "docs/curriculum/v2_16_lesson_foundation_plan.md"
+      ],
+      "missing_artifacts": [
+        "No runtime V2MicroLesson object under lib/data/",
+        "No generated lesson spec under docs/generated_lessons/",
+        "No lesson-specific test under test/",
+        "No final prompt/content line source for voiceover extraction"
+      ]
+    }
+  ]
+}

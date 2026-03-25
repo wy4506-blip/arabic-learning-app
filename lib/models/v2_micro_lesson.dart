@@ -116,6 +116,7 @@ class V2MicroPracticeItem {
   final String? arabicText;
   final String? transliteration;
   final String? meaning;
+  final List<String> choiceOptions;
   final String itemRefId;
   final ReviewObjectType reviewObjectType;
   final ReviewActionType reviewActionType;
@@ -133,6 +134,7 @@ class V2MicroPracticeItem {
     this.arabicText,
     this.transliteration,
     this.meaning,
+    this.choiceOptions = const <String>[],
     this.objectiveIds = const <String>[],
     this.expectedAnswer,
     this.confusionWithRefId,

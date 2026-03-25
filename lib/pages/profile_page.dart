@@ -6,8 +6,11 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../app_scope.dart';
+import '../data/generated_preview_lessons.dart';
+import '../data/generated_stage_c_preview_lessons.dart';
 import '../l10n/app_strings.dart';
 import '../l10n/lesson_localizer.dart';
+import '../l10n/localized_text.dart';
 import '../models/app_settings.dart';
 import '../models/lesson.dart';
 import '../services/lesson_service.dart';
@@ -22,6 +25,12 @@ import 'lesson_detail_page.dart';
 import 'review_page.dart';
 import 'static_info_page.dart';
 import 'unlock_page.dart';
+import 'v2_foundation_pilot_page.dart';
+import 'v2_micro_lesson_page.dart';
+import 'v2_foundation_preview_page.dart';
+import 'v2_stage_a_preview_page.dart';
+import 'v2_stage_b_preview_page.dart';
+import 'v2_stage_c_preview_page.dart';
 
 const Duration _profileLoadTimeout = Duration(seconds: 2);
 
@@ -286,6 +295,109 @@ ${_buildAppContextSummary()}
     await Clipboard.setData(ClipboardData(text: body));
     if (!mounted) return;
     _showSnackBar(fallbackMessage);
+  }
+
+  Future<void> _openKitabLessonPreview() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => V2MicroLessonPage(
+          settings: widget.settings,
+          lesson: kitabPreviewLesson,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openFoundationPilot() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => V2FoundationPilotPage(
+          settings: widget.settings,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openFoundationPreview() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => V2FoundationPreviewPage(
+          settings: widget.settings,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openStageCPreview() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => V2StageCPreviewPage(
+          settings: widget.settings,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openStageBPreview() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => V2StageBPreviewPage(
+          settings: widget.settings,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openStageCLesson9Preview() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => V2MicroLessonPage(
+          settings: widget.settings,
+          lesson: lesson9BaytMakeItStickPreviewLesson,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openStageCLesson10Preview() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => V2MicroLessonPage(
+          settings: widget.settings,
+          lesson: lesson10ArabicGivesYouAClueTaMarbutaPreviewLesson,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openStageCLesson12Preview() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => V2MicroLessonPage(
+          settings: widget.settings,
+          lesson: lesson12YouCanReadATinyArabicCardPreviewLesson,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openStageAPreview() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => V2StageAPreviewPage(
+          settings: widget.settings,
+        ),
+      ),
+    );
   }
 
   void _showSnackBar(String message) {
@@ -582,6 +694,141 @@ ${strings.t('profile.about_version')}: $_appVersion
             _SettingsSection(
               title: strings.t('profile.section_about_info'),
               children: [
+                _SettingsSwitchItem(
+                  title: localizedText(
+                    context,
+                    zh: 'Home Uses Foundation Pilot',
+                    en: 'Home Uses Foundation Pilot',
+                  ),
+                  subtitle: localizedText(
+                    context,
+                    zh: 'When enabled, the Home main card follows the 12-lesson Foundation pilot instead of the current 7-lesson live pilot. Default stays off while validation is in progress.',
+                    en: 'When enabled, the Home main card follows the 12-lesson Foundation pilot instead of the current 7-lesson live pilot. Default stays off while validation is in progress.',
+                  ),
+                  value: widget.settings.homeUsesFoundationPilot,
+                  onChanged: (value) => widget.onSettingsChanged(
+                    widget.settings.copyWith(homeUsesFoundationPilot: value),
+                  ),
+                ),
+                _SettingsNavItem(
+                  title: localizedText(
+                    context,
+                    zh: 'Foundation Pilot Candidate',
+                    en: 'Foundation Pilot Candidate',
+                  ),
+                  subtitle: localizedText(
+                    context,
+                    zh: 'Run the accepted 12-lesson foundation path with real progress and review evidence while Home stays unchanged.',
+                    en: 'Run the accepted 12-lesson foundation path with real progress and review evidence while Home stays unchanged.',
+                  ),
+                  onTap: _openFoundationPilot,
+                ),
+                _SettingsNavItem(
+                  title: localizedText(
+                    context,
+                    zh: 'Preview Foundation Path',
+                    en: 'Preview Foundation Path',
+                  ),
+                  subtitle: localizedText(
+                    context,
+                    zh: 'Open a single review hub for Stage A, Stage B, and Stage C without affecting the live home flow.',
+                    en: 'Open a single review hub for Stage A, Stage B, and Stage C without affecting the live home flow.',
+                  ),
+                  onTap: _openFoundationPreview,
+                ),
+                _SettingsNavItem(
+                  title: localizedText(
+                    context,
+                    zh: 'Preview Stage A Chapter',
+                    en: 'Preview Stage A Chapter',
+                  ),
+                  subtitle: localizedText(
+                    context,
+                    zh:
+                        'Open the four Stage A beginner V2 lessons without affecting the live home flow or formal progress.',
+                    en:
+                        'Open the four Stage A beginner V2 lessons without affecting the live home flow or formal progress.',
+                  ),
+                  onTap: _openStageAPreview,
+                ),
+                _SettingsNavItem(
+                  title: localizedText(
+                    context,
+                    zh: 'Preview Generated Lesson',
+                    en: 'Preview Generated Lesson',
+                  ),
+                  subtitle: localizedText(
+                    context,
+                    zh: 'Run the generated "book" V2 micro-lesson without affecting the live home flow.',
+                    en: 'Run the generated "book" V2 micro-lesson without affecting the live home flow.',
+                  ),
+                  onTap: _openKitabLessonPreview,
+                ),
+                _SettingsNavItem(
+                  title: localizedText(
+                    context,
+                    zh: 'Preview Stage B Chapter',
+                    en: 'Preview Stage B Chapter',
+                  ),
+                  subtitle: localizedText(
+                    context,
+                    zh: 'Open Lessons 5-8 as one connected Stage B preview flow without affecting the live home flow.',
+                    en: 'Open Lessons 5-8 as one connected Stage B preview flow without affecting the live home flow.',
+                  ),
+                  onTap: _openStageBPreview,
+                ),
+                _SettingsNavItem(
+                  title: localizedText(
+                    context,
+                    zh: 'Preview Stage C Chapter',
+                    en: 'Preview Stage C Chapter',
+                  ),
+                  subtitle: localizedText(
+                    context,
+                    zh: 'Open Lessons 9-12 as one connected Stage C review flow without affecting the live home flow.',
+                    en: 'Open Lessons 9-12 as one connected Stage C review flow without affecting the live home flow.',
+                  ),
+                  onTap: _openStageCPreview,
+                ),
+                _SettingsNavItem(
+                  title: localizedText(
+                    context,
+                    zh: 'Preview Stage C Lesson 9',
+                    en: 'Preview Stage C Lesson 9',
+                  ),
+                  subtitle: localizedText(
+                    context,
+                    zh: 'Open the Stage C preview for بيت = house without affecting the live home flow.',
+                    en: 'Open the Stage C preview for بيت = house without affecting the live home flow.',
+                  ),
+                  onTap: _openStageCLesson9Preview,
+                ),
+                _SettingsNavItem(
+                  title: localizedText(
+                    context,
+                    zh: 'Preview Stage C Lesson 10',
+                    en: 'Preview Stage C Lesson 10',
+                  ),
+                  subtitle: localizedText(
+                    context,
+                    zh: 'Open the Stage C preview for the ة clue lesson without affecting the live home flow.',
+                    en: 'Open the Stage C preview for the ة clue lesson without affecting the live home flow.',
+                  ),
+                  onTap: _openStageCLesson10Preview,
+                ),
+                _SettingsNavItem(
+                  title: localizedText(
+                    context,
+                    zh: 'Preview Stage C Lesson 12',
+                    en: 'Preview Stage C Lesson 12',
+                  ),
+                  subtitle: localizedText(
+                    context,
+                    zh: 'Open the tiny supported Arabic card preview without affecting the live home flow.',
+                    en: 'Open the tiny supported Arabic card preview without affecting the live home flow.',
+                  ),
+                  onTap: _openStageCLesson12Preview,
+                ),
                 _SettingsNavItem(
                   title: strings.t('profile.developer_note'),
                   subtitle: strings.t('profile.developer_note_subtitle'),

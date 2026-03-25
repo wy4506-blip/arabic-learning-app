@@ -13,6 +13,7 @@ class LessonCompletionEvaluation {
   final List<V2ObjectiveProgressRecord> objectiveResults;
   final double? currentScore;
   final bool confirmationPassed;
+  final bool? targetReached;
   final String? nextRecommendedLessonId;
 
   const LessonCompletionEvaluation({
@@ -20,6 +21,7 @@ class LessonCompletionEvaluation {
     required this.objectiveResults,
     this.currentScore,
     this.confirmationPassed = true,
+    this.targetReached,
     this.nextRecommendedLessonId,
   });
 }
@@ -36,9 +38,10 @@ class LessonCompletionEvaluator {
             item.status == V2ObjectiveStatus.weak || !item.reachedThreshold)
         .map((item) => item.objectiveId)
         .toList(growable: false);
-    final allReached = evaluation.objectiveResults.isNotEmpty &&
-        weakObjectiveIds.isEmpty &&
-        evaluation.confirmationPassed;
+    final allReached = evaluation.targetReached ??
+        (evaluation.objectiveResults.isNotEmpty &&
+            weakObjectiveIds.isEmpty &&
+            evaluation.confirmationPassed);
 
     return existing.copyWith(
       status:

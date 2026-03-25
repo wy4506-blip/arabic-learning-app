@@ -15,6 +15,7 @@ class AppSettings {
   final AppThemePreference themePreference;
   final AppLanguage appLanguage;
   final ContentLanguage meaningLanguage;
+  final bool homeUsesFoundationPilot;
   final bool showTransliteration;
   final ArabicFontScale arabicFontScale;
   final bool reminderEnabled;
@@ -26,6 +27,7 @@ class AppSettings {
     this.themePreference = AppThemePreference.system,
     this.appLanguage = AppLanguage.zh,
     this.meaningLanguage = ContentLanguage.zh,
+    this.homeUsesFoundationPilot = false,
     this.showTransliteration = true,
     this.arabicFontScale = ArabicFontScale.standard,
     this.reminderEnabled = false,
@@ -38,6 +40,7 @@ class AppSettings {
     AppThemePreference? themePreference,
     AppLanguage? appLanguage,
     ContentLanguage? meaningLanguage,
+    bool? homeUsesFoundationPilot,
     bool? showTransliteration,
     ArabicFontScale? arabicFontScale,
     bool? reminderEnabled,
@@ -49,6 +52,8 @@ class AppSettings {
       themePreference: themePreference ?? this.themePreference,
       appLanguage: appLanguage ?? this.appLanguage,
       meaningLanguage: meaningLanguage ?? this.meaningLanguage,
+      homeUsesFoundationPilot:
+          homeUsesFoundationPilot ?? this.homeUsesFoundationPilot,
       showTransliteration: showTransliteration ?? this.showTransliteration,
       arabicFontScale: arabicFontScale ?? this.arabicFontScale,
       reminderEnabled: reminderEnabled ?? this.reminderEnabled,

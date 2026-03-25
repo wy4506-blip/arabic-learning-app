@@ -1,25 +1,38 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
-import '../data/v2_micro_lessons.dart';
+import '../data/generated_stage_a_preview_lessons.dart';
+import '../data/generated_stage_b_preview_lessons.dart';
+import '../data/generated_stage_c_preview_lessons.dart';
+import '../data/v2_micro_lesson_catalog.dart';
 import '../l10n/localized_text.dart';
 import '../l10n/v2_micro_lesson_localizer.dart';
 import '../models/app_settings.dart';
 import '../models/v2_micro_lesson.dart';
 import '../services/audio_service.dart';
 import '../services/v2_micro_lesson_completion_orchestrator.dart';
+import '../theme/app_theme.dart';
 import '../widgets/arabic_text_with_audio.dart';
 import '../widgets/app_widgets.dart';
 import 'v2_micro_lesson_completion_page.dart';
 
 class V2MicroLessonPage extends StatefulWidget {
-  final String lessonId;
+  final String? lessonId;
+  final V2MicroLesson? lesson;
   final AppSettings settings;
 
   const V2MicroLessonPage({
     super.key,
-    required this.lessonId,
     required this.settings,
-  });
+    this.lessonId,
+    this.lesson,
+  }) : assert(
+          lessonId != null || lesson != null,
+          'Provide either lessonId or lesson.',
+        ),
+        assert(
+          lessonId == null || lesson == null,
+          'Provide only one of lessonId or lesson.',
+        );
 
   @override
   State<V2MicroLessonPage> createState() => _V2MicroLessonPageState();
@@ -40,9 +53,7 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
   @override
   void initState() {
     super.initState();
-    _lesson = v2PilotMicroLessons.firstWhere(
-      (lesson) => lesson.lessonId == widget.lessonId,
-    );
+    _lesson = widget.lesson ?? v2MicroLessonById(widget.lessonId!);
   }
 
   @override
@@ -53,6 +64,32 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
 
   V2MicroPracticeItem get _currentPractice =>
       _lesson.practiceItems[_currentPracticeIndex];
+
+  bool get _isPreviewLesson => widget.lesson != null;
+
+  int get _stageAPreviewIndex {
+    return stageAFoundationPreviewLessons.indexWhere(
+      (lesson) => lesson.lessonId == _lesson.lessonId,
+    );
+  }
+
+  bool get _isStageAPreviewLesson => _stageAPreviewIndex >= 0;
+
+  int get _stageBPreviewIndex {
+    return stageBPreviewLessons.indexWhere(
+      (lesson) => lesson.lessonId == _lesson.lessonId,
+    );
+  }
+
+  bool get _isStageBPreviewLesson => _stageBPreviewIndex >= 0;
+
+  int get _stageCPreviewIndex {
+    return stageCPreviewLessons.indexWhere(
+      (lesson) => lesson.lessonId == _lesson.lessonId,
+    );
+  }
+
+  bool get _isStageCPreviewLesson => _stageCPreviewIndex >= 0;
 
   V2MicroContentItem? get _goalContent {
     for (final item in _lesson.contentItems) {
@@ -126,12 +163,18 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
     }
 
     setState(() => _submitting = true);
-    final result = await V2MicroLessonCompletionOrchestrator.completeLesson(
-      lessonId: _lesson.lessonId,
-      practiceOutcomes: _lesson.practiceItems
-          .map((item) => _outcomes[item.itemId]!)
-          .toList(growable: false),
-    );
+    final practiceOutcomes = _lesson.practiceItems
+        .map((item) => _outcomes[item.itemId]!)
+        .toList(growable: false);
+    final result = _isPreviewLesson
+        ? await V2MicroLessonCompletionOrchestrator.completePreviewLesson(
+            lesson: _lesson,
+            practiceOutcomes: practiceOutcomes,
+          )
+        : await V2MicroLessonCompletionOrchestrator.completeLesson(
+            lessonId: _lesson.lessonId,
+            practiceOutcomes: practiceOutcomes,
+          );
     if (!mounted) {
       return;
     }
@@ -141,6 +184,8 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
         builder: (_) => V2MicroLessonCompletionPage(
           settings: widget.settings,
           result: result,
+          lessonOverride: _isPreviewLesson ? _lesson : null,
+          previewMode: _isPreviewLesson,
         ),
       ),
     );
@@ -214,8 +259,7 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
 
   String _normalizePracticeAnswer(String value) {
     return removeArabicDiacritics(value)
-        .replaceAll(RegExp(r'[.,!?;:貙責貨]'), ' ')
-        .replaceAll('賭', '')
+        .replaceAll(RegExp(r'[.,!?;:]'), ' ')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim()
         .toLowerCase();
@@ -314,6 +358,14 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
       for (final segment in segments) {
         addOption(segment);
       }
+    }
+
+    if (practice.choiceOptions.isNotEmpty) {
+      for (final option in practice.choiceOptions) {
+        addOption(option);
+      }
+      addOption(practice.arabicText);
+      return options;
     }
 
     for (final item in _lesson.practiceItems) {
@@ -417,6 +469,475 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
       return goalBody;
     }
     return 'Stay with one usable response, then move straight into practice.';
+  }
+
+  String _previewSupportText() {
+    return localizedText(
+      context,
+      zh: 'This is a local preview lesson for checking the lesson experience. It does not change the live home progression.',
+      en: 'This is a local preview lesson for checking the lesson experience. It does not change the live home progression.',
+    );
+  }
+
+  Future<void> _openStageAPreviewLessonAt(int index) async {
+    if (!_isStageAPreviewLesson ||
+        index < 0 ||
+        index >= stageAFoundationPreviewLessons.length ||
+        index == _stageAPreviewIndex) {
+      return;
+    }
+
+    await Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => V2MicroLessonPage(
+          settings: widget.settings,
+          lesson: stageAFoundationPreviewLessons[index],
+        ),
+      ),
+    );
+  }
+
+  void _returnToStageAPreviewHub() {
+    if (_isStageAPreviewLesson) {
+      Navigator.pop(context);
+    }
+  }
+
+  Widget _buildStageAPreviewNavigator(BuildContext context, ThemeData theme) {
+    if (!_isStageAPreviewLesson) {
+      return const SizedBox.shrink();
+    }
+
+    final currentIndex = _stageAPreviewIndex;
+    final currentNumber = currentIndex + 1;
+    final descriptor = stageAPreviewDescriptorForLessonId(_lesson.lessonId);
+
+    return AppSurface(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Pill(
+            label: localizedText(
+              context,
+              zh: 'STAGE A PREVIEW',
+              en: 'STAGE A PREVIEW',
+            ),
+            backgroundColor: AppTheme.softAccent,
+            foregroundColor: AppTheme.accentMintDark,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            localizedText(
+              context,
+              zh: 'Lesson $currentNumber of ${stageAFoundationPreviewLessons.length}',
+              en: 'Lesson $currentNumber of ${stageAFoundationPreviewLessons.length}',
+            ),
+            style: theme.textTheme.titleLarge,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            localizedText(
+              context,
+              zh: 'Now previewing: ${_lesson.title}',
+              en: 'Now previewing: ${_lesson.title}',
+            ),
+            style: theme.textTheme.bodyMedium,
+          ),
+          if (descriptor != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              descriptor.chapterRole,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: AppTheme.accentMintDark,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              localizedText(
+                context,
+                zh: 'Next unlock: ${descriptor.nextUnlock}',
+                en: 'Next unlock: ${descriptor.nextUnlock}',
+              ),
+              style: theme.textTheme.bodySmall,
+            ),
+          ],
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: List<Widget>.generate(
+              stageAFoundationPreviewLessons.length,
+              (index) {
+                final lesson = stageAFoundationPreviewLessons[index];
+                return ChoiceChip(
+                  key: ValueKey<String>(
+                    'stage_a_preview_lesson_chip_${lesson.lessonId}',
+                  ),
+                  label: Text('${index + 1}'),
+                  selected: index == currentIndex,
+                  onSelected: index == currentIndex
+                      ? null
+                      : (_) => _openStageAPreviewLessonAt(index),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              OutlinedButton(
+                onPressed: currentIndex > 0
+                    ? () => _openStageAPreviewLessonAt(currentIndex - 1)
+                    : null,
+                child: Text(
+                  localizedText(
+                    context,
+                    zh: 'Previous Lesson',
+                    en: 'Previous Lesson',
+                  ),
+                ),
+              ),
+              OutlinedButton(
+                onPressed: _returnToStageAPreviewHub,
+                child: Text(
+                  localizedText(
+                    context,
+                    zh: 'Back to Chapter',
+                    en: 'Back to Chapter',
+                  ),
+                ),
+              ),
+              OutlinedButton(
+                onPressed:
+                    currentIndex < stageAFoundationPreviewLessons.length - 1
+                        ? () => _openStageAPreviewLessonAt(currentIndex + 1)
+                        : null,
+                child: Text(
+                  localizedText(
+                    context,
+                    zh: 'Next Lesson',
+                    en: 'Next Lesson',
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openStageBPreviewLessonAt(int index) async {
+    if (!_isStageBPreviewLesson ||
+        index < 0 ||
+        index >= stageBPreviewLessons.length ||
+        index == _stageBPreviewIndex) {
+      return;
+    }
+
+    await Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => V2MicroLessonPage(
+          settings: widget.settings,
+          lesson: stageBPreviewLessons[index],
+        ),
+      ),
+    );
+  }
+
+  void _returnToStageBPreviewHub() {
+    if (_isStageBPreviewLesson) {
+      Navigator.pop(context);
+    }
+  }
+
+  Widget _buildStageBPreviewNavigator(BuildContext context, ThemeData theme) {
+    if (!_isStageBPreviewLesson) {
+      return const SizedBox.shrink();
+    }
+
+    final currentIndex = _stageBPreviewIndex;
+    final descriptor = stageBPreviewDescriptorForLessonId(_lesson.lessonId);
+    final currentNumber = descriptor?.order ?? (currentIndex + 5);
+
+    return AppSurface(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Pill(
+            label: localizedText(
+              context,
+              zh: 'STAGE B PREVIEW',
+              en: 'STAGE B PREVIEW',
+            ),
+            backgroundColor: AppTheme.softAccent,
+            foregroundColor: AppTheme.accentMintDark,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            localizedText(
+              context,
+              zh: 'Lesson $currentNumber of 8',
+              en: 'Lesson $currentNumber of 8',
+            ),
+            style: theme.textTheme.titleLarge,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            localizedText(
+              context,
+              zh: 'Now previewing: ${_lesson.title}',
+              en: 'Now previewing: ${_lesson.title}',
+            ),
+            style: theme.textTheme.bodyMedium,
+          ),
+          if (descriptor != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              descriptor.chapterRole,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: AppTheme.accentMintDark,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              localizedText(
+                context,
+                zh: 'Next unlock: ${descriptor.nextUnlock}',
+                en: 'Next unlock: ${descriptor.nextUnlock}',
+              ),
+              style: theme.textTheme.bodySmall,
+            ),
+          ],
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: List<Widget>.generate(
+              stageBPreviewLessons.length,
+              (index) {
+                final lesson = stageBPreviewLessons[index];
+                final lessonDescriptor =
+                    stageBPreviewDescriptorForLessonId(lesson.lessonId);
+                final chipLabel = lessonDescriptor == null
+                    ? '${index + 5}'
+                    : '${lessonDescriptor.order}';
+                return ChoiceChip(
+                  key: ValueKey<String>(
+                    'stage_b_preview_lesson_chip_${lesson.lessonId}',
+                  ),
+                  label: Text(chipLabel),
+                  selected: index == currentIndex,
+                  onSelected: index == currentIndex
+                      ? null
+                      : (_) => _openStageBPreviewLessonAt(index),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              OutlinedButton(
+                onPressed: currentIndex > 0
+                    ? () => _openStageBPreviewLessonAt(currentIndex - 1)
+                    : null,
+                child: Text(
+                  localizedText(
+                    context,
+                    zh: 'Previous Lesson',
+                    en: 'Previous Lesson',
+                  ),
+                ),
+              ),
+              OutlinedButton(
+                onPressed: _returnToStageBPreviewHub,
+                child: Text(
+                  localizedText(
+                    context,
+                    zh: 'Back to Chapter',
+                    en: 'Back to Chapter',
+                  ),
+                ),
+              ),
+              OutlinedButton(
+                onPressed: currentIndex < stageBPreviewLessons.length - 1
+                    ? () => _openStageBPreviewLessonAt(currentIndex + 1)
+                    : null,
+                child: Text(
+                  localizedText(
+                    context,
+                    zh: 'Next Lesson',
+                    en: 'Next Lesson',
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openStageCPreviewLessonAt(int index) async {
+    if (!_isStageCPreviewLesson ||
+        index < 0 ||
+        index >= stageCPreviewLessons.length ||
+        index == _stageCPreviewIndex) {
+      return;
+    }
+
+    await Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => V2MicroLessonPage(
+          settings: widget.settings,
+          lesson: stageCPreviewLessons[index],
+        ),
+      ),
+    );
+  }
+
+  void _returnToStageCPreviewHub() {
+    if (_isStageCPreviewLesson) {
+      Navigator.pop(context);
+    }
+  }
+
+  Widget _buildStageCPreviewNavigator(BuildContext context, ThemeData theme) {
+    if (!_isStageCPreviewLesson) {
+      return const SizedBox.shrink();
+    }
+
+    final currentIndex = _stageCPreviewIndex;
+    final descriptor = stageCPreviewDescriptorForLessonId(_lesson.lessonId);
+    final currentNumber = descriptor?.order ?? (currentIndex + 9);
+
+    return AppSurface(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Pill(
+            label: localizedText(
+              context,
+              zh: 'STAGE C PREVIEW',
+              en: 'STAGE C PREVIEW',
+            ),
+            backgroundColor: AppTheme.softAccent,
+            foregroundColor: AppTheme.accentMintDark,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            localizedText(
+              context,
+              zh: 'Lesson $currentNumber of 12',
+              en: 'Lesson $currentNumber of 12',
+            ),
+            style: theme.textTheme.titleLarge,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            localizedText(
+              context,
+              zh: 'Now previewing: ${_lesson.title}',
+              en: 'Now previewing: ${_lesson.title}',
+            ),
+            style: theme.textTheme.bodyMedium,
+          ),
+          if (descriptor != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              descriptor.chapterRole,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: AppTheme.accentMintDark,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              localizedText(
+                context,
+                zh: 'Next unlock: ${descriptor.nextUnlock}',
+                en: 'Next unlock: ${descriptor.nextUnlock}',
+              ),
+              style: theme.textTheme.bodySmall,
+            ),
+          ],
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: List<Widget>.generate(
+              stageCPreviewLessons.length,
+              (index) {
+                final lesson = stageCPreviewLessons[index];
+                final lessonDescriptor =
+                    stageCPreviewDescriptorForLessonId(lesson.lessonId);
+                final chipLabel = lessonDescriptor == null
+                    ? '${index + 9}'
+                    : '${lessonDescriptor.order}';
+                return ChoiceChip(
+                  key: ValueKey<String>(
+                    'stage_c_preview_lesson_chip_${lesson.lessonId}',
+                  ),
+                  label: Text(chipLabel),
+                  selected: index == currentIndex,
+                  onSelected: index == currentIndex
+                      ? null
+                      : (_) => _openStageCPreviewLessonAt(index),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              OutlinedButton(
+                onPressed: currentIndex > 0
+                    ? () => _openStageCPreviewLessonAt(currentIndex - 1)
+                    : null,
+                child: Text(
+                  localizedText(
+                    context,
+                    zh: 'Previous Lesson',
+                    en: 'Previous Lesson',
+                  ),
+                ),
+              ),
+              OutlinedButton(
+                onPressed: _returnToStageCPreviewHub,
+                child: Text(
+                  localizedText(
+                    context,
+                    zh: 'Back to Chapter',
+                    en: 'Back to Chapter',
+                  ),
+                ),
+              ),
+              OutlinedButton(
+                onPressed: currentIndex < stageCPreviewLessons.length - 1
+                    ? () => _openStageCPreviewLessonAt(currentIndex + 1)
+                    : null,
+                child: Text(
+                  localizedText(
+                    context,
+                    zh: 'Next Lesson',
+                    en: 'Next Lesson',
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   String _autoFeedbackTitle(bool passed) {
@@ -532,6 +1053,19 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
       widget.settings.appLanguage,
     );
     final goalBody = _goalBodyText();
+    final stageAPreviewDescriptor = stageAPreviewDescriptorForLessonId(
+      _lesson.lessonId,
+    );
+    final stageBPreviewDescriptor = stageBPreviewDescriptorForLessonId(
+      _lesson.lessonId,
+    );
+    final stageCPreviewDescriptor = stageCPreviewDescriptorForLessonId(
+      _lesson.lessonId,
+    );
+    final completionEvidence =
+        stageAPreviewDescriptor?.completionEvidence ??
+        stageBPreviewDescriptor?.completionEvidence ??
+        stageCPreviewDescriptor?.completionEvidence;
 
     return Container(
       width: double.infinity,
@@ -560,11 +1094,36 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
             const SizedBox(height: 8),
             Text(goalBody, style: theme.textTheme.bodyMedium),
           ],
+          if (completionEvidence != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              localizedText(
+                context,
+                zh: 'Completion evidence: $completionEvidence',
+                en: 'Completion evidence: $completionEvidence',
+              ),
+              style: theme.textTheme.bodySmall,
+            ),
+          ],
+          if (_isPreviewLesson) ...[
+            const SizedBox(height: 8),
+            Text(_previewSupportText(), style: theme.textTheme.bodySmall),
+          ],
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: [
+              if (_isPreviewLesson)
+                Chip(
+                  label: Text(
+                    localizedText(
+                      context,
+                      zh: 'Preview Lesson',
+                      en: 'Preview Lesson',
+                    ),
+                  ),
+                ),
               Chip(
                 label: Text(
                   localizedText(
@@ -1209,6 +1768,18 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (_isStageAPreviewLesson) ...[
+                      _buildStageAPreviewNavigator(context, theme),
+                      const SizedBox(height: 16),
+                    ],
+                    if (_isStageBPreviewLesson) ...[
+                      _buildStageBPreviewNavigator(context, theme),
+                      const SizedBox(height: 16),
+                    ],
+                    if (_isStageCPreviewLesson) ...[
+                      _buildStageCPreviewNavigator(context, theme),
+                      const SizedBox(height: 16),
+                    ],
                     _buildLessonBrief(context, theme),
                     if (_supportedContentItems.isNotEmpty) ...[
                       const SizedBox(height: 20),
@@ -1227,3 +1798,13 @@ class _V2MicroLessonPageState extends State<V2MicroLessonPage> {
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
